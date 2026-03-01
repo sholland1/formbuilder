@@ -1,0 +1,275 @@
+{
+    "id": "builder",
+    "title": "Build your own form!",
+    "forms": {
+        "header": {
+            "fields": [
+                {
+                    "id": "id",
+                    "type": "text",
+                    "question": "Enter an id for your form.",
+                    "placeholder": "(example-id)",
+                    "pattern": "[a-zA-Z][a-zA-Z0-9_\\-]*"
+                },
+                {
+                    "id": "title",
+                    "type": "text",
+                    "question": "What is the title of your form?"
+                }
+            ]
+        },
+        "field_start": {
+            "fields": [
+                {
+                    "id": "id",
+                    "type": "text",
+                    "question": "Enter an id for your field.",
+                    "placeholder": "(example-id)",
+                    "pattern": "[a-zA-Z][a-zA-Z0-9_\\-]*"
+                },
+                {
+                    "id": "type",
+                    "type": "select",
+                    "question": "What type of field?",
+                    "options": [
+                        "text",
+                        "multitext",
+                        "number",
+                        "select",
+                        "multiselect",
+                        "timestamp",
+                        "date",
+                        "counter",
+                        "color",
+                        "bool"
+                    ]
+                }
+            ]
+        },
+        "field_type_text": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                },
+                {
+                    "id": "placeholder",
+                    "type": "text",
+                    "question": "Enter some placeholder text.",
+                    "placeholder": "(Optional)",
+                    "required": false
+                },
+                {
+                    "id": "maxlength",
+                    "type": "number",
+                    "question": "What is the max length of your field?",
+                    "max": 8000,
+                    "required": false
+                },
+                {
+                    "id": "pattern",
+                    "type": "text",
+                    "question": "Enter a regular expression to match.",
+                    "required": false
+                }
+            ]
+        },
+        "field_type_number": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                },
+                {
+                    "id": "min",
+                    "type": "number",
+                    "question": "Min:",
+                    "required": false
+                },
+                {
+                    "id": "max",
+                    "type": "number",
+                    "question": "Max:",
+                    "required": false
+                },
+                {
+                    "id": "step",
+                    "type": "select",
+                    "question": "Step:",
+                    "options": [
+                        "1", "2", "3", "4", "5", "10", "20", "25", "50", "100",
+                        "0.1", "0.2", "0.25", "0.5",
+                        "0.01", "0.02", "0.025", "0.05",
+                        "0.001", "0.002", "0.0025", "0.005",
+                        "0.0001", "0.0002", "0.00025", "0.0005"
+                    ],
+                    "required": false
+                }
+            ]
+        },
+        "field_type_select": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                },
+                {
+                    "id": "options",
+                    "type": "multitext",
+                    "question": "Enter a list of options separated by commas."
+                }
+            ]
+        },
+        "field_type_multiselect": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "options",
+                    "type": "multitext",
+                    "question": "Enter a list of options separated by commas."
+                },
+                {
+                    "id": "min",
+                    "type": "number",
+                    "question": "Min:",
+                    "required": false
+                },
+                {
+                    "id": "max",
+                    "type": "number",
+                    "question": "Max:",
+                    "required": false
+                }
+            ]
+        },
+        "field_type_timestamp": {
+            "fields": []
+        },
+        "field_type_date": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                },
+                {
+                    "id": "start_date",
+                    "type": "date",
+                    "question": "Start Date:",
+                    "required": false
+                },
+                {
+                    "id": "end_date",
+                    "type": "date",
+                    "question": "End Date:",
+                    "required": false
+                }
+            ]
+        },
+        "field_type_counter": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                }
+            ]
+        },
+        "field_type_color": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                }
+            ]
+        },
+        "field_type_bool": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                }
+            ]
+        },
+        "field_type_multitext": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
+                },
+                {
+                    "id": "placeholder",
+                    "type": "text",
+                    "question": "Enter some placeholder text.",
+                    "placeholder": "(Optional)",
+                    "required": false
+                },
+                {
+                    "id": "min",
+                    "type": "number",
+                    "question": "Min:",
+                    "required": false
+                },
+                {
+                    "id": "max",
+                    "type": "number",
+                    "question": "Max:",
+                    "required": false
+                },
+                {
+                    "id": "maxlength",
+                    "type": "number",
+                    "question": "What is the max length of each option?",
+                    "max": 8000,
+                    "required": false
+                },
+                {
+                    "id": "pattern",
+                    "type": "text",
+                    "question": "Enter a regular expression to match for each option.",
+                    "required": false
+                }
+            ]
+        }
+    }
+}

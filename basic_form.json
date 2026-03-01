@@ -1,0 +1,100 @@
+{
+    "id": "basic-form",
+    "title": "My Basic Test Form",
+    "fields": [
+        {
+            "id": "name",
+            "type": "text",
+            "question": "What is your name?",
+            "placeholder": "(John Smith)",
+            "maxlength": 16
+        },
+        {
+            "id": "ssn",
+            "type": "text",
+            "question": "Give me your Social Security Number! Now!!",
+            "required": false,
+            "placeholder": "(000-00-0000)",
+            "pattern": "\\d{3}-\\d{2}-\\d{4}"
+        },
+        {
+            "id": "age",
+            "type": "number",
+            "question": "How old are you?",
+            "required": false,
+            "min": 0,
+            "max": 127
+        },
+        {
+            "id": "weight",
+            "type": "number",
+            "question": "How much do you weigh?",
+            "required": false,
+            "min": 0,
+            "max": 1024,
+            "step": 0.1
+        },
+        {
+            "id": "ice_cream_flavor",
+            "type": "select",
+            "question": "What is your favorite ice cream flavor?",
+            "required": false,
+            "options": [
+                "vanilla",
+                "chocolate",
+                "strawberry",
+                "neapolitan"
+            ]
+        },
+        {
+            "id": "sports",
+            "type": "multiselect",
+            "question": "What sports do you play?",
+            "options": [
+                "basketball",
+                "baseball",
+                "gymnastics",
+                "football",
+                "soccer",
+                "hockey",
+                "tennis",
+                "pickleball"
+            ],
+            "min": 1,
+            "max": 3
+        },
+        {
+            "id": "timestamp",
+            "type": "timestamp"
+        },
+        {
+            "id": "date_of_birth",
+            "type": "date",
+            "question": "Enter your date of birth.",
+            "required": false,
+            "start_date": "1900-01-01",
+            "end_date": "2026-02-28"
+        },
+        {
+            "id": "some_count",
+            "type": "counter",
+            "question": "Count something, would ya?"
+        },
+        {
+            "id": "favorite_color",
+            "type": "color",
+            "question": "What is your favorite color?"
+        },
+        {
+            "id": "happy",
+            "type": "bool",
+            "question": "Are you happy?"
+        },
+        {
+            "id": "video_games",
+            "type": "multitext",
+            "question": "What are some of your favorite video games?",
+            "placeholder": "(Enter a list of options separated by commas.)"
+        }
+    ]
+}

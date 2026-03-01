@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="form.css">
+    <style>
+        #builder {
+            summary {
+                height:2.2em;
+                align-content:center;
+            }
+            details {
+                cursor:pointer;
+                position:relative;
+                .builder-details-buttons {
+                    position:absolute;
+                    top:-0.1em;
+                    right:0.5em;
+                }
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <form id="builder">
+            <h1 id="builder-title"></h1>
+            <details open>
+                <summary>Form Header
+                    <div class="builder-details-buttons">
+                        <button id="add_field" type="button">+ Add field</button>
+                        <button id="toggle_sections" type="button">Expand/Collapse all</button>
+                    </div>
+                </summary>
+                <div id="builder-header"></div>
+            </details>
+
+            <div id="builder-fields"></div>
+        </form>
+        <button id="submit-btn" type="button">Submit</button>
+    </div>
+</body>
+
+<script type="module">
+    import formObject from "./builder.json" with {type: "json"};
+    import FormBuilder from "./FormBuilder.js";
+
+    const forms = formObject.forms;
+    let current_index = 0;
+
+    const builder = new FormBuilder(document, () => new Date());
+    builder.build(forms.header, "builder-header");
+    const createElementCreator = (tagName) => (a, ...b) => builder.element(tagName, a, ...b);
+
+    const div = createElementCreator("div");
+    const summary = createElementCreator("summary");
+    const details = createElementCreator("details");
+    const span = createElementCreator("span");
+    const button = createElementCreator("button");
+
+    document.title = formObject.title;
+    document.getElementById("builder-title").innerText = formObject.title;
+
+    document.getElementById("add_field").addEventListener("click", () => {
+        let field_form = details({ id: `field_${current_index}`, open: false },
+            summary({id: `field_id_${current_index}`},
+                `Field ${current_index}`,
+                div({class: "builder-details-buttons"},
+                    button({id: `remove_field_${current_index}`, type: "button"}, "🗑️ Remove field"),
+                    button({id: `move_field_up_${current_index}`, type: "button"}, "↑ Move field up"),
+                    button({id: `move_field_down_${current_index}`, type: "button"}, "↓ Move field down"))),
+                div({id: `field_start_${current_index}`, class: "builder-field-start"}),
+                div({id: `field_type_${current_index}`}))
+
+        document.getElementById("builder-fields").appendChild(field_form);
+        builder.build(forms["field_start"], `field_start_${current_index}`);
+
+        const index_copy = current_index;
+        const current_field = document.getElementById(`field_${current_index}`);
+        current_field.querySelector("#type").addEventListener("change",
+            e => builder.build(forms[`field_type_${e.target.value}`], `field_type_${index_copy}`));
+
+        current_field.querySelector("input#id").addEventListener("keyup", e =>
+            document.getElementById(`field_id_${index_copy}`).innerText =
+                e.target.value === "" ? `Field ${index_copy}` : e.target.value);
+
+        const focusable = current_field.querySelectorAll("input, select, textarea");
+        if (focusable.length > 0) {
+            focusable[0].addEventListener("keydown", e => {
+                if (e.shiftKey && e.key === "Tab") {
+                    e.preventDefault();
+                    e.target.parentElement.parentElement.parentElement.previousElementSibling.focus();
+                }
+            });
+        }
+
+        current_field.addEventListener("keydown", e => {
+            if (e.key !== "Tab" || e.shiftKey) return;
+            if (!e.target.matches("summary")) return;
+
+            e.preventDefault();
+            current_field.open = true;
+
+            const previous = current_field.previousElementSibling;
+            if (previous && previous.tagName.toLowerCase() === "details")
+                previous.open = false;
+
+            const focusable = current_field.querySelectorAll("input, select, textarea");
+            if (focusable.length > 0) focusable[0].focus();
+        });
+
+        document.getElementById(`remove_field_${current_index}`).addEventListener("click",
+            e => document.getElementById(`field_${index_copy}`).remove());
+
+        document.getElementById(`move_field_up_${current_index}`).addEventListener("click", e => {
+            const field = document.getElementById(`field_${index_copy}`);
+            const previous = field.previousElementSibling;
+            if (previous) field.parentNode.insertBefore(field, previous);
+        });
+
+        document.getElementById(`move_field_down_${current_index}`).addEventListener("click", e => {
+            const field = document.getElementById(`field_${index_copy}`);
+            const next = field.nextElementSibling;
+            if (next) field.parentNode.insertBefore(next, field);
+        });
+
+        current_index++;
+    });
+
+    document.getElementById("toggle_sections").addEventListener("click", () => {
+        const details = document.querySelectorAll("#builder-fields details");
+        const anyOpen = Array.from(details).some(d => d.open);
+        details.forEach(d => d.open = !anyOpen);
+    });
+
+    document.getElementById("submit-btn").addEventListener("click", () => {
+        const form = document.getElementById(formObject.id);
+
+        form.querySelectorAll('[required]').forEach(el => {
+            if (!el.checkValidity()) {
+                const d = el.closest('details');
+                if (d) d.open = true;
+            }
+        });
+
+        const ids = Array.from(form.querySelectorAll('[id="id"]')).map(e => e.value);
+        if (ids.some((id, i) => id && ids.indexOf(id) !== i)) return;
+
+        const isValid = form.reportValidity();
+        if (!isValid) return;
+
+        let formData = builder.getFormData("builder-header");
+        formData.fields = Array.from(
+            { length: ids.length - 1 },
+            (_, i) => builder.getFormData(`field_${i}`)
+        );
+
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData));
+        let downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "form_data.json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+    });
+</script>
+
+</html>

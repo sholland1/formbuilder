@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="form.css">
+</head>
+
+<body>
+    <div id="main">
+        <form id="basic-form"></form>
+        <button id="submit-btn" type="button">Submit</button>
+    </div>
+</body>
+
+<script type="module">
+    import formObject from "./basic_form.json" with {type: "json"};
+    import FormBuilder from "./FormBuilder.js";
+
+    const builder = new FormBuilder(document, () => new Date());
+    builder.build(formObject);
+
+    document.title = formObject.title;
+
+    document.getElementById("submit-btn").addEventListener("click", () => {
+        const form = document.getElementById(formObject.id);
+        const isValid = form.reportValidity();
+        if (!isValid) return;
+
+        let formData = builder.getFormData();
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData));
+        let downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "form_data.json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+    });
+</script>
+
+</html>
