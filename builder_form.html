@@ -40,7 +40,8 @@
 
             <div id="builder-fields"></div>
         </form>
-        <button id="submit-btn" type="button">Submit</button>
+        <button id="download-btn" type="button">Download</button>
+        <button id="preview-btn" type="button">Preview</button>
     </div>
 </body>
 
@@ -49,7 +50,7 @@
     import FormBuilder from "./FormBuilder.js";
 
     const forms = formObject.forms;
-    let current_index = 0;
+    let field_index = 0;
 
     const builder = new FormBuilder(document, () => new Date());
     builder.build(forms.header, "builder-header");
@@ -61,25 +62,22 @@
     const span = createElementCreator("span");
     const button = createElementCreator("button");
 
-    document.title = formObject.title;
-    document.getElementById("builder-title").innerText = formObject.title;
-
-    document.getElementById("add_field").addEventListener("click", () => {
-        let field_form = details({ id: `field_${current_index}`, open: false },
-            summary({id: `field_id_${current_index}`},
-                `Field ${current_index}`,
+    function addField() {
+        let field_form = details({ id: `field_${field_index}`, open: false },
+            summary({},
+                span({id: `field_id_${field_index}`}, `Field ${field_index}`),
                 div({class: "builder-details-buttons"},
-                    button({id: `remove_field_${current_index}`, type: "button"}, "🗑️ Remove field"),
-                    button({id: `move_field_up_${current_index}`, type: "button"}, "↑ Move field up"),
-                    button({id: `move_field_down_${current_index}`, type: "button"}, "↓ Move field down"))),
-                div({id: `field_start_${current_index}`, class: "builder-field-start"}),
-                div({id: `field_type_${current_index}`}))
+                    button({id: `remove_field_${field_index}`, type: "button"}, "🗑️ Remove field"),
+                    button({id: `move_field_up_${field_index}`, type: "button"}, "↑ Move field up"),
+                    button({id: `move_field_down_${field_index}`, type: "button"}, "↓ Move field down"))),
+                div({id: `field_start_${field_index}`, class: "builder-field-start"}),
+                div({id: `field_type_${field_index}`}))
 
         document.getElementById("builder-fields").appendChild(field_form);
-        builder.build(forms["field_start"], `field_start_${current_index}`);
+        builder.build(forms.field_start, `field_start_${field_index}`);
 
-        const index_copy = current_index;
-        const current_field = document.getElementById(`field_${current_index}`);
+        const index_copy = field_index;
+        const current_field = document.getElementById(`field_${field_index}`);
         current_field.querySelector("#type").addEventListener("change",
             e => builder.build(forms[`field_type_${e.target.value}`], `field_type_${index_copy}`));
 
@@ -112,23 +110,25 @@
             if (focusable.length > 0) focusable[0].focus();
         });
 
-        document.getElementById(`remove_field_${current_index}`).addEventListener("click",
-            e => document.getElementById(`field_${index_copy}`).remove());
+        document.getElementById(`remove_field_${field_index}`).addEventListener("click",
+            () => document.getElementById(`field_${index_copy}`).remove());
 
-        document.getElementById(`move_field_up_${current_index}`).addEventListener("click", e => {
+        document.getElementById(`move_field_up_${field_index}`).addEventListener("click", () => {
             const field = document.getElementById(`field_${index_copy}`);
             const previous = field.previousElementSibling;
             if (previous) field.parentNode.insertBefore(field, previous);
         });
 
-        document.getElementById(`move_field_down_${current_index}`).addEventListener("click", e => {
+        document.getElementById(`move_field_down_${field_index}`).addEventListener("click", () => {
             const field = document.getElementById(`field_${index_copy}`);
             const next = field.nextElementSibling;
             if (next) field.parentNode.insertBefore(next, field);
         });
 
-        current_index++;
-    });
+        return `field_${field_index++}`;
+    }
+
+    document.getElementById("add_field").addEventListener("click", addField);
 
     document.getElementById("toggle_sections").addEventListener("click", () => {
         const details = document.querySelectorAll("#builder-fields details");
@@ -136,7 +136,7 @@
         details.forEach(d => d.open = !anyOpen);
     });
 
-    document.getElementById("submit-btn").addEventListener("click", () => {
+    document.getElementById("download-btn").addEventListener("click", () => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -146,7 +146,7 @@
             }
         });
 
-        const ids = Array.from(form.querySelectorAll('[id="id"]')).map(e => e.value);
+        const ids = Array.from(form.querySelectorAll("#id")).map(e => e.value);
         if (ids.some((id, i) => id && ids.indexOf(id) !== i)) return;
 
         const isValid = form.reportValidity();
@@ -158,13 +158,71 @@
             (_, i) => builder.getFormData(`field_${i}`)
         );
 
-        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData));
+        const json = JSON.stringify(formData);
+
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(json);
         let downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", "form_data.json");
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
     });
+
+    document.getElementById("preview-btn").addEventListener("click", e => {
+        const form = document.getElementById(formObject.id);
+
+        form.querySelectorAll('[required]').forEach(el => {
+            if (!el.checkValidity()) {
+                const d = el.closest('details');
+                if (d) d.open = true;
+            }
+        });
+
+        const ids = Array.from(form.querySelectorAll("#id")).map(e => e.value);
+        if (ids.some((id, i) => id && ids.indexOf(id) !== i)) return;
+
+        const isValid = form.reportValidity();
+        if (!isValid) return;
+
+        let formData = builder.getFormData("builder-header");
+
+        let fieldsElement = document.getElementById("builder-fields");
+        formData.fields = Array.from(
+            fieldsElement.querySelectorAll('details[id^="field_"]'),
+            x => builder.getFormData(x.id));
+
+        sessionStorage.formObject = JSON.stringify(formData);
+        window.location = "/form.html?preview=true";
+    });
+
+    document.title = formObject.title;
+    document.getElementById("builder-title").innerText = formObject.title;
+
+    const parameters = window.location.search.substring(1).split('&');
+
+    if (parameters.includes("edit=true")) {
+        const formObject = JSON.parse(sessionStorage.formObject);
+        const header = document.getElementById("builder-header");
+        header.querySelector("#id").value = formObject.id;
+        header.querySelector("#title").value = formObject.title;
+
+        for (const fieldData of formObject.fields) {
+            const field_id = addField();
+
+            const current_field = document.getElementById(field_id);
+
+            for (const propName in fieldData) {
+                const element = current_field.querySelector(`#${propName}`);
+                element.value = fieldData[propName];
+                if (propName === "id") {
+                    element.dispatchEvent(new Event('keyup', { bubbles: true }));
+                }
+                else if (propName === "type") {
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        }
+    }
 </script>
 
 </html>

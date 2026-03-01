@@ -56,7 +56,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 },
                 {
                     "id": "placeholder",
@@ -90,7 +91,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 },
                 {
                     "id": "min",
@@ -129,7 +131,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 },
                 {
                     "id": "options",
@@ -177,7 +180,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 },
                 {
                     "id": "start_date",
@@ -221,7 +225,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 }
             ]
         },
@@ -235,7 +240,8 @@
                 {
                     "id": "required",
                     "type": "bool",
-                    "question": "Is your field required?"
+                    "question": "Is your field required?",
+                    "required": false
                 },
                 {
                     "id": "placeholder",

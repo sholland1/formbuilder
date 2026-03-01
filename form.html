@@ -9,33 +9,59 @@
 
 <body>
     <div id="main">
+        <div id="preview" hidden>
+            <span>Preview mode</span>
+            <button id="edit-btn">Edit</button>
+        </div>
         <form id="basic-form"></form>
         <button id="submit-btn" type="button">Submit</button>
     </div>
 </body>
 
 <script type="module">
-    import formObject from "./basic_form.json" with {type: "json"};
     import FormBuilder from "./FormBuilder.js";
+    import defaultForm from './basic_form.json' with { type: 'json' }
 
-    const builder = new FormBuilder(document, () => new Date());
-    builder.build(formObject);
+    const parameters = window.location.search.substring(1).split('&');
+    let formObject;
+    try {
+        formObject = JSON.parse(sessionStorage.formObject);
+    }
+    catch {
+        formObject = defaultForm;
+    }
 
-    document.title = formObject.title;
+    if (parameters.includes("preview=true")) {
+        const previewElement = document.getElementById("preview");
+        previewElement.hidden = false;
 
-    document.getElementById("submit-btn").addEventListener("click", () => {
-        const form = document.getElementById(formObject.id);
-        const isValid = form.reportValidity();
-        if (!isValid) return;
+        document.getElementById("edit-btn").addEventListener("click", () => {
+            sessionStorage.formObject = JSON.stringify(formObject);
+            window.location = "/builder_form.html?edit=true"
+        });
+    }
 
-        let formData = builder.getFormData();
-        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData));
-        let downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "form_data.json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
-        downloadAnchorNode.click();
-    });
+    const form_id = "basic-form";
+    if (formObject) {
+        const builder = new FormBuilder(document, () => new Date());
+        builder.build(formObject, form_id);
+
+        document.title = formObject.title;
+
+        document.getElementById("submit-btn").addEventListener("click", () => {
+            const form = document.getElementById(form_id);
+            const isValid = form.reportValidity();
+            if (!isValid) return;
+
+            let formData = builder.getFormData();
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData));
+            let downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "form_data.json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+        });
+    }
 </script>
 
 </html>
