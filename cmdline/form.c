@@ -4,6 +4,7 @@
 #include "jim_form.h"
 
 #include <termios.h>
+#include <locale.h>
 
 #define ESC "\033"
 #define CLR    ESC"[2J"
@@ -367,6 +368,9 @@ int main(int argc, char *argv[]) {
     }
 
     deinit();
+
+    // This necessary to output json double correctly
+    setlocale(LC_NUMERIC, "C");
 
     Jim jim = {.pp = option == pretty ? 4 : 0};
     jim_answers(&jim, &answers);
