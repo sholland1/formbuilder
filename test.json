@@ -1,0 +1,38 @@
+{
+    "id": "basic-form",
+    "title": "My Basic Test Form",
+    "fields": [
+        {
+            "id": "name",
+            "type": "text",
+            "question": "What is your name?",
+            "placeholder": "(John Smith)",
+            "maxlength": 16
+        },
+        {
+            "id": "ssn",
+            "type": "text",
+            "question": "Give me your Social Security Number! Now!!",
+            "required": false,
+            "placeholder": "(000-00-0000)",
+            "pattern": "[0-9]{3}-[0-9]{2}-[0-9]{4}"
+        },
+        {
+            "id": "age",
+            "type": "number",
+            "question": "How old are you?",
+            "required": false,
+            "min": 0,
+            "max": 127
+        },
+        {
+            "id": "weight",
+            "type": "number",
+            "question": "How much do you weigh?",
+            "required": false,
+            "min": 0,
+            "max": 1023,
+            "step": 0.1
+        }
+    ]
+}

@@ -1,0 +1,228 @@
+#include "jimp.h"
+#include "jim.h"
+#include "nob.h"
+
+#include "types.h"
+
+#include <math.h>
+#include <regex.h>
+
+void jim_field_type(Jim *jim, FieldType t) {
+    switch (t) {
+    case ft_text: jim_string(jim, "text"); break;
+    case ft_number: jim_string(jim, "number"); break;
+    case ft_select: jim_string(jim, "select"); break;
+    case ft_multiselect: jim_string(jim, "multiselect"); break;
+    case ft_multitext: jim_string(jim, "multitext"); break;
+    case ft_timestamp: jim_string(jim, "timestamp"); break;
+    case ft_date: jim_string(jim, "date"); break;
+    case ft_counter: jim_string(jim, "counter"); break;
+    case ft_color: jim_string(jim, "color"); break;
+    case ft_bool: jim_string(jim, "bool"); break;
+    default: assert("Unidentified type!\n");
+    }
+}
+
+// TODO: maybe match with regex
+FieldType parse_type(const char *type_str) {
+    if (strcmp(type_str, "text") == 0) return ft_text;
+    if (strcmp(type_str, "number") == 0) return ft_number;
+    if (strcmp(type_str, "select") == 0) return ft_select;
+    if (strcmp(type_str, "multiselect") == 0) return ft_multiselect;
+    if (strcmp(type_str, "multitext") == 0) return ft_multitext;
+    if (strcmp(type_str, "timestamp") == 0) return ft_timestamp;
+    if (strcmp(type_str, "date") == 0) return ft_date;
+    if (strcmp(type_str, "counter") == 0) return ft_counter;
+    if (strcmp(type_str, "color") == 0) return ft_color;
+    if (strcmp(type_str, "bool") == 0) return ft_bool;
+    assert("Unidentified type!\n");
+}
+
+void jim_form(Jim *jim, const Form *f) {
+    jim_object_begin(jim);
+    jim_member_key(jim, "id");
+    jim_string(jim, f->id);
+    jim_member_key(jim, "title");
+    jim_string(jim, f->title);
+    jim_member_key(jim, "fields");
+
+    jim_array_begin(jim);
+    da_foreach(Field, x, &f->fields) {
+        jim_object_begin(jim);
+        jim_member_key(jim, "id");
+        jim_string(jim, x->id);
+        jim_member_key(jim, "type");
+        jim_field_type(jim, x->type);
+
+        switch (x->type) {
+        case ft_text:
+            TextFieldMembers p0 = x->text;
+            jim_member_key(jim, "question"); jim_string(jim, p0.question);
+            if (p0.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p0.placeholder);}
+            if (p0.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p0.maxlength);}
+            jim_member_key(jim, "required"); jim_bool(jim, p0.required);
+            if (p0.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p0.pattern);}
+            break;
+
+        case ft_number:
+            NumberFieldMembers p1 = x->number;
+            jim_member_key(jim, "question"); jim_string(jim, p1.question);
+            jim_member_key(jim, "required"); jim_bool(jim, p1.required);
+            int precision = -1;
+            jim_member_key(jim, "min"); jim_double(jim, p1.min, precision);
+            jim_member_key(jim, "max"); jim_double(jim, p1.max, precision);
+            jim_member_key(jim, "step"); jim_double(jim, p1.step, precision);
+            break;
+
+        default:
+            assert("Unidentified type!\n");
+        }
+        jim_object_end(jim);
+    }
+    jim_array_end(jim);
+    jim_object_end(jim);
+}
+
+void field_set_defaults(Field *field) {
+    // Set non-zero defaults
+    switch (field->type) {
+        case ft_text:
+            field->text.required = true;
+            field->text.maxlength = SIZE_MAX;
+            break;
+
+        case ft_number:
+            field->number.required = true;
+            field->number.min = -NAN;
+            field->number.max = NAN;
+            field->number.step = 1;
+            break;
+
+        default:
+            assert("Unidentified type!\n");
+    }
+}
+
+bool jimp_field(Jimp *jimp, Field *field) {
+    if (!jimp_object_begin(jimp)) return false;
+    while (jimp_object_member(jimp)) {
+        if (strcmp(jimp->string, "id") == 0) {
+            if (!jimp_string(jimp)) return false;
+            field->id = strdup(jimp->string);
+        }
+        else if (strcmp(jimp->string, "type") == 0) {
+            if (!jimp_string(jimp)) return false;
+            field->type = parse_type(jimp->string);
+            field_set_defaults(field);
+        }
+        else {
+            switch (field->type) {
+                case ft_text:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->text.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "placeholder") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->text.placeholder = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "maxlength") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->text.maxlength = (size_t)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->text.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "pattern") == 0) {
+                        if (!jimp_string(jimp)) return false;
+
+                        regex_t regex;
+                        int ret = regcomp(&regex, jimp->string, REG_EXTENDED | REG_NOSUB);
+                        if (ret) {
+                            char errbuf[256];
+                            regerror(ret, &regex, errbuf, sizeof(errbuf));
+                            fprintf(stderr, "regcomp failed: %s\n", errbuf);
+                            return 1;
+                        }
+
+                        field->text.regex = (regex_t *)malloc(sizeof(regex_t));
+                        *field->text.regex = regex;
+                        field->text.pattern = strdup(jimp->string);
+                    }
+                    break;
+
+                case ft_number:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->number.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->number.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "min") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->number.min = (double)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "max") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->number.max = (double)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "step") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->number.step = (double)jimp->number;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
+
+                default:
+                    assert("Unidentified type!\n");
+            }
+        }
+    }
+    return jimp_object_end(jimp);
+}
+
+bool jimp_form(Jimp *jimp, Form *form) {
+    if (!jimp_object_begin(jimp)) return false;
+    while (jimp_object_member(jimp)) {
+        if (strcmp(jimp->string, "id") == 0) {
+            if (!jimp_string(jimp)) return false;
+            form->id = strdup(jimp->string);
+        }
+        else if (strcmp(jimp->string, "title") == 0) {
+            if (!jimp_string(jimp)) return false;
+            form->title = strdup(jimp->string);
+        }
+        else if (strcmp(jimp->string, "fields") == 0) {
+            if (!jimp_array_begin(jimp)) return false;
+            while (jimp_array_item(jimp)) {
+                Field f = {0};
+                if (!jimp_field(jimp, &f)) return false;
+                da_append(&form->fields, f);
+            }
+            if (!jimp_array_end(jimp)) return false;
+        }
+        else {
+            jimp_unknown_member(jimp);
+            return false;
+        }
+    }
+    return jimp_object_end(jimp);
+}
+
+void jim_answers(Jim *jim, const Answers *answers) {
+    jim_object_begin(jim);
+    da_foreach(Answer, x, answers) {
+        jim_member_key(jim, x->id);
+        jim_element_begin(jim);
+        jim_write_cstr(jim, x->value);
+        jim_element_end(jim);
+    }
+    jim_object_end(jim);
+}
+
