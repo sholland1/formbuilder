@@ -17,7 +17,11 @@
 #define CLRDOWN ESC"[K"
 
 #define BUFFER_LEN 1024
-#define is_between(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define CLAMP(x, lower, upper) (MAX((lower), MIN((upper), (x))))
+#define IS_BETWEEN(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
 
 void append_answer(Answers *answers, const char *id, const char *value) {
     // LEAK: Memory must be used, and it'll be cleaned up at exit
@@ -70,16 +74,17 @@ bool fails_checks(const Field *f, const char *answer) {
     bool empty = is_empty(answer);
     switch (f->type) {
         case ft_text:
+            TextFieldMembers p0 = f->text;
             return empty
-                ? f->text.required
-                : !is_match(f->text.regex, answer);
+                ? p0.required
+                : !is_match(p0.regex, answer);
             break;
 
         case ft_number:
             NumberFieldMembers p1 = f->number;
             bool req = p1.required;
             bool isnum = !empty && is_numeric(answer);
-            bool between = isnum && is_between(to_double(answer), p1.min, p1.max);
+            bool between = isnum && IS_BETWEEN(to_double(answer), p1.min, p1.max);
             return between && !isnum && !req || isnum && !between && !req || !empty && !isnum && !req;
 
         default:
@@ -129,40 +134,22 @@ void read_number(char *buffer, double min, double max, double step) {
 
             // up and down
             case '\033':          // Escape sequence start
-                if (read(fileno(tty_in), &c, 1) != 1 && c != '[') {
-                    break; // error or EOF
-                }
-                if (read(fileno(tty_in), &c, 1) != 1) {
-                    break; // error or EOF
-                }
+                if (read(fileno(tty_in), &c, 1) != 1 && c != '[')  break; // error or EOF
+                if (read(fileno(tty_in), &c, 1) != 1)  break; // error or EOF
+
+                double current = round(to_double(buffer) / step) * step;
+                double new_value = current;
                 if (c == 'A') { // Up arrow
-                    double current = round(to_double(buffer) / step) * step;
-                    double new_value = current + step;
-                    if (new_value > max) {
-                        new_value = max;
-                    }
-                    else if (new_value < min) {
-                        new_value = min;
-                    }
-                    snprintf(buffer, BUFFER_LEN, "%g", new_value);
-                    fprintf(tty_out, "\r> %s" CLRDOWN, buffer);
-                    fflush(tty_out);
-                    pos = strlen(buffer);
+                    new_value += step;
                 }
                 else if (c == 'B') { // Down arrow
-                    double current = round(to_double(buffer) / step) * step;
-                    double new_value = current - step;
-                    if (new_value > max) {
-                        new_value = max;
-                    }
-                    else if (new_value < min) {
-                        new_value = min;
-                    }
-                    snprintf(buffer, BUFFER_LEN, "%g", new_value);
-                    fprintf(tty_out, "\r> %s" CLRDOWN, buffer);
-                    fflush(tty_out);
-                    pos = strlen(buffer);
+                    new_value -= step;
                 }
+                else break;
+                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(new_value, min, max));
+                fprintf(tty_out, "\r> %s" CLRDOWN, buffer);
+                fflush(tty_out);
+                pos = strlen(buffer);
                 break;
 
             default:
@@ -232,12 +219,10 @@ void read_string(char *buffer, size_t maxlen) {
                     }
                     // else: silently ignore (max length reached)
                 }
-                // You could also handle arrow keys, Ctrl+U etc. here later
                 break;
         }
     }
 
-    // If we somehow exit loop without \n
     buffer[pos] = '\0';
 }
 
@@ -254,7 +239,7 @@ void deinit(void) {
 }
 
 void init(void) {
-// Open controlling terminal
+    // Open controlling terminal
     tty_in = fopen("/dev/tty", "r");
     tty_out = fopen("/dev/tty", "w");
     if (!tty_in || !tty_out) {

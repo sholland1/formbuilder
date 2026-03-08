@@ -68,7 +68,7 @@ void jim_form(Jim *jim, const Form *f) {
             NumberFieldMembers p1 = x->number;
             jim_member_key(jim, "question"); jim_string(jim, p1.question);
             jim_member_key(jim, "required"); jim_bool(jim, p1.required);
-            int precision = -1;
+            const int precision = -1;
             jim_member_key(jim, "min"); jim_double(jim, p1.min, precision);
             jim_member_key(jim, "max"); jim_double(jim, p1.max, precision);
             jim_member_key(jim, "step"); jim_double(jim, p1.step, precision);
@@ -225,4 +225,3 @@ void jim_answers(Jim *jim, const Answers *answers) {
     }
     jim_object_end(jim);
 }
-
