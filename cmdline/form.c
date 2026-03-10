@@ -85,11 +85,12 @@ bool fails_checks(const Field *f, const char *answer) {
             bool req = p1.required;
             bool isnum = !empty && is_numeric(answer);
             bool between = isnum && IS_BETWEEN(to_double(answer), p1.min, p1.max);
-            return between && !isnum && !req || isnum && !between && !req || !empty && !isnum && !req;
+            return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
 
         default:
-            assert("Unidentified type!\n");
     }
+    assert("Unidentified type!\n");
+    return false;
 }
 
 static struct termios original_termios;

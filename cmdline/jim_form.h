@@ -35,7 +35,9 @@ FieldType parse_type(const char *type_str) {
     if (strcmp(type_str, "counter") == 0) return ft_counter;
     if (strcmp(type_str, "color") == 0) return ft_color;
     if (strcmp(type_str, "bool") == 0) return ft_bool;
+
     assert("Unidentified type!\n");
+    return (FieldType)-1;
 }
 
 void jim_form(Jim *jim, const Form *f) {
