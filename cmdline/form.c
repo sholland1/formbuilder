@@ -12,6 +12,7 @@
 #define RESET  ESC"[0m"
 #define BOLD   ESC"[1m"
 #define FAINT  ESC"[2m"
+#define RED    ESC"[31m"
 #define UP     ESC"[1A"
 #define DOWN   ESC"[1B"
 #define CLRDOWN ESC"[K"
@@ -87,7 +88,7 @@ bool fails_checks(const Field *f, const char *answer) {
             bool between = isnum && IS_BETWEEN(to_double(answer), p1.min, p1.max);
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
 
-        default:
+        default: break;
     }
     assert("Unidentified type!\n");
     return false;
@@ -97,6 +98,16 @@ static struct termios original_termios;
 static FILE *tty_in = NULL;
 static FILE *tty_out = NULL;
 
+void make_prompt_red(size_t pos, bool b) {
+    // move to beginning of line
+    putc('\r', tty_out);
+    // put red or normal '>'
+    fprintf(tty_out, b ? RED"> "RESET : "> ");
+    // move back to original position
+    fprintf(tty_out, ESC"[%zuG", pos+3);
+    fflush(tty_out);
+}
+
 void read_input(char *buffer, const Field *field) {
     fflush(tty_out);
 
@@ -104,6 +115,8 @@ void read_input(char *buffer, const Field *field) {
     buffer[0] = '\0';
 
     while (1) {
+        make_prompt_red(pos, fails_checks(field, buffer));
+
         // Read one raw byte
         unsigned char c;
         if (read(fileno(tty_in), &c, 1) != 1) {
@@ -141,6 +154,7 @@ void read_input(char *buffer, const Field *field) {
             if (c >= 32 && c <= 126 // basic printable ASCII
                 && pos < field->text.maxlength - 1) {
                 buffer[pos++] = (char)c;
+                buffer[pos] = '\0';
                 putc(c, tty_out);
                 fflush(tty_out);
             }
@@ -170,6 +184,7 @@ void read_input(char *buffer, const Field *field) {
             else if (c == '-' || c == '.' || isdigit(c)) {
                 if (pos < BUFFER_LEN - 1) {
                     buffer[pos++] = (char)c;
+                    buffer[pos] = '\0';
                     putc(c, tty_out);
                     fflush(tty_out);
                 }
