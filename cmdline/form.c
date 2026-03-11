@@ -97,7 +97,7 @@ static struct termios original_termios;
 static FILE *tty_in = NULL;
 static FILE *tty_out = NULL;
 
-void read_number(char *buffer, double min, double max, double step) {
+void read_input(char *buffer, const Field *field) {
     fflush(tty_out);
 
     size_t pos = 0;
@@ -133,97 +133,51 @@ void read_number(char *buffer, double min, double max, double step) {
             case 4:             // Ctrl+D
                 exit(EXIT_FAILURE);
 
+            default: break;
+        }
+
+        if (field->type == ft_text) {
+            // Printable character
+            if (c >= 32 && c <= 126 // basic printable ASCII
+                && pos < field->text.maxlength - 1) {
+                buffer[pos++] = (char)c;
+                putc(c, tty_out);
+                fflush(tty_out);
+            }
+        }
+        else if (field->type == ft_number) {
+            NumberFieldMembers p0 = field->number;
             // up and down
-            case '\033':          // Escape sequence start
+            if (c == '\033') {          // Escape sequence start
                 if (read(fileno(tty_in), &c, 1) != 1 && c != '[')  break; // error or EOF
                 if (read(fileno(tty_in), &c, 1) != 1)  break; // error or EOF
 
-                double current = round(to_double(buffer) / step) * step;
-                double new_value = current;
+                double signed_step;
                 if (c == 'A') { // Up arrow
-                    new_value += step;
+                    signed_step = p0.step;
                 }
                 else if (c == 'B') { // Down arrow
-                    new_value -= step;
+                    signed_step = -p0.step;
                 }
                 else break;
-                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(new_value, min, max));
+                double current = round(to_double(buffer) / p0.step) * p0.step;
+                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p0.min, p0.max));
                 fprintf(tty_out, "\r> %s" CLRDOWN, buffer);
                 fflush(tty_out);
                 pos = strlen(buffer);
-                break;
-
-            default:
-                // Numeric character or '-' or '.'
-                if (c == '-' || c == '.' || isdigit(c)) {
-                    if (pos < BUFFER_LEN - 1) {
-                        buffer[pos++] = (char)c;
-                        putc(c, tty_out);
-                        fflush(tty_out);
-                    }
+            }
+            // Numeric character or '-' or '.'
+            else if (c == '-' || c == '.' || isdigit(c)) {
+                if (pos < BUFFER_LEN - 1) {
+                    buffer[pos++] = (char)c;
+                    putc(c, tty_out);
+                    fflush(tty_out);
                 }
-                break;
+            }
         }
     }
 
     // If we somehow exit loop without \n
-    buffer[pos] = '\0';
-}
-
-void read_string(char *buffer, size_t maxlen) {
-    fflush(tty_out);
-    if (maxlen == 0) {
-        buffer[0] = '\0';
-        return;
-    }
-
-    size_t pos = 0;
-    buffer[0] = '\0';
-
-    while (1) {
-        // Read one raw byte
-        unsigned char c;
-        if (read(fileno(tty_in), &c, 1) != 1) {
-            break; // error or EOF
-        }
-
-        switch (c) {
-            case '\n':          // Enter pressed
-            case '\r':          // Sometimes terminals send \r
-                putc('\r', tty_out);
-                putc('\n', tty_out);
-                fflush(tty_out);
-                buffer[pos] = '\0';
-                return;
-
-            case 127:           // Backspace (most common)
-            case '\b':          // Some terminals send \b
-                if (pos > 0) {
-                    pos--;
-                    // Move cursor left, overwrite with space, move left again
-                    fprintf(tty_out, "\b \b");
-                    fflush(tty_out);
-                }
-                break;
-
-            case 3:             // Ctrl+C
-            case 4:             // Ctrl+D
-                exit(EXIT_FAILURE);
-
-            default:
-                // Printable character
-                if (c >= 32 && c <= 126) {  // basic printable ASCII
-                    if (pos < maxlen - 1) {
-                        buffer[pos++] = (char)c;
-                        putc(c, tty_out);
-                        fflush(tty_out);
-                    }
-                    // else: silently ignore (max length reached)
-                }
-                break;
-        }
-    }
-
     buffer[pos] = '\0';
 }
 
@@ -323,7 +277,7 @@ int main(int argc, char *argv[]) {
 
             do {
                 fprintf(tty_out, UP CLRDOWN "> ");
-                read_string(answer_buffer, p0.maxlength);
+                read_input(answer_buffer, f);
             } while (fails_checks(f, answer_buffer));
 
             if (is_empty(answer_buffer)) {
@@ -341,7 +295,7 @@ int main(int argc, char *argv[]) {
 
             do {
                 fprintf(tty_out, UP CLRDOWN "> ");
-                read_number(answer_buffer, p1.min, p1.max, p1.step);
+                read_input(answer_buffer, f);
             } while (fails_checks(f, answer_buffer));
 
             append_answer(&answers, f->id,
