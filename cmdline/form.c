@@ -22,7 +22,7 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define CLAMP(x, lower, upper) (MAX((lower), MIN((upper), (x))))
-#define IS_BETWEEN(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
+#define BETWEEN(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
 
 void append_answer(Answers *answers, const char *id, const char *value) {
     // LEAK: Memory must be used, and it'll be cleaned up at exit
@@ -85,7 +85,7 @@ bool fails_checks(const Field *f, const char *answer) {
             NumberFieldMembers p1 = f->number;
             bool req = p1.required;
             bool isnum = !empty && is_numeric(answer);
-            bool between = isnum && IS_BETWEEN(to_double(answer), p1.min, p1.max);
+            bool between = isnum && BETWEEN(to_double(answer), p1.min, p1.max);
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
 
         default: break;
