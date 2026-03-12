@@ -108,92 +108,225 @@ void make_prompt_red(size_t pos, bool b) {
     fflush(tty_out);
 }
 
+typedef enum {
+    key_eof,
+    key_char,
+    key_delete,
+    key_ctrl_delete,
+    key_backspace,
+    key_ctrl_backspace,
+    key_enter,
+    key_arrow_up,
+    key_arrow_down,
+    key_arrow_right,
+    key_arrow_left,
+    key_home,
+    key_end,
+    key_ctrl_right,
+    key_ctrl_left,
+    key_exit,
+    key_unknown,
+} KeyType;
+
+typedef struct {
+    KeyType type;
+    unsigned char ch;
+} Key;
+
+#define KEY(x) (Key){.type = (x)}
+#define KEY_EOF KEY(key_eof)
+
+Key read_key(FILE *stream) {
+    unsigned char c;
+    if (read(fileno(stream), &c, 1) != 1) return KEY_EOF;
+
+    if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
+    if (c == '\n' || c == '\r')  return KEY(key_enter);
+    if (c >= 32 && c <= 126) return  (Key){.type = key_char, .ch = (c)}; // Printable ASCII
+    if (c == 127 || c == '\b') return KEY(key_backspace);
+    if (c == 23) return KEY(key_ctrl_backspace);
+
+    if (c == '\033') { // Escape sequence
+        if (read(fileno(stream), &c, 1) != 1 && c != '[') return KEY_EOF;
+        if (c == 'd') return KEY(key_ctrl_delete);
+
+        if (read(fileno(stream), &c, 1) != 1 && c != '[') return KEY_EOF;
+
+        if (c == 'A') return KEY(key_arrow_up);
+        if (c == 'B') return KEY(key_arrow_down);
+        if (c == 'C') return KEY(key_arrow_right);
+        if (c == 'D') return KEY(key_arrow_left);
+        if (c == 'F') return KEY(key_end);
+        if (c == 'H') return KEY(key_home);
+        if (c == '1') {
+            if (read(fileno(stream), &c, 1) != 1 && c != ';') return KEY_EOF;
+            if (read(fileno(stream), &c, 1) != 1 && c != '5') return KEY_EOF;
+            if (read(fileno(stream), &c, 1) != 1) return KEY_EOF;
+
+            if (c == 'C') return KEY(key_ctrl_right);
+            if (c == 'D') return KEY(key_ctrl_left);
+        }
+        if (c == '3') {
+            if (read(fileno(stream), &c, 1) != 1 && c != '~') return KEY_EOF;
+            return KEY(key_delete);
+        }
+    }
+
+    return KEY(key_unknown);
+}
+
+bool is_word_boundary(char c) {
+    return c == ' ' || c == '.';
+}
+
+void write_prompt_with_buffer(FILE *stream, const char *buffer) {
+    fprintf(stream, "\r> %s" CLRDOWN, buffer);
+    fflush(stream);
+}
+
 void read_input(char *buffer, const Field *field) {
     fflush(tty_out);
 
     size_t pos = 0;
+    size_t end = 0;
     buffer[0] = '\0';
 
     while (1) {
         make_prompt_red(pos, fails_checks(field, buffer));
 
-        // Read one raw byte
-        unsigned char c;
-        if (read(fileno(tty_in), &c, 1) != 1) {
-            break; // error or EOF
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) { // Ctrl+C or Ctrl+D
+            exit(EXIT_FAILURE);
+        }
+        if (k.type == key_enter) {
+            putc('\r', tty_out);
+            putc('\n', tty_out);
+            fflush(tty_out);
+            buffer[end] = '\0';
+            return;
         }
 
-        switch (c) {
-            case '\n':          // Enter pressed
-            case '\r':          // Sometimes terminals send \r
-                putc('\r', tty_out);
-                putc('\n', tty_out);
-                fflush(tty_out);
-                buffer[pos] = '\0';
-                return;
-
-            case 127:           // Backspace (most common)
-            case '\b':          // Some terminals send \b
-                if (pos > 0) {
-                    buffer[--pos] = '\0';
-                    // Move cursor left, overwrite with space, move left again
-                    fprintf(tty_out, "\b \b");
+        if (k.type == key_backspace) { // Backspace
+            if (pos > 0) {
+                for (int i = pos; i < end; i++) {
+                    buffer[i-1] = buffer[i];
+                }
+                pos--;
+                buffer[--end] = '\0';
+                write_prompt_with_buffer(tty_out, buffer);
+            }
+        }
+        else if (k.type == key_ctrl_backspace) { // Ctrl+Backspace
+            int orig_pos = pos;
+            while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
+            while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
+            int del_len = orig_pos-pos;
+            for (int i = orig_pos; i < end; i++) {
+                buffer[i-del_len] = buffer[i];
+            }
+            end -= del_len;
+            buffer[end] = '\0';
+            write_prompt_with_buffer(tty_out, buffer);
+        }
+        else if (k.type == key_delete) {
+            if (pos < end) {
+                for (int i = pos + 1; i < end; i++) {
+                    buffer[i-1] = buffer[i];
+                }
+                buffer[--end] = '\0';
+                write_prompt_with_buffer(tty_out, buffer);
+            }
+        }
+        else if (k.type == key_ctrl_delete) {
+            int orig_pos = pos;
+            while (pos < end && !is_word_boundary(buffer[pos])) pos++;
+            while (pos < end && is_word_boundary(buffer[pos])) pos++;
+            int del_len = pos-orig_pos;
+            for (int i = pos; i < end; i++) {
+                buffer[i-del_len] = buffer[i];
+            }
+            end -= del_len;
+            pos = orig_pos;
+            buffer[end] = '\0';
+            write_prompt_with_buffer(tty_out, buffer);
+        }
+        else if (k.type == key_home) {
+            pos = 0;
+        }
+        else if (k.type == key_end) {
+            pos = end;
+        }
+        else if (k.type == key_arrow_right) {
+            if (pos < end) pos++;
+        }
+        else if (k.type == key_arrow_left) {
+            if (pos > 0) pos--;
+        }
+        else if (k.type == key_ctrl_right) {
+            while (pos < end && !is_word_boundary(buffer[pos])) pos++;
+            while (pos < end && is_word_boundary(buffer[pos])) pos++;
+        }
+        else if (k.type == key_ctrl_left) {
+            while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
+            while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
+        }
+        else if (field->type == ft_text) {
+            if (k.type == key_char && pos < field->text.maxlength - 1) {
+                if (pos < end) {
+                    for (int i = end+1; i >= pos+1; i--) {
+                        buffer[i] = buffer[i-1];
+                    }
+                    buffer[pos++] = k.ch;
+                    buffer[++end] = '\0';
+                    write_prompt_with_buffer(tty_out, buffer);
+                }
+                else {
+                    buffer[pos++] = k.ch;
+                    buffer[++end] = '\0';
+                    putc(k.ch, tty_out);
                     fflush(tty_out);
                 }
-                break;
-
-            case 3:             // Ctrl+C
-            case 4:             // Ctrl+D
-                exit(EXIT_FAILURE);
-
-            default: break;
-        }
-
-        if (field->type == ft_text) {
-            // Printable character
-            if (c >= 32 && c <= 126 // basic printable ASCII
-                && pos < field->text.maxlength - 1) {
-                buffer[pos++] = (char)c;
-                buffer[pos] = '\0';
-                putc(c, tty_out);
-                fflush(tty_out);
             }
         }
         else if (field->type == ft_number) {
             NumberFieldMembers p0 = field->number;
-            // up and down
-            if (c == '\033') {          // Escape sequence start
-                if (read(fileno(tty_in), &c, 1) != 1 && c != '[')  break; // error or EOF
-                if (read(fileno(tty_in), &c, 1) != 1)  break; // error or EOF
-
+            if (k.type == key_char && (k.ch == '-' || k.ch == '.' || isdigit(k.ch))) {
+                // if (pos < BUFFER_LEN - 1) {
+                if (pos < end) {
+                    for (int i = end+1; i >= pos+1; i--) {
+                        buffer[i] = buffer[i-1];
+                    }
+                    buffer[pos++] = k.ch;
+                    buffer[++end] = '\0';
+                    write_prompt_with_buffer(tty_out, buffer);
+                }
+                else {
+                    buffer[pos++] = k.ch;
+                    buffer[++end] = '\0';
+                    putc(k.ch, tty_out);
+                    fflush(tty_out);
+                }
+            }
+            else {
                 double signed_step;
-                if (c == 'A') { // Up arrow
+                if (k.type == key_arrow_up) { // Up arrow
                     signed_step = p0.step;
                 }
-                else if (c == 'B') { // Down arrow
+                else if (k.type == key_arrow_down) { // Down arrow
                     signed_step = -p0.step;
                 }
                 else break;
                 double current = round(to_double(buffer) / p0.step) * p0.step;
                 snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p0.min, p0.max));
-                fprintf(tty_out, "\r> %s" CLRDOWN, buffer);
-                fflush(tty_out);
+                write_prompt_with_buffer(tty_out, buffer);
                 pos = strlen(buffer);
-            }
-            // Numeric character or '-' or '.'
-            else if (c == '-' || c == '.' || isdigit(c)) {
-                if (pos < BUFFER_LEN - 1) {
-                    buffer[pos++] = (char)c;
-                    buffer[pos] = '\0';
-                    putc(c, tty_out);
-                    fflush(tty_out);
-                }
+                end = pos;
             }
         }
     }
 
     // If we somehow exit loop without \n
-    buffer[pos] = '\0';
+    buffer[end] = '\0';
 }
 
 void deinit(void) {
@@ -274,6 +407,7 @@ int main(int argc, char *argv[]) {
 
     // Clear console
     fprintf(tty_out, CLR HOME);
+
     // Display form title in bold
     fprintf(tty_out, BOLD"%s"RESET"\r\n", form.title);
 
