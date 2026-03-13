@@ -419,7 +419,7 @@ void init(void) {
 }
 
 int main(void) {
-    const char *file_path = "../test.json";
+    const char *file_path = "test.json";
     Nob_String_Builder sb = {0};
     if (!nob_read_entire_file(file_path, &sb)) return 1;
 
