@@ -6,16 +6,18 @@
 #include <termios.h>
 #include <locale.h>
 
+#define _STR(x)  #x
+#define __STR(x) _STR(x)
+
 #define ESC "\033"
-#define CLR    ESC"[2J"
-#define HOME   ESC"[H"
-#define RESET  ESC"[0m"
-#define BOLD   ESC"[1m"
-#define FAINT  ESC"[2m"
-#define RED    ESC"[31m"
-#define UP     ESC"[1A"
-#define DOWN   ESC"[1B"
-#define CLRDOWN ESC"[K"
+#define CLR      ESC"[2J"
+#define HOME     ESC"[H"
+#define RESET    ESC"[0m"
+#define BOLD     ESC"[1m"
+#define FAINT    ESC"[2m"
+#define RED      ESC"[31m"
+#define CLRDOWN  ESC"[K"
+#define RIGHT(n) ESC"["__STR(n)"G"
 
 #define BUFFER_LEN 1024
 
@@ -104,7 +106,7 @@ void make_prompt_red(size_t pos, bool b) {
     // put red or normal '>'
     fprintf(tty_out, b ? RED"> "RESET : "> ");
     // move back to original position
-    fprintf(tty_out, ESC"[%zuG", pos+3);
+    fprintf(tty_out, RIGHT(%zu), pos+3);
     fflush(tty_out);
 }
 
@@ -184,14 +186,38 @@ void write_prompt_with_buffer(FILE *stream, const char *buffer) {
     fflush(stream);
 }
 
-void read_input(char *buffer, const Field *field) {
-    fflush(tty_out);
+void write_placeholder(FILE *stream, const char *ph) {
+    fprintf(stream, "\r> "FAINT"%s"RESET"\r"RIGHT(3), ph);
+    fflush(stream);
+}
 
+#define write_question(stream, field) \
+    do { \
+        fprintf(stream, "%s%s\r\n", (field).question, (field).required ? "*" : ""); \
+        fflush(stream); \
+    } while (0)
+
+void write_nl(FILE *stream) {
+    putc('\r', stream);
+    putc('\n', stream);
+    fflush(stream);
+}
+
+void read_input(char *buffer, const Field *field) {
     size_t pos = 0;
     size_t end = 0;
     buffer[0] = '\0';
 
     while (1) {
+        if (field->type == ft_text) {
+            const char *ph = field->text.placeholder;
+            if (end == 0 && ph) {
+                write_placeholder(tty_out, ph);
+            }
+            else {
+                write_prompt_with_buffer(tty_out, buffer);
+            }
+        }
         make_prompt_red(pos, fails_checks(field, buffer));
 
         Key k = read_key(tty_in);
@@ -199,9 +225,6 @@ void read_input(char *buffer, const Field *field) {
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
-            putc('\r', tty_out);
-            putc('\n', tty_out);
-            fflush(tty_out);
             buffer[end] = '\0';
             return;
         }
@@ -422,14 +445,13 @@ int main(int argc, char *argv[]) {
     da_foreach(Field, f, &form.fields) {
         switch (f->type) {
         case ft_text:
-            TextFieldMembers p0 = f->text;
-            fprintf(tty_out, "%s%s\r\n> ", p0.question, p0.required ? "*" : "");
-            fprintf(tty_out, FAINT"%s"RESET"\r\n\r\n", p0.placeholder);
+            write_question(tty_out, f->text);
 
             do {
-                fprintf(tty_out, UP CLRDOWN "> ");
                 read_input(answer_buffer, f);
             } while (fails_checks(f, answer_buffer));
+
+            write_nl(tty_out);
 
             if (is_empty(answer_buffer)) {
                 append_answer(&answers, f->id, "null");
@@ -441,13 +463,13 @@ int main(int argc, char *argv[]) {
             break;
 
         case ft_number:
-            NumberFieldMembers p1 = f->number;
-            fprintf(tty_out, "%s%s\r\n\r\n", p1.question, p1.required ? "*" : "");
+            write_question(tty_out, f->number);
 
             do {
-                fprintf(tty_out, UP CLRDOWN "> ");
                 read_input(answer_buffer, f);
             } while (fails_checks(f, answer_buffer));
+
+            write_nl(tty_out);
 
             append_answer(&answers, f->id,
                 is_empty(answer_buffer) ? "null" : answer_buffer);
