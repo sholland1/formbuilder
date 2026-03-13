@@ -218,6 +218,9 @@ void read_input(char *buffer, const Field *field) {
                 write_prompt_with_buffer(tty_out, buffer);
             }
         }
+        else if (field->type == ft_number) {
+            write_prompt_with_buffer(tty_out, buffer);
+        }
         make_prompt_red(pos, fails_checks(field, buffer));
 
         Key k = read_key(tty_in);
