@@ -101,14 +101,14 @@ static struct termios original_termios;
 static FILE *tty_in = NULL;
 static FILE *tty_out = NULL;
 
-void make_prompt_red(size_t pos, bool b) {
+void make_prompt_red(FILE *stream, size_t pos, bool b) {
     // move to beginning of line
-    putc('\r', tty_out);
+    putc('\r', stream);
     // put red or normal '>'
-    fprintf(tty_out, b ? RED"> "RESET : "> ");
+    fprintf(stream, b ? RED"> "RESET : "> ");
     // move back to original position
-    fprintf(tty_out, RIGHT(%zu), pos+3);
-    fflush(tty_out);
+    fprintf(stream, RIGHT(%zu), pos+3);
+    fflush(stream);
 }
 
 typedef enum {
@@ -222,10 +222,10 @@ void read_input(char *buffer, const Field *field) {
         else if (field->type == ft_number) {
             write_prompt_with_buffer(tty_out, buffer);
         }
-        make_prompt_red(pos, fails_checks(field, buffer));
+        make_prompt_red(tty_out, pos, fails_checks(field, buffer));
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) { // Ctrl+C or Ctrl+D
+        if (k.type == key_exit) {
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
@@ -233,7 +233,7 @@ void read_input(char *buffer, const Field *field) {
             return;
         }
 
-        if (k.type == key_backspace) { // Backspace
+        if (k.type == key_backspace) {
             if (pos > 0) {
                 for (size_t i = pos; i < end; i++) {
                     buffer[i-1] = buffer[i];
@@ -243,7 +243,7 @@ void read_input(char *buffer, const Field *field) {
                 write_prompt_with_buffer(tty_out, buffer);
             }
         }
-        else if (k.type == key_ctrl_backspace) { // Ctrl+Backspace
+        else if (k.type == key_ctrl_backspace) {
             int orig_pos = pos;
             while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
             while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
@@ -338,10 +338,10 @@ void read_input(char *buffer, const Field *field) {
             }
             else {
                 double signed_step;
-                if (k.type == key_arrow_up) { // Up arrow
+                if (k.type == key_arrow_up) {
                     signed_step = p0.step;
                 }
-                else if (k.type == key_arrow_down) { // Down arrow
+                else if (k.type == key_arrow_down) {
                     signed_step = -p0.step;
                 }
                 else break;
@@ -358,7 +358,7 @@ void read_input(char *buffer, const Field *field) {
     buffer[end] = '\0';
 }
 
-void deinit(void) {
+void terminal_deinit(void) {
     if (tty_in) {
         tcsetattr(fileno(tty_in), TCSAFLUSH, &original_termios);
         fclose(tty_in);
@@ -370,7 +370,7 @@ void deinit(void) {
     }
 }
 
-void init(void) {
+void terminal_init(void) {
     // Open controlling terminal
     tty_in = fopen("/dev/tty", "r");
     tty_out = fopen("/dev/tty", "w");
@@ -382,7 +382,7 @@ void init(void) {
     // Save original settings
     if (tcgetattr(fileno(tty_in), &original_termios) == -1) {
         perror("tcgetattr");
-        deinit();           // best effort cleanup
+        terminal_deinit();           // best effort cleanup
         exit(EXIT_FAILURE);
     }
 
@@ -406,14 +406,14 @@ void init(void) {
 
     if (tcsetattr(fileno(tty_in), TCSAFLUSH, &raw) == -1) {
         perror("tcsetattr");
-        deinit();
+        terminal_deinit();
         exit(EXIT_FAILURE);
     }
 
     // Register normal exit cleanup
-    if (atexit(deinit) != 0) {
+    if (atexit(terminal_deinit) != 0) {
         fprintf(stderr, "atexit failed\n");
-        deinit();
+        terminal_deinit();
         exit(EXIT_FAILURE);
     }
 }
@@ -432,7 +432,7 @@ int main(void) {
         return 1;
     }
 
-    init();
+    terminal_init();
 
     // Clear console
     fprintf(tty_out, CLR HOME);
@@ -484,7 +484,7 @@ int main(void) {
         }
     }
 
-    deinit();
+    terminal_deinit();
 
     // This necessary to output json double correctly
     setlocale(LC_NUMERIC, "C");
