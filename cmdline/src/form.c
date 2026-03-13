@@ -446,6 +446,7 @@ int main(void) {
 
     char answer_buffer[BUFFER_LEN];
     char quoted_answer_buffer[BUFFER_LEN+2];
+    const char *timestamp_field_id = NULL;
     nob_da_foreach(Field, f, &form.fields) {
         switch (f->type) {
         case ft_text:
@@ -479,9 +480,20 @@ int main(void) {
                 is_empty(answer_buffer) ? "null" : answer_buffer);
             break;
 
+        case ft_timestamp:
+            timestamp_field_id = f->id;
+            break;
+
         default:
             assert("Unidentified type!\n");
         }
+    }
+
+    if (timestamp_field_id) {
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d %H:%M:%S\"", t);
+        append_answer(&answers, timestamp_field_id, quoted_answer_buffer);
     }
 
     terminal_deinit();
