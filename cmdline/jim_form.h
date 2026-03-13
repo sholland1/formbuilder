@@ -49,7 +49,7 @@ void jim_form(Jim *jim, const Form *f) {
     jim_member_key(jim, "fields");
 
     jim_array_begin(jim);
-    da_foreach(Field, x, &f->fields) {
+    nob_da_foreach(Field, x, &f->fields) {
         jim_object_begin(jim);
         jim_member_key(jim, "id");
         jim_string(jim, x->id);
@@ -205,7 +205,7 @@ bool jimp_form(Jimp *jimp, Form *form) {
             while (jimp_array_item(jimp)) {
                 Field f = {0};
                 if (!jimp_field(jimp, &f)) return false;
-                da_append(&form->fields, f);
+                nob_da_append(&form->fields, f);
             }
             if (!jimp_array_end(jimp)) return false;
         }
@@ -219,7 +219,7 @@ bool jimp_form(Jimp *jimp, Form *form) {
 
 void jim_answers(Jim *jim, const Answers *answers) {
     jim_object_begin(jim);
-    da_foreach(Answer, x, answers) {
+    nob_da_foreach(Answer, x, answers) {
         jim_member_key(jim, x->id);
         jim_element_begin(jim);
         jim_write_cstr(jim, x->value);

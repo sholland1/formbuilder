@@ -1,6 +1,7 @@
 #define JIM_IMPLEMENTATION
 #define JIMP_IMPLEMENTATION
 #define NOB_IMPLEMENTATION
+#define NOB_UNSTRIP_PREFIX
 #include "jim_form.h"
 
 #include <termios.h>
@@ -32,7 +33,7 @@ void append_answer(Answers *answers, const char *id, const char *value) {
         .id = strdup(id),
         .value = strdup(value),
     };
-    da_append(answers, a);
+    nob_da_append(answers, a);
 }
 
 bool is_match(const regex_t *regex, const char *s) {
@@ -419,15 +420,15 @@ void init(void) {
 
 int main(void) {
     const char *file_path = "../test.json";
-    String_Builder sb = {0};
-    if (!read_entire_file(file_path, &sb)) return 1;
+    Nob_String_Builder sb = {0};
+    if (!nob_read_entire_file(file_path, &sb)) return 1;
 
     Jimp jimp = {0};
     jimp_begin(&jimp, file_path, sb.items, sb.count);
 
     Form form = {0};
     if (!jimp_form(&jimp, &form)) {
-        nob_log(ERROR, "Failed to parse form in %s", file_path);
+        fprintf(stderr, "Failed to parse form in %s", file_path);
         return 1;
     }
 
@@ -445,7 +446,7 @@ int main(void) {
 
     char answer_buffer[BUFFER_LEN];
     char quoted_answer_buffer[BUFFER_LEN+2];
-    da_foreach(Field, f, &form.fields) {
+    nob_da_foreach(Field, f, &form.fields) {
         switch (f->type) {
         case ft_text:
             write_question(tty_out, f->text);
