@@ -290,21 +290,23 @@ void read_input(char *buffer, const Field *field) {
         }
         else if (field->type == ft_number) {
             NumberFieldMembers p0 = field->number;
-            if (k.type == key_char && (k.ch == '-' || k.ch == '.' || isdigit(k.ch))) {
-                // if (pos < BUFFER_LEN - 1) {
-                if (pos < end) {
-                    for (int i = end+1; i >= pos+1; i--) {
-                        buffer[i] = buffer[i-1];
+            if (k.type == key_char) {
+                if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
+                    // if (pos < BUFFER_LEN - 1) {
+                    if (pos < end) {
+                        for (int i = end+1; i >= pos+1; i--) {
+                            buffer[i] = buffer[i-1];
+                        }
+                        buffer[pos++] = k.ch;
+                        buffer[++end] = '\0';
+                        write_prompt_with_buffer(tty_out, buffer);
                     }
-                    buffer[pos++] = k.ch;
-                    buffer[++end] = '\0';
-                    write_prompt_with_buffer(tty_out, buffer);
-                }
-                else {
-                    buffer[pos++] = k.ch;
-                    buffer[++end] = '\0';
-                    putc(k.ch, tty_out);
-                    fflush(tty_out);
+                    else {
+                        buffer[pos++] = k.ch;
+                        buffer[++end] = '\0';
+                        putc(k.ch, tty_out);
+                        fflush(tty_out);
+                    }
                 }
             }
             else {
