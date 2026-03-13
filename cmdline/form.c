@@ -231,7 +231,7 @@ void read_input(char *buffer, const Field *field) {
 
         if (k.type == key_backspace) { // Backspace
             if (pos > 0) {
-                for (int i = pos; i < end; i++) {
+                for (size_t i = pos; i < end; i++) {
                     buffer[i-1] = buffer[i];
                 }
                 pos--;
@@ -244,7 +244,7 @@ void read_input(char *buffer, const Field *field) {
             while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
             while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
             int del_len = orig_pos-pos;
-            for (int i = orig_pos; i < end; i++) {
+            for (size_t i = orig_pos; i < end; i++) {
                 buffer[i-del_len] = buffer[i];
             }
             end -= del_len;
@@ -253,7 +253,7 @@ void read_input(char *buffer, const Field *field) {
         }
         else if (k.type == key_delete) {
             if (pos < end) {
-                for (int i = pos + 1; i < end; i++) {
+                for (size_t i = pos + 1; i < end; i++) {
                     buffer[i-1] = buffer[i];
                 }
                 buffer[--end] = '\0';
@@ -265,7 +265,7 @@ void read_input(char *buffer, const Field *field) {
             while (pos < end && !is_word_boundary(buffer[pos])) pos++;
             while (pos < end && is_word_boundary(buffer[pos])) pos++;
             int del_len = pos-orig_pos;
-            for (int i = pos; i < end; i++) {
+            for (size_t i = pos; i < end; i++) {
                 buffer[i-del_len] = buffer[i];
             }
             end -= del_len;
@@ -296,7 +296,7 @@ void read_input(char *buffer, const Field *field) {
         else if (field->type == ft_text) {
             if (k.type == key_char && pos < field->text.maxlength - 1) {
                 if (pos < end) {
-                    for (int i = end+1; i >= pos+1; i--) {
+                    for (size_t i = end+1; i >= pos+1; i--) {
                         buffer[i] = buffer[i-1];
                     }
                     buffer[pos++] = k.ch;
@@ -317,7 +317,7 @@ void read_input(char *buffer, const Field *field) {
                 if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
                     // if (pos < BUFFER_LEN - 1) {
                     if (pos < end) {
-                        for (int i = end+1; i >= pos+1; i--) {
+                        for (size_t i = end+1; i >= pos+1; i--) {
                             buffer[i] = buffer[i-1];
                         }
                         buffer[pos++] = k.ch;
@@ -414,7 +414,7 @@ void init(void) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(void) {
     const char *file_path = "../test.json";
     String_Builder sb = {0};
     if (!read_entire_file(file_path, &sb)) return 1;
