@@ -98,6 +98,11 @@ bool fails_checks(const Field *f, const char *answer) {
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
         }
 
+        case ft_select: {
+            SelectFieldMembers p = f->select;
+            return empty && p.required;
+        }
+
         case ft_bool:
             return false;
 
@@ -129,6 +134,7 @@ typedef enum {
     key_backspace,
     key_ctrl_backspace,
     key_enter,
+    key_tab,
     key_arrow_up,
     key_arrow_down,
     key_arrow_right,
@@ -155,6 +161,7 @@ Key read_key(FILE *stream) {
 
     if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
     if (c == '\n' || c == '\r')  return KEY(key_enter);
+    if (c == '\t')  return KEY(key_tab);
     if (c >= 32 && c <= 126) return  (Key){.type = key_char, .ch = (c)}; // Printable ASCII
     if (c == 127 || c == '\b') return KEY(key_backspace);
     if (c == 23) return KEY(key_ctrl_backspace);
@@ -238,6 +245,64 @@ bool read_bool(void) {
             choice = !choice;
         }
         fprintf(tty_out, UP(2) CLRDOWN);
+    }
+}
+
+void read_select(char *buffer, const Field *field, bool first_time) {
+    fprintf(tty_out, HIDE);
+
+    SelectOptions opts = field->select.options;
+    if (!first_time)
+        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
+
+    size_t pos = 0;
+    while(1) {
+        fprintf(tty_out, "\r%s\r\n", pos == 0
+            ? field->select.required ? ERR_PROMPT : PROMPT
+            : " ");
+        for (size_t i = 1; i < opts.count+1; i++) {
+            fprintf(tty_out, "\r%s %s\r\n", pos == i ? PROMPT : " ", opts.items[i-1]);
+        }
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_enter) {
+            fprintf(tty_out, SHOW);
+            if (pos == 0) {
+                buffer[0] = 0;
+            }
+            else {
+                strcpy(buffer, opts.items[pos-1]);
+            }
+            return;
+        }
+        if (k.type == key_tab) {
+            fprintf(tty_out, SHOW);
+            buffer[0] = 0;
+            return;
+        }
+        if (k.type == key_exit) {
+            fprintf(tty_out, SHOW);
+            exit(EXIT_FAILURE);
+        }
+
+        if (k.type == key_arrow_up) {
+            if (pos == 0) {
+                pos = opts.count;
+            }
+            else {
+                pos--;
+            }
+        }
+        else if (k.type == key_arrow_down) {
+            if (pos == opts.count) {
+                pos = 0;
+            }
+            else {
+                pos++;
+            }
+        }
+        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
     }
 }
 
@@ -515,6 +580,25 @@ int main(void) {
 
             append_answer(&answers, f->id,
                 is_empty(answer_buffer) ? "null" : answer_buffer);
+            break;
+
+        case ft_select:
+            write_question(tty_out, f->select);
+            bool first_time = true;
+            do {
+                read_select(answer_buffer, f, first_time);
+                first_time = false;
+            } while (fails_checks(f, answer_buffer));
+
+            write_nl(tty_out);
+
+            if (is_empty(answer_buffer)) {
+                append_answer(&answers, f->id, "null");
+            }
+            else {
+                sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
+                append_answer(&answers, f->id, quoted_answer_buffer);
+            }
             break;
 
         case ft_bool:

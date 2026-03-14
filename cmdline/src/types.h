@@ -34,6 +34,18 @@ typedef struct {
 } NumberFieldMembers;
 
 typedef struct {
+    char **items;
+    size_t count;
+    size_t capacity;
+} SelectOptions;
+
+typedef struct {
+    const char *question;
+    bool required;
+    SelectOptions options;
+} SelectFieldMembers;
+
+typedef struct {
     const char *question;
 } BoolFieldMembers;
 
@@ -43,6 +55,7 @@ typedef struct {
     union {
         TextFieldMembers text;
         NumberFieldMembers number;
+        SelectFieldMembers select;
         BoolFieldMembers boolean;
     };
 } Field;

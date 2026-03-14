@@ -78,6 +78,19 @@ void jim_form(Jim *jim, const Form *f) {
                 break;
             }
 
+            case ft_select: {
+                SelectFieldMembers p = x->select;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "required"); jim_bool(jim, p.required);
+                jim_member_key(jim, "options");
+                jim_array_begin(jim);
+                nob_da_foreach(char *, x, &p.options) {
+                    jim_string(jim, *x);
+                }
+                jim_array_end(jim);
+                break;
+            }
+
             case ft_bool:
                 jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
                 break;
@@ -107,6 +120,14 @@ void field_set_defaults(Field *field) {
             field->number.max = NAN;
             field->number.step = 1;
             break;
+
+        case ft_select: {
+            field->select.required = true;
+            field->select.options.capacity = 0;
+            field->select.options.count = 0;
+            field->select.options.items = NULL;
+            break;
+        }
 
         case ft_bool:
         case ft_timestamp:
@@ -190,6 +211,25 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else {
                         jimp_unknown_member(jimp);
                         return false;
+                    }
+                    break;
+
+                case ft_select:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->select.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->select.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "options") == 0) {
+                        if (!jimp_array_begin(jimp)) return false;
+                        while (jimp_array_item(jimp)) {
+                            if (!jimp_string(jimp)) return false;
+                            nob_da_append(&field->select.options, strdup(jimp->string));
+                        }
+                        if (!jimp_array_end(jimp)) return false;
                     }
                     break;
 
