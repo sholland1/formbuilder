@@ -87,16 +87,16 @@ bool is_numeric(const char *str) {
 }
 
 bool is_empty(const char *s) {
-    return !*s;
+    return !s || !*s;
 }
 
 double to_double(const char* str) {
     return str ? strtod(str, NULL) : 0.0;
 }
 
-bool fails_multiselect_checks(const Field *f, const SelectOptions *opts) {
+bool fails_multiselect_checks(const Field *f, unsigned int opts_count) {
     MultiSelectFieldMembers p = f->multiselect;
-    return !BETWEEN(opts->count, p.min, p.max);
+    return !BETWEEN(opts_count, p.min, p.max);
 }
 
 bool fails_checks(const Field *f, const char *answer) {
@@ -333,9 +333,18 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
 
     size_t pos = 0;
     while(1) {
+        int selected_opt_count = 0;
+        for (size_t i = 0; i < opts.count; i++) {
+            if (selected_indexes[i]) {
+                selected_opt_count++;
+            }
+        }
+        bool fail_checks = fails_multiselect_checks(field, selected_opt_count);
         for (size_t i = 0; i < opts.count; i++) {
             fprintf(tty_out, "\r%s %s %s\r\n",
-                pos == i ? PROMPT : " ",
+                pos == i
+                ? fail_checks ? ERR_PROMPT : PROMPT
+                : " ",
                 selected_indexes[i] ? CHECK : UNCHECK,
                 opts.items[i]);
         }
@@ -698,7 +707,7 @@ int main(void) {
                 opts.count = 0;
                 read_multiselect(selected_indexes, &opts, f, first_time);
                 first_time = false;
-            } while (fails_multiselect_checks(f, &opts));
+            } while (fails_multiselect_checks(f, opts.count));
 
             append_multiselect_answer(&answers, f->id, &opts);
             break;
