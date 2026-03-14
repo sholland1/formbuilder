@@ -57,24 +57,26 @@ void jim_form(Jim *jim, const Form *f) {
         jim_field_type(jim, x->type);
 
         switch (x->type) {
-            case ft_text:
-                TextFieldMembers p0 = x->text;
-                jim_member_key(jim, "question"); jim_string(jim, p0.question);
-                if (p0.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p0.placeholder);}
-                if (p0.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p0.maxlength);}
-                jim_member_key(jim, "required"); jim_bool(jim, p0.required);
-                if (p0.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p0.pattern);}
+            case ft_text: {
+                TextFieldMembers p = x->text;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
+                if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
+                jim_member_key(jim, "required"); jim_bool(jim, p.required);
+                if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
                 break;
+            }
 
-            case ft_number:
-                NumberFieldMembers p1 = x->number;
-                jim_member_key(jim, "question"); jim_string(jim, p1.question);
-                jim_member_key(jim, "required"); jim_bool(jim, p1.required);
+            case ft_number: {
+                NumberFieldMembers p = x->number;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "required"); jim_bool(jim, p.required);
                 const int precision = -1;
-                jim_member_key(jim, "min"); jim_double(jim, p1.min, precision);
-                jim_member_key(jim, "max"); jim_double(jim, p1.max, precision);
-                jim_member_key(jim, "step"); jim_double(jim, p1.step, precision);
+                jim_member_key(jim, "min"); jim_double(jim, p.min, precision);
+                jim_member_key(jim, "max"); jim_double(jim, p.max, precision);
+                jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
                 break;
+            }
 
             case ft_bool:
                 jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
@@ -196,6 +198,11 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         if (!jimp_string(jimp)) return false;
                         field->number.question = strdup(jimp->string);
                     }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
 
                 case ft_timestamp: break;
 

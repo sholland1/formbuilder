@@ -82,19 +82,21 @@ double to_double(const char* str) {
 bool fails_checks(const Field *f, const char *answer) {
     bool empty = is_empty(answer);
     switch (f->type) {
-        case ft_text:
-            TextFieldMembers p0 = f->text;
+        case ft_text: {
+            TextFieldMembers p = f->text;
             return empty
-                ? p0.required
-                : !is_match(p0.regex, answer);
+                ? p.required
+                : !is_match(p.regex, answer);
             break;
+        }
 
-        case ft_number:
-            NumberFieldMembers p1 = f->number;
-            bool req = p1.required;
+        case ft_number: {
+            NumberFieldMembers p = f->number;
+            bool req = p.required;
             bool isnum = !empty && is_numeric(answer);
-            bool between = isnum && BETWEEN(to_double(answer), p1.min, p1.max);
+            bool between = isnum && BETWEEN(to_double(answer), p.min, p.max);
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
+        }
 
         case ft_bool:
             return false;
@@ -212,7 +214,7 @@ void write_nl(FILE *stream) {
     fflush(stream);
 }
 
-bool read_bool() {
+bool read_bool(void) {
     fprintf(tty_out, HIDE);
 
     bool choice = true;
@@ -351,7 +353,7 @@ void read_input(char *buffer, const Field *field) {
             }
         }
         else if (field->type == ft_number) {
-            NumberFieldMembers p0 = field->number;
+            NumberFieldMembers p = field->number;
             if (k.type == key_char) {
                 if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
                     // if (pos < BUFFER_LEN - 1) {
@@ -374,14 +376,14 @@ void read_input(char *buffer, const Field *field) {
             else {
                 double signed_step;
                 if (k.type == key_arrow_up) {
-                    signed_step = p0.step;
+                    signed_step = p.step;
                 }
                 else if (k.type == key_arrow_down) {
-                    signed_step = -p0.step;
+                    signed_step = -p.step;
                 }
                 else break;
-                double current = round(to_double(buffer) / p0.step) * p0.step;
-                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p0.min, p0.max));
+                double current = round(to_double(buffer) / p.step) * p.step;
+                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
                 write_prompt_with_buffer(tty_out, buffer);
                 pos = strlen(buffer);
                 end = pos;
