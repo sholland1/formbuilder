@@ -17,6 +17,9 @@
 #define FAINT    "\e[2m"
 #define RED      "\e[31m"
 #define CLRDOWN  "\e[K"
+#define HIDE     "\e[?25l"
+#define SHOW     "\e[?25h"
+#define UP(n)    "\e["__STR(n)"A"
 #define RIGHT(n) "\e["__STR(n)"G"
 
 #define ERR_PROMPT RED BOLD"→"RESET
@@ -92,6 +95,9 @@ bool fails_checks(const Field *f, const char *answer) {
             bool isnum = !empty && is_numeric(answer);
             bool between = isnum && BETWEEN(to_double(answer), p1.min, p1.max);
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
+
+        case ft_bool:
+            return false;
 
         default: break;
     }
@@ -204,6 +210,33 @@ void write_nl(FILE *stream) {
     putc('\r', stream);
     putc('\n', stream);
     fflush(stream);
+}
+
+bool read_bool() {
+    fprintf(tty_out, HIDE);
+
+    bool choice = true;
+    while(1) {
+        fprintf(tty_out, "\r%s Yes\r\n%s No\r\n",
+            choice ? PROMPT : " ",
+            !choice ? PROMPT : " ");
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_enter) {
+            fprintf(tty_out, SHOW);
+            return choice;
+        }
+        if (k.type == key_exit) {
+            fprintf(tty_out, SHOW);
+            exit(EXIT_FAILURE);
+        }
+
+        if (k.type == key_arrow_up || k.type == key_arrow_down) {
+            choice = !choice;
+        }
+        fprintf(tty_out, UP(2) CLRDOWN);
+    }
 }
 
 void read_input(char *buffer, const Field *field) {
@@ -480,6 +513,13 @@ int main(void) {
 
             append_answer(&answers, f->id,
                 is_empty(answer_buffer) ? "null" : answer_buffer);
+            break;
+
+        case ft_bool:
+            fprintf(tty_out, "%s\r\n", f->boolean.question);
+            fflush(tty_out);
+            bool choice = read_bool();
+            append_answer(&answers, f->id, choice ? "true" : "false");
             break;
 
         case ft_timestamp:

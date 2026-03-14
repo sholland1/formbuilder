@@ -34,11 +34,16 @@ typedef struct {
 } NumberFieldMembers;
 
 typedef struct {
+    const char *question;
+} BoolFieldMembers;
+
+typedef struct {
     const char *id;
     FieldType type;
     union {
         TextFieldMembers text;
         NumberFieldMembers number;
+        BoolFieldMembers boolean;
     };
 } Field;
 
