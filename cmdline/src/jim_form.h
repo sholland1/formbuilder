@@ -10,35 +10,19 @@
 
 void jim_field_type(Jim *jim, FieldType t) {
     switch (t) {
-    case ft_text: jim_string(jim, "text"); break;
-    case ft_number: jim_string(jim, "number"); break;
-    case ft_select: jim_string(jim, "select"); break;
-    case ft_multiselect: jim_string(jim, "multiselect"); break;
-    case ft_multitext: jim_string(jim, "multitext"); break;
-    case ft_timestamp: jim_string(jim, "timestamp"); break;
-    case ft_date: jim_string(jim, "date"); break;
-    case ft_counter: jim_string(jim, "counter"); break;
-    case ft_color: jim_string(jim, "color"); break;
-    case ft_bool: jim_string(jim, "bool"); break;
-    default: assert("Unidentified type!\n");
+#define X(name) case ft_##name: jim_string(jim, #name); break;
+        FIELDTYPES
+#undef X
+        default: NOB_UNREACHABLE("Unidentified type!");
     }
 }
 
 // TODO: maybe match with regex
 FieldType parse_type(const char *type_str) {
-    if (strcmp(type_str, "text") == 0) return ft_text;
-    if (strcmp(type_str, "number") == 0) return ft_number;
-    if (strcmp(type_str, "select") == 0) return ft_select;
-    if (strcmp(type_str, "multiselect") == 0) return ft_multiselect;
-    if (strcmp(type_str, "multitext") == 0) return ft_multitext;
-    if (strcmp(type_str, "timestamp") == 0) return ft_timestamp;
-    if (strcmp(type_str, "date") == 0) return ft_date;
-    if (strcmp(type_str, "counter") == 0) return ft_counter;
-    if (strcmp(type_str, "color") == 0) return ft_color;
-    if (strcmp(type_str, "bool") == 0) return ft_bool;
-
-    assert("Unidentified type!\n");
-    return (FieldType)-1;
+#define X(name) if (strcmp(type_str, #name) == 0) return ft_##name;
+    FIELDTYPES
+#undef X
+    NOB_UNREACHABLE("Unidentified type!");
 }
 
 void jim_form(Jim *jim, const Form *f) {
@@ -112,8 +96,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_timestamp: break;
 
-            default:
-                assert("Unidentified type!\n");
+            default: NOB_UNREACHABLE("Unidentified type!");
         }
         jim_object_end(jim);
     }
@@ -157,8 +140,7 @@ void field_set_defaults(Field *field) {
         case ft_timestamp:
             break;
 
-        default:
-            assert("Unidentified type!\n");
+        default: NOB_UNREACHABLE("Unidentified type!");
     }
 }
 
@@ -293,8 +275,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
 
                 case ft_timestamp: break;
 
-                default:
-                    assert("Unidentified type!\n");
+                default: NOB_UNREACHABLE("Unidentified type!");
             }
         }
     }

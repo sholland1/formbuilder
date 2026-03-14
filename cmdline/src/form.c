@@ -7,9 +7,6 @@
 #include <termios.h>
 #include <locale.h>
 
-#define _STR(x)  #x
-#define __STR(x) _STR(x)
-
 #define CLR      "\e[2J"
 #define HOME     "\e[H"
 #define RESET    "\e[0m"
@@ -19,8 +16,8 @@
 #define CLRDOWN  "\e[K"
 #define HIDE     "\e[?25l"
 #define SHOW     "\e[?25h"
-#define UP(n)    "\e["__STR(n)"A"
-#define RIGHT(n) "\e["__STR(n)"G"
+#define UP(n)    "\e["#n"A"
+#define RIGHT(n) "\e["#n"G"
 
 #define ERR_PROMPT RED BOLD"→"RESET
 #define PROMPT BOLD"→"RESET
@@ -126,8 +123,7 @@ bool fails_checks(const Field *f, const char *answer) {
 
         default: break;
     }
-    assert("Unidentified type!\n");
-    return false;
+    NOB_UNREACHABLE("Unidentified type!");
 }
 
 static struct termios original_termios;
@@ -725,8 +721,7 @@ int main(void) {
             timestamp_field_id = f->id;
             break;
 
-        default:
-            assert("Unidentified type!\n");
+        default: NOB_UNREACHABLE("Unidentified type!");
         }
     }
 

@@ -2,17 +2,22 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#define FIELDTYPES \
+    X(text) \
+    X(number) \
+    X(select) \
+    X(multiselect) \
+    X(multitext) \
+    X(timestamp) \
+    X(date) \
+    X(counter) \
+    X(color) \
+    X(bool)
+
 typedef enum {
-    ft_text,
-    ft_number,
-    ft_select,
-    ft_multiselect,
-    ft_multitext,
-    ft_timestamp,
-    ft_date,
-    ft_counter,
-    ft_color,
-    ft_bool,
+#define X(name) ft_##name,
+    FIELDTYPES
+#undef X
     FIELD_TYPE_LENGTH,
 } FieldType;
 
