@@ -13,6 +13,8 @@
 #define BOLD     "\e[1m"
 #define FAINT    "\e[2m"
 #define RED      "\e[31m"
+#define GREEN    "\e[32m"
+#define BLUE     "\e[34m"
 #define CLRDOWN  "\e[K"
 #define HIDE     "\e[?25l"
 #define SHOW     "\e[?25h"
@@ -24,6 +26,9 @@
 
 #define CHECK "[✘]"
 #define UNCHECK "[ ]"
+
+#define RGB_FG "\e[38;2;%d;%d;%dm"
+#define RGB_BG "\e[48;2;%d;%d;%dm"
 
 #define BUFFER_LEN 1024
 
@@ -117,6 +122,7 @@ bool fails_checks(const Field *f, const char *answer) {
         case ft_select:
             return empty && f->select.required;
 
+        case ft_color:
         case ft_bool:
             return false;
 
@@ -148,6 +154,7 @@ typedef enum {
     key_ctrl_backspace,
     key_enter,
     key_tab,
+    key_shift_tab,
     key_arrow_up,
     key_arrow_down,
     key_arrow_right,
@@ -191,6 +198,7 @@ Key read_key(FILE *stream) {
         if (c == 'D') return KEY(key_arrow_left);
         if (c == 'F') return KEY(key_end);
         if (c == 'H') return KEY(key_home);
+        if (c == 'Z') return KEY(key_shift_tab);
         if (c == '1') {
             if (read(fileno(stream), &c, 1) != 1 && c != ';') return KEY_EOF;
             if (read(fileno(stream), &c, 1) != 1 && c != '5') return KEY_EOF;
@@ -232,6 +240,103 @@ void write_nl(FILE *stream) {
     putc('\r', stream);
     putc('\n', stream);
     fflush(stream);
+}
+
+typedef struct {
+    union {
+        struct {
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+        };
+        uint32_t rgb;
+    };
+} Color;
+
+void color_to_str(char* buffer, Color c) {
+    sprintf(buffer, "#%.2X%.2X%.2X", c.r, c.g, c.b);
+}
+
+#define RGB_SET(rgb, component, value)  \
+    ( (rgb) & ~(0xFu << (component)) ) | ( ((value) & 0xFu) << (component) )
+
+Color read_color(void) {
+    static const uint8_t component_locations[] = {3, 4, 8, 9, 13, 14};
+
+    Color c = {0};
+    int pos = 1;
+    fprintf(tty_out, " "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n");
+    while (1) {
+        fprintf(tty_out, "\r"CLRDOWN"0x%.2X 0x%.2X 0x%.2X : "RGB_BG"   "RESET, c.r, c.g, c.b, c.r, c.g, c.b);
+        fprintf(tty_out, "\r"RIGHT(%d), component_locations[pos]);
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_enter) {
+            fprintf(tty_out, SHOW);
+            return c;
+        }
+        if (k.type == key_exit) {
+            fprintf(tty_out, SHOW);
+            exit(EXIT_FAILURE);
+        }
+
+        if (k.type == key_tab) {
+            if (pos == 0 || pos == 1) {
+                pos = 3;
+            }
+            else if (pos == 2 || pos == 3) {
+                pos = 5;
+            }
+            else if (pos == 4 || pos == 5) {
+                pos = 1;
+            }
+        }
+        else if (k.type == key_shift_tab) {
+            if (pos == 0 || pos == 1) {
+                pos = 5;
+            }
+            else if (pos == 2 || pos == 3) {
+                pos = 1;
+            }
+            else if (pos == 4 || pos == 5) {
+                pos = 3;
+            }
+        }
+        else if (k.type == key_arrow_left) {
+            if (pos == 0) pos = 5;
+            else pos--;
+        }
+        else if (k.type == key_arrow_right) {
+            if (pos == 5) pos = 0;
+            else pos++;
+        }
+        else if (k.type == key_arrow_up) {
+            if (pos == 0) c.r+=16;
+            else if (pos == 1) c.r++;
+            else if (pos == 2) c.g+=16;
+            else if (pos == 3) c.g++;
+            else if (pos == 4) c.b+=16;
+            else if (pos == 5) c.b++;
+        }
+        else if (k.type == key_arrow_down) {
+            if (pos == 0) c.r-=16;
+            else if (pos == 1) c.r--;
+            else if (pos == 2) c.g-=16;
+            else if (pos == 3) c.g--;
+            else if (pos == 4) c.b-=16;
+            else if (pos == 5) c.b--;
+        }
+        else if (k.type == key_char) {
+            if (isxdigit(k.ch)) {
+                char x = tolower(k.ch);
+                x -= isdigit(x) ? '0' : ('a'-10);
+                static const uint8_t pos_to_shift[] = {4, 0, 12, 8, 20, 16};
+                c.rgb = RGB_SET(c.rgb, pos_to_shift[pos], x);
+            }
+        }
+    }
+    return c;
 }
 
 bool read_bool(void) {
@@ -703,7 +808,17 @@ int main(void) {
 
             append_multiselect_answer(&answers, f->id, &opts);
         } break;
-        }
+
+        case ft_color: {
+            fprintf(tty_out, "%s\r\n", f->color.question);
+            fflush(tty_out);
+            Color choice = read_color();
+            write_nl(tty_out);
+
+            color_to_str(answer_buffer, choice);
+            sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
+            append_answer(&answers, f->id, quoted_answer_buffer);
+        } break;
 
         case ft_bool: {
             fprintf(tty_out, "%s\r\n", f->boolean.question);

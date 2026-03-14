@@ -60,7 +60,7 @@ typedef struct {
 
 typedef struct {
     const char *question;
-} BoolFieldMembers;
+} QOnlyFieldMembers;
 
 typedef struct {
     const char *id;
@@ -70,7 +70,8 @@ typedef struct {
         NumberFieldMembers number;
         SelectFieldMembers select;
         MultiSelectFieldMembers multiselect;
-        BoolFieldMembers boolean;
+        QOnlyFieldMembers color;
+        QOnlyFieldMembers boolean;
     };
 } Field;
 

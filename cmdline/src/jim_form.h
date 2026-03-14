@@ -84,6 +84,9 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "min"); jim_integer(jim, p.min);
                 jim_member_key(jim, "max"); jim_integer(jim, p.max);
             } break;
+
+            case ft_color:
+                jim_member_key(jim, "question"); jim_string(jim, x->color.question);
                 break;
 
             case ft_bool:
@@ -132,6 +135,7 @@ void field_set_defaults(Field *field) {
             break;
         }
 
+        case ft_color:
         case ft_bool:
         case ft_timestamp:
             break;
@@ -255,6 +259,17 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "max") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->multiselect.max = (uint32_t)jimp->number;
+                    }
+                    break;
+
+                case ft_color:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->color.question = strdup(jimp->string);
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
                     }
                     break;
 
