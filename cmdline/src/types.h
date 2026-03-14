@@ -47,6 +47,13 @@ typedef struct {
 
 typedef struct {
     const char *question;
+    SelectOptions options;
+    unsigned int min;
+    unsigned int max;
+} MultiSelectFieldMembers;
+
+typedef struct {
+    const char *question;
 } BoolFieldMembers;
 
 typedef struct {
@@ -56,14 +63,15 @@ typedef struct {
         TextFieldMembers text;
         NumberFieldMembers number;
         SelectFieldMembers select;
+        MultiSelectFieldMembers multiselect;
         BoolFieldMembers boolean;
     };
 } Field;
 
 typedef struct {
     Field *items;
-    size_t capacity;
     size_t count;
+    size_t capacity;
 } Fields;
 
 typedef struct {
@@ -74,13 +82,17 @@ typedef struct {
 
 typedef struct {
     const char *id;
-    const char *value;
+    FieldType type;
+    union {
+        const char *value;
+        SelectOptions options;
+    };
 } Answer;
 
 typedef struct {
     Answer *items;
-    size_t capacity;
     size_t count;
+    size_t capacity;
 } Answers;
 
 typedef enum {

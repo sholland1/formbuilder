@@ -4,6 +4,7 @@
 
 #include "types.h"
 
+#include <limits.h>
 #include <math.h>
 #include <regex.h>
 
@@ -91,6 +92,20 @@ void jim_form(Jim *jim, const Form *f) {
                 break;
             }
 
+            case ft_multiselect: {
+                MultiSelectFieldMembers p = x->multiselect;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "options");
+                jim_array_begin(jim);
+                nob_da_foreach(char *, x, &p.options) {
+                    jim_string(jim, *x);
+                }
+                jim_array_end(jim);
+                jim_member_key(jim, "min"); jim_integer(jim, p.min);
+                jim_member_key(jim, "max"); jim_integer(jim, p.max);
+                break;
+            }
+
             case ft_bool:
                 jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
                 break;
@@ -126,6 +141,15 @@ void field_set_defaults(Field *field) {
             field->select.options.capacity = 0;
             field->select.options.count = 0;
             field->select.options.items = NULL;
+            break;
+        }
+
+        case ft_multiselect: {
+            field->multiselect.options.capacity = 0;
+            field->multiselect.options.count = 0;
+            field->multiselect.options.items = NULL;
+            field->multiselect.min = 0;
+            field->multiselect.max = UINT_MAX;
             break;
         }
 
@@ -233,6 +257,29 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     }
                     break;
 
+                case ft_multiselect:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->multiselect.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "options") == 0) {
+                        if (!jimp_array_begin(jimp)) return false;
+                        while (jimp_array_item(jimp)) {
+                            if (!jimp_string(jimp)) return false;
+                            nob_da_append(&field->multiselect.options, strdup(jimp->string));
+                        }
+                        if (!jimp_array_end(jimp)) return false;
+                    }
+                    else if (strcmp(jimp->string, "min") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->multiselect.min = (unsigned int)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "max") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->multiselect.max = (unsigned int)jimp->number;
+                    }
+                break;
+
                 case ft_bool:
                     if (strcmp(jimp->string, "question") == 0) {
                         if (!jimp_string(jimp)) return false;
@@ -286,9 +333,18 @@ void jim_answers(Jim *jim, const Answers *answers) {
     jim_object_begin(jim);
     nob_da_foreach(Answer, x, answers) {
         jim_member_key(jim, x->id);
-        jim_element_begin(jim);
-        jim_write_cstr(jim, x->value);
-        jim_element_end(jim);
+        if (x->type == ft_multiselect) {
+            jim_array_begin(jim);
+            nob_da_foreach(char*, o, &x->options) {
+                jim_string(jim, *o);
+            }
+            jim_array_end(jim);
+        }
+        else {
+            jim_element_begin(jim);
+            jim_write_cstr(jim, x->value);
+            jim_element_end(jim);
+        }
     }
     jim_object_end(jim);
 }

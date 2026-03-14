@@ -25,6 +25,9 @@
 #define ERR_PROMPT RED BOLD"→"RESET
 #define PROMPT BOLD"→"RESET
 
+#define CHECK "[✘]"
+#define UNCHECK "[ ]"
+
 #define BUFFER_LEN 1024
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -33,11 +36,23 @@
 #define BETWEEN(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
 
 void append_answer(Answers *answers, const char *id, const char *value) {
-    // LEAK: Memory must be used, and it'll be cleaned up at exit
     Answer a = {
         .id = strdup(id),
+        .type = ft_text,
         .value = strdup(value),
     };
+    nob_da_append(answers, a);
+}
+
+void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts) {
+    Answer a = {
+        .id = strdup(id),
+        .type = ft_multiselect,
+    };
+    a.options.capacity = 0;
+    a.options.count = 0;
+    a.options.items = NULL;
+    nob_da_append_many(&a.options, opts->items, opts->count);
     nob_da_append(answers, a);
 }
 
@@ -79,6 +94,11 @@ double to_double(const char* str) {
     return str ? strtod(str, NULL) : 0.0;
 }
 
+bool fails_multiselect_checks(const Field *f, const SelectOptions *opts) {
+    MultiSelectFieldMembers p = f->multiselect;
+    return !BETWEEN(opts->count, p.min, p.max);
+}
+
 bool fails_checks(const Field *f, const char *answer) {
     bool empty = is_empty(answer);
     switch (f->type) {
@@ -98,10 +118,8 @@ bool fails_checks(const Field *f, const char *answer) {
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
         }
 
-        case ft_select: {
-            SelectFieldMembers p = f->select;
-            return empty && p.required;
-        }
+        case ft_select:
+            return empty && f->select.required;
 
         case ft_bool:
             return false;
@@ -303,6 +321,61 @@ void read_select(char *buffer, const Field *field, bool first_time) {
             }
         }
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
+    }
+}
+
+void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, const Field *field, bool first_time) {
+    fprintf(tty_out, HIDE);
+
+    SelectOptions opts = field->multiselect.options;
+    if (!first_time)
+        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
+
+    size_t pos = 0;
+    while(1) {
+        for (size_t i = 0; i < opts.count; i++) {
+            fprintf(tty_out, "\r%s %s %s\r\n",
+                pos == i ? PROMPT : " ",
+                selected_indexes[i] ? CHECK : UNCHECK,
+                opts.items[i]);
+        }
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_enter || k.type == key_tab) {
+            fprintf(tty_out, SHOW);
+            for (size_t i = 0; i < opts.count; i++) {
+                if (selected_indexes[i]) {
+                    nob_da_append(selected_opts, opts.items[i]);
+                }
+            }
+            return;
+        }
+        if (k.type == key_char && k.ch == ' ') {
+            selected_indexes[pos] = !selected_indexes[pos];
+        }
+        if (k.type == key_exit) {
+            fprintf(tty_out, SHOW);
+            exit(EXIT_FAILURE);
+        }
+
+        if (k.type == key_arrow_up) {
+            if (pos == 0) {
+                pos = opts.count-1;
+            }
+            else {
+                pos--;
+            }
+        }
+        else if (k.type == key_arrow_down) {
+            if (pos == opts.count-1) {
+                pos = 0;
+            }
+            else {
+                pos++;
+            }
+        }
+        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
     }
 }
 
@@ -545,13 +618,14 @@ int main(void) {
     Option option = pretty;
 
     Answers answers = {0};
+    nob_da_reserve(&answers, form.fields.count);
 
     char answer_buffer[BUFFER_LEN];
     char quoted_answer_buffer[BUFFER_LEN+2];
     const char *timestamp_field_id = NULL;
     nob_da_foreach(Field, f, &form.fields) {
         switch (f->type) {
-        case ft_text:
+        case ft_text: {
             write_question(tty_out, f->text);
 
             do {
@@ -568,8 +642,9 @@ int main(void) {
                 append_answer(&answers, f->id, quoted_answer_buffer);
             }
             break;
+        }
 
-        case ft_number:
+        case ft_number: {
             write_question(tty_out, f->number);
 
             do {
@@ -581,16 +656,15 @@ int main(void) {
             append_answer(&answers, f->id,
                 is_empty(answer_buffer) ? "null" : answer_buffer);
             break;
+        }
 
-        case ft_select:
+        case ft_select: {
             write_question(tty_out, f->select);
             bool first_time = true;
             do {
                 read_select(answer_buffer, f, first_time);
                 first_time = false;
             } while (fails_checks(f, answer_buffer));
-
-            write_nl(tty_out);
 
             if (is_empty(answer_buffer)) {
                 append_answer(&answers, f->id, "null");
@@ -600,13 +674,43 @@ int main(void) {
                 append_answer(&answers, f->id, quoted_answer_buffer);
             }
             break;
+        }
 
-        case ft_bool:
+        case ft_multiselect: {
+            MultiSelectFieldMembers p = f->multiselect;
+            fprintf(tty_out, "%s ", p.question);
+            if (p.max == UINT_MAX) {
+                if (p.min == 0) {
+                    fprintf(tty_out, "(any)\r\n");
+                }
+                else {
+                    fprintf(tty_out, "(at least %d)\r\n", p.min);
+                }
+            }
+            else {
+                fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
+            }
+
+            bool first_time = true;
+            SelectOptions opts = {0};
+            bool selected_indexes[100] = {0};
+            do {
+                opts.count = 0;
+                read_multiselect(selected_indexes, &opts, f, first_time);
+                first_time = false;
+            } while (fails_multiselect_checks(f, &opts));
+
+            append_multiselect_answer(&answers, f->id, &opts);
+            break;
+        }
+
+        case ft_bool: {
             fprintf(tty_out, "%s\r\n", f->boolean.question);
             fflush(tty_out);
             bool choice = read_bool();
             append_answer(&answers, f->id, choice ? "true" : "false");
             break;
+        }
 
         case ft_timestamp:
             timestamp_field_id = f->id;
