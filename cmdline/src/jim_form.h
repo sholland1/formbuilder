@@ -46,24 +46,24 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
                 if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
                 if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
-                jim_member_key(jim, "required"); jim_bool(jim, p.required);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
             } break;
 
             case ft_number: {
                 NumberFieldMembers p = x->number;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
-                jim_member_key(jim, "required"); jim_bool(jim, p.required);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 const int precision = -1;
-                jim_member_key(jim, "min"); jim_double(jim, p.min, precision);
-                jim_member_key(jim, "max"); jim_double(jim, p.max, precision);
-                jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
+                if (!isnan(p.min)) {jim_member_key(jim, "min"); jim_double(jim, p.min, precision);}
+                if (!isnan(p.max)) {jim_member_key(jim, "max"); jim_double(jim, p.max, precision);}
+                if (p.step != 1) {jim_member_key(jim, "step"); jim_double(jim, p.step, precision);}
             } break;
 
             case ft_select: {
                 SelectFieldMembers p = x->select;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
-                jim_member_key(jim, "required"); jim_bool(jim, p.required);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 jim_member_key(jim, "options");
                 jim_array_begin(jim);
                 nob_da_foreach(char *, x, &p.options) {
@@ -81,8 +81,8 @@ void jim_form(Jim *jim, const Form *f) {
                     jim_string(jim, *x);
                 }
                 jim_array_end(jim);
-                jim_member_key(jim, "min"); jim_integer(jim, p.min);
-                jim_member_key(jim, "max"); jim_integer(jim, p.max);
+                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+                if (p.max != UINT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
             } break;
 
             case ft_counter:
@@ -122,22 +122,20 @@ void field_set_defaults(Field *field) {
             field->number.step = 1;
             break;
 
-        case ft_select: {
+        case ft_select:
             field->select.required = true;
             field->select.options.capacity = 0;
             field->select.options.count = 0;
             field->select.options.items = NULL;
             break;
-        }
 
-        case ft_multiselect: {
+        case ft_multiselect:
             field->multiselect.options.capacity = 0;
             field->multiselect.options.count = 0;
             field->multiselect.options.items = NULL;
             field->multiselect.min = 0;
             field->multiselect.max = UINT_MAX;
             break;
-        }
 
         case ft_counter:
         case ft_color:

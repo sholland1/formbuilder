@@ -46,6 +46,31 @@ void append_answer(Answers *answers, const char *id, const char *value) {
     nob_da_append(answers, a);
 }
 
+void append_static_answer(Answers *answers, const char *id, const char *value) {
+    Answer a = {
+        .id = strdup(id),
+        .type = ft_text,
+        .value = value,
+    };
+    nob_da_append(answers, a);
+}
+
+char quoted_answer_buffer[BUFFER_LEN+2];
+void append_quoted_answer(Answers *answers, const char *id, const char *value) {
+    sprintf(quoted_answer_buffer, "\"%s\"", value);
+    append_answer(answers, id, quoted_answer_buffer);
+}
+void append_datetime_answer(Answers *answers, const char *id, struct tm *t) {
+    strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d %H:%M:%S\"", t);
+    append_answer(answers, id, quoted_answer_buffer);
+}
+
+char answer_buffer[BUFFER_LEN];
+void append_integer_answer(Answers *answers, const char *id, uint64_t value) {
+    sprintf(answer_buffer, "%lu", value);
+    append_answer(answers, id, answer_buffer);
+}
+
 void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts) {
     Answer a = {
         .id = strdup(id),
@@ -281,10 +306,12 @@ Color read_color(void) {
         Key k = read_key(tty_in);
         if (k.type == key_enter) {
             fprintf(tty_out, SHOW);
+            write_nl(tty_out);
             return c;
         }
         if (k.type == key_exit) {
             fprintf(tty_out, SHOW);
+            write_nl(tty_out);
             exit(EXIT_FAILURE);
         }
 
@@ -504,11 +531,12 @@ uint64_t read_counter() {
     while (1) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) {
+            write_nl(tty_out);
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
             fprintf(tty_out, SHOW);
-            fflush(tty_out);
+            write_nl(tty_out);
             return value;
         }
 
@@ -769,8 +797,6 @@ int main(void) {
     Answers answers = {0};
     nob_da_reserve(&answers, form.fields.count);
 
-    char answer_buffer[BUFFER_LEN];
-    char quoted_answer_buffer[BUFFER_LEN+2];
     const char *timestamp_field_id = NULL;
     nob_da_foreach(Field, f, &form.fields) {
         switch (f->type) {
@@ -784,11 +810,10 @@ int main(void) {
             write_nl(tty_out);
 
             if (is_empty(answer_buffer)) {
-                append_answer(&answers, f->id, "null");
+                append_static_answer(&answers, f->id, "null");
             }
             else {
-                sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
-                append_answer(&answers, f->id, quoted_answer_buffer);
+                append_quoted_answer(&answers, f->id, answer_buffer);
             }
         } break;
 
@@ -801,8 +826,12 @@ int main(void) {
 
             write_nl(tty_out);
 
-            append_answer(&answers, f->id,
-                is_empty(answer_buffer) ? "null" : answer_buffer);
+            if (is_empty(answer_buffer)) {
+                append_static_answer(&answers, f->id, "null");
+            }
+            else {
+                append_answer(&answers, f->id, answer_buffer);
+            }
         } break;
 
         case ft_select: {
@@ -814,11 +843,10 @@ int main(void) {
             } while (fails_checks(f, answer_buffer));
 
             if (is_empty(answer_buffer)) {
-                append_answer(&answers, f->id, "null");
+                append_static_answer(&answers, f->id, "null");
             }
             else {
-                sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
-                append_answer(&answers, f->id, quoted_answer_buffer);
+                append_quoted_answer(&answers, f->id, answer_buffer);
             }
         } break;
 
@@ -853,30 +881,21 @@ int main(void) {
             fprintf(tty_out, "%s\r\n", f->counter.question);
             fflush(tty_out);
 
-            uint64_t value = read_counter();
-
-            write_nl(tty_out);
-
-            sprintf(answer_buffer, "%lu", value);
-            append_answer(&answers, f->id, answer_buffer);
+            append_integer_answer(&answers, f->id, read_counter());
         } break;
 
         case ft_color: {
             fprintf(tty_out, "%s\r\n", f->color.question);
             fflush(tty_out);
-            Color choice = read_color();
-            write_nl(tty_out);
 
-            color_to_str(answer_buffer, choice);
-            sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
-            append_answer(&answers, f->id, quoted_answer_buffer);
+            color_to_str(answer_buffer, read_color());
+            append_quoted_answer(&answers, f->id, answer_buffer);
         } break;
 
         case ft_bool: {
             fprintf(tty_out, "%s\r\n", f->boolean.question);
             fflush(tty_out);
-            bool choice = read_bool();
-            append_answer(&answers, f->id, choice ? "true" : "false");
+            append_static_answer(&answers, f->id, read_bool() ? "true" : "false");
         } break;
 
         case ft_timestamp:
@@ -889,9 +908,7 @@ int main(void) {
 
     if (timestamp_field_id) {
         time_t now = time(NULL);
-        struct tm *t = localtime(&now);
-        strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d %H:%M:%S\"", t);
-        append_answer(&answers, timestamp_field_id, quoted_answer_buffer);
+        append_datetime_answer(&answers, timestamp_field_id, localtime(&now));
     }
 
     terminal_deinit();
