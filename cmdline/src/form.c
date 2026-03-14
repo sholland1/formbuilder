@@ -10,15 +10,17 @@
 #define _STR(x)  #x
 #define __STR(x) _STR(x)
 
-#define ESC "\033"
-#define CLR      ESC"[2J"
-#define HOME     ESC"[H"
-#define RESET    ESC"[0m"
-#define BOLD     ESC"[1m"
-#define FAINT    ESC"[2m"
-#define RED      ESC"[31m"
-#define CLRDOWN  ESC"[K"
-#define RIGHT(n) ESC"["__STR(n)"G"
+#define CLR      "\e[2J"
+#define HOME     "\e[H"
+#define RESET    "\e[0m"
+#define BOLD     "\e[1m"
+#define FAINT    "\e[2m"
+#define RED      "\e[31m"
+#define CLRDOWN  "\e[K"
+#define RIGHT(n) "\e["__STR(n)"G"
+
+#define ERR_PROMPT RED BOLD"→"RESET
+#define PROMPT BOLD"→"RESET
 
 #define BUFFER_LEN 1024
 
@@ -104,8 +106,8 @@ static FILE *tty_out = NULL;
 void make_prompt_red(FILE *stream, size_t pos, bool b) {
     // move to beginning of line
     putc('\r', stream);
-    // put red or normal '>'
-    fprintf(stream, b ? RED"> "RESET : "> ");
+    // put red or normal prompt
+    fprintf(stream, b ? ERR_PROMPT" ": PROMPT" ");
     // move back to original position
     fprintf(stream, RIGHT(%zu), pos+3);
     fflush(stream);
@@ -149,7 +151,7 @@ Key read_key(FILE *stream) {
     if (c == 127 || c == '\b') return KEY(key_backspace);
     if (c == 23) return KEY(key_ctrl_backspace);
 
-    if (c == '\033') { // Escape sequence
+    if (c == '\e') { // Escape sequence
         if (read(fileno(stream), &c, 1) != 1 && c != '[') return KEY_EOF;
         if (c == 'd') return KEY(key_ctrl_delete);
 
@@ -183,12 +185,12 @@ bool is_word_boundary(char c) {
 }
 
 void write_prompt_with_buffer(FILE *stream, const char *buffer) {
-    fprintf(stream, "\r> %s" CLRDOWN, buffer);
+    fprintf(stream, "\r"PROMPT" %s" CLRDOWN, buffer);
     fflush(stream);
 }
 
 void write_placeholder(FILE *stream, const char *ph) {
-    fprintf(stream, "\r> "FAINT"%s"RESET"\r"RIGHT(3), ph);
+    fprintf(stream, "\r"PROMPT" "FAINT"%s"RESET"\r"RIGHT(3), ph);
     fflush(stream);
 }
 
