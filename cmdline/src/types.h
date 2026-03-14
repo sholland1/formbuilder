@@ -70,6 +70,7 @@ typedef struct {
         NumberFieldMembers number;
         SelectFieldMembers select;
         MultiSelectFieldMembers multiselect;
+        QOnlyFieldMembers counter;
         QOnlyFieldMembers color;
         QOnlyFieldMembers boolean;
     };

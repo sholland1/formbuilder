@@ -95,6 +95,9 @@ bool is_empty(const char *s) {
 double to_double(const char* str) {
     return str ? strtod(str, NULL) : 0.0;
 }
+uint64_t to_int(const char* str) {
+    return str ? strtoul(str, NULL, 10) : 0;
+}
 
 bool fails_multiselect_checks(const Field *f, uint32_t opts_count) {
     MultiSelectFieldMembers p = f->multiselect;
@@ -122,6 +125,7 @@ bool fails_checks(const Field *f, const char *answer) {
         case ft_select:
             return empty && f->select.required;
 
+        case ft_counter:
         case ft_color:
         case ft_bool:
             return false;
@@ -152,6 +156,7 @@ typedef enum {
     key_ctrl_delete,
     key_backspace,
     key_ctrl_backspace,
+    key_escape,
     key_enter,
     key_tab,
     key_shift_tab,
@@ -176,22 +181,29 @@ typedef struct {
 #define KEY_EOF KEY(key_eof)
 
 Key read_key(FILE *stream) {
-    uint8_t c;
-    if (read(fileno(stream), &c, 1) != 1) return KEY_EOF;
+    uint8_t buffer[6];
+    int count = read(fileno(stream), &buffer, 6);
+    if (count == 0) return KEY_EOF;
 
-    if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
-    if (c == '\n' || c == '\r')  return KEY(key_enter);
-    if (c == '\t')  return KEY(key_tab);
-    if (c >= 32 && c <= 126) return  (Key){.type = key_char, .ch = (c)}; // Printable ASCII
-    if (c == 127 || c == '\b') return KEY(key_backspace);
-    if (c == 23) return KEY(key_ctrl_backspace);
+    uint8_t c = buffer[0];
+    if (count == 1) {
+        if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
+        if (c == '\n' || c == '\r') return KEY(key_enter);
+        if (c == '\t') return KEY(key_tab);
+        if (c >= 32 && c <= 126) return (Key){.type = key_char, .ch = (c)}; // Printable ASCII
+        if (c == 127 || c == '\b') return KEY(key_backspace);
+        if (c == 23) return KEY(key_ctrl_backspace);
+        if (c == '\e') return KEY(key_escape);
+        return KEY(key_unknown);
+    }
+    if (c != '\e') return KEY(key_unknown);
 
-    if (c == '\e') { // Escape sequence
-        if (read(fileno(stream), &c, 1) != 1 && c != '[') return KEY_EOF;
-        if (c == 'd') return KEY(key_ctrl_delete);
+    c = buffer[1];
+    if (count == 2 && c == 'd') return KEY(key_ctrl_delete);
+    if (c != '[') return KEY(key_unknown);
 
-        if (read(fileno(stream), &c, 1) != 1 && c != '[') return KEY_EOF;
-
+    c = buffer[2];
+    if (count == 3) {
         if (c == 'A') return KEY(key_arrow_up);
         if (c == 'B') return KEY(key_arrow_down);
         if (c == 'C') return KEY(key_arrow_right);
@@ -199,20 +211,15 @@ Key read_key(FILE *stream) {
         if (c == 'F') return KEY(key_end);
         if (c == 'H') return KEY(key_home);
         if (c == 'Z') return KEY(key_shift_tab);
-        if (c == '1') {
-            if (read(fileno(stream), &c, 1) != 1 && c != ';') return KEY_EOF;
-            if (read(fileno(stream), &c, 1) != 1 && c != '5') return KEY_EOF;
-            if (read(fileno(stream), &c, 1) != 1) return KEY_EOF;
-
-            if (c == 'C') return KEY(key_ctrl_right);
-            if (c == 'D') return KEY(key_ctrl_left);
-        }
-        if (c == '3') {
-            if (read(fileno(stream), &c, 1) != 1 && c != '~') return KEY_EOF;
-            return KEY(key_delete);
-        }
+        return KEY(key_unknown);
     }
 
+    if (count == 4 && c == '3' && buffer[3] == '~') return KEY(key_delete);
+    else if (count == 6 && c == '1' && buffer[3] == ';' && buffer[4] == '5') {
+        c = buffer[5];
+        if (c == 'C') return KEY(key_ctrl_right);
+        if (c == 'D') return KEY(key_ctrl_left);
+    }
     return KEY(key_unknown);
 }
 
@@ -485,6 +492,39 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
             }
         }
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
+    }
+}
+
+uint64_t read_counter() {
+    fprintf(tty_out, "0"HIDE);
+    fflush(tty_out);
+
+    uint64_t value = 0;
+
+    while (1) {
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
+        if (k.type == key_enter) {
+            fprintf(tty_out, SHOW);
+            fflush(tty_out);
+            return value;
+        }
+
+        if (k.type == key_escape) {
+            value = 0;
+        }
+        else if (k.type == key_arrow_up || (k.type == key_char && k.ch == ' ')) {
+            if (value < UINT64_MAX) value++;
+        }
+        else if (k.type == key_arrow_down) {
+            if (value > 0) value--;
+        }
+        else continue;
+
+        fprintf(tty_out, "\r%lu"CLRDOWN, value);
+        fflush(tty_out);
     }
 }
 
@@ -807,6 +847,18 @@ int main(void) {
             } while (fails_multiselect_checks(f, opts.count));
 
             append_multiselect_answer(&answers, f->id, &opts);
+        } break;
+
+        case ft_counter: {
+            fprintf(tty_out, "%s\r\n", f->counter.question);
+            fflush(tty_out);
+
+            uint64_t value = read_counter();
+
+            write_nl(tty_out);
+
+            sprintf(answer_buffer, "%lu", value);
+            append_answer(&answers, f->id, answer_buffer);
         } break;
 
         case ft_color: {
