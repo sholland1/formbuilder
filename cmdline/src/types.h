@@ -1,6 +1,7 @@
 #include <regex.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define FIELDTYPES \
     X(text) \
@@ -53,8 +54,8 @@ typedef struct {
 typedef struct {
     const char *question;
     SelectOptions options;
-    unsigned int min;
-    unsigned int max;
+    uint32_t min;
+    uint32_t max;
 } MultiSelectFieldMembers;
 
 typedef struct {

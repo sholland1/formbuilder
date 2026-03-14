@@ -67,7 +67,7 @@ bool is_numeric(const char *str) {
     bool has_digit = false;
 
     while (*str) {
-        if (isdigit((unsigned char)*str)) {
+        if (isdigit((uint8_t)*str)) {
             has_digit = true;
         }
         else if (*str == '.') {
@@ -91,7 +91,7 @@ double to_double(const char* str) {
     return str ? strtod(str, NULL) : 0.0;
 }
 
-bool fails_multiselect_checks(const Field *f, unsigned int opts_count) {
+bool fails_multiselect_checks(const Field *f, uint32_t opts_count) {
     MultiSelectFieldMembers p = f->multiselect;
     return !BETWEEN(opts_count, p.min, p.max);
 }
@@ -104,8 +104,7 @@ bool fails_checks(const Field *f, const char *answer) {
             return empty
                 ? p.required
                 : !is_match(p.regex, answer);
-            break;
-        }
+        } break;
 
         case ft_number: {
             NumberFieldMembers p = f->number;
@@ -163,14 +162,14 @@ typedef enum {
 
 typedef struct {
     KeyType type;
-    unsigned char ch;
+    uint8_t ch;
 } Key;
 
 #define KEY(x) (Key){.type = (x)}
 #define KEY_EOF KEY(key_eof)
 
 Key read_key(FILE *stream) {
-    unsigned char c;
+    uint8_t c;
     if (read(fileno(stream), &c, 1) != 1) return KEY_EOF;
 
     if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
@@ -239,7 +238,7 @@ bool read_bool(void) {
     fprintf(tty_out, HIDE);
 
     bool choice = true;
-    while(1) {
+    while (1) {
         fprintf(tty_out, "\r%s Yes\r\n%s No\r\n",
             choice ? PROMPT : " ",
             !choice ? PROMPT : " ");
@@ -270,7 +269,7 @@ void read_select(char *buffer, const Field *field, bool first_time) {
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
 
     size_t pos = 0;
-    while(1) {
+    while (1) {
         fprintf(tty_out, "\r%s\r\n", pos == 0
             ? field->select.required ? ERR_PROMPT : PROMPT
             : " ");
@@ -328,7 +327,7 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
 
     size_t pos = 0;
-    while(1) {
+    while (1) {
         int selected_opt_count = 0;
         for (size_t i = 0; i < opts.count; i++) {
             if (selected_indexes[i]) {
@@ -646,8 +645,7 @@ int main(void) {
                 sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
                 append_answer(&answers, f->id, quoted_answer_buffer);
             }
-            break;
-        }
+        } break;
 
         case ft_number: {
             write_question(tty_out, f->number);
@@ -660,8 +658,7 @@ int main(void) {
 
             append_answer(&answers, f->id,
                 is_empty(answer_buffer) ? "null" : answer_buffer);
-            break;
-        }
+        } break;
 
         case ft_select: {
             write_question(tty_out, f->select);
@@ -678,8 +675,7 @@ int main(void) {
                 sprintf(quoted_answer_buffer, "\"%s\"", answer_buffer);
                 append_answer(&answers, f->id, quoted_answer_buffer);
             }
-            break;
-        }
+        } break;
 
         case ft_multiselect: {
             MultiSelectFieldMembers p = f->multiselect;
@@ -706,7 +702,7 @@ int main(void) {
             } while (fails_multiselect_checks(f, opts.count));
 
             append_multiselect_answer(&answers, f->id, &opts);
-            break;
+        } break;
         }
 
         case ft_bool: {
@@ -714,8 +710,7 @@ int main(void) {
             fflush(tty_out);
             bool choice = read_bool();
             append_answer(&answers, f->id, choice ? "true" : "false");
-            break;
-        }
+        } break;
 
         case ft_timestamp:
             timestamp_field_id = f->id;

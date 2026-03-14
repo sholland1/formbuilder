@@ -4,7 +4,6 @@
 
 #include "types.h"
 
-#include <limits.h>
 #include <math.h>
 #include <regex.h>
 
@@ -49,8 +48,7 @@ void jim_form(Jim *jim, const Form *f) {
                 if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
                 jim_member_key(jim, "required"); jim_bool(jim, p.required);
                 if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
-                break;
-            }
+            } break;
 
             case ft_number: {
                 NumberFieldMembers p = x->number;
@@ -60,8 +58,7 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "min"); jim_double(jim, p.min, precision);
                 jim_member_key(jim, "max"); jim_double(jim, p.max, precision);
                 jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
-                break;
-            }
+            } break;
 
             case ft_select: {
                 SelectFieldMembers p = x->select;
@@ -73,8 +70,7 @@ void jim_form(Jim *jim, const Form *f) {
                     jim_string(jim, *x);
                 }
                 jim_array_end(jim);
-                break;
-            }
+            } break;
 
             case ft_multiselect: {
                 MultiSelectFieldMembers p = x->multiselect;
@@ -87,8 +83,8 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_array_end(jim);
                 jim_member_key(jim, "min"); jim_integer(jim, p.min);
                 jim_member_key(jim, "max"); jim_integer(jim, p.max);
+            } break;
                 break;
-            }
 
             case ft_bool:
                 jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
@@ -254,18 +250,18 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     }
                     else if (strcmp(jimp->string, "min") == 0) {
                         if (!jimp_number(jimp)) return false;
-                        field->multiselect.min = (unsigned int)jimp->number;
+                        field->multiselect.min = (uint32_t)jimp->number;
                     }
                     else if (strcmp(jimp->string, "max") == 0) {
                         if (!jimp_number(jimp)) return false;
-                        field->multiselect.max = (unsigned int)jimp->number;
+                        field->multiselect.max = (uint32_t)jimp->number;
                     }
-                break;
+                    break;
 
                 case ft_bool:
                     if (strcmp(jimp->string, "question") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->number.question = strdup(jimp->string);
+                        field->boolean.question = strdup(jimp->string);
                     }
                     else {
                         jimp_unknown_member(jimp);
