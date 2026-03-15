@@ -63,6 +63,18 @@ typedef struct {
 } QOnlyFieldMembers;
 
 typedef struct {
+    bool is_today;
+    struct tm *dt;
+} date_t;
+
+typedef struct {
+    const char *question;
+    bool required;
+    date_t start_date;
+    date_t end_date;
+} DateFieldMembers;
+
+typedef struct {
     const char *id;
     FieldType type;
     union {
@@ -70,6 +82,7 @@ typedef struct {
         NumberFieldMembers number;
         SelectFieldMembers select;
         MultiSelectFieldMembers multiselect;
+        DateFieldMembers date;
         QOnlyFieldMembers counter;
         QOnlyFieldMembers color;
         QOnlyFieldMembers boolean;

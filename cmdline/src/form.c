@@ -7,19 +7,20 @@
 #include <termios.h>
 #include <locale.h>
 
-#define CLR      "\e[2J"
-#define HOME     "\e[H"
-#define RESET    "\e[0m"
-#define BOLD     "\e[1m"
-#define FAINT    "\e[2m"
-#define RED      "\e[31m"
-#define GREEN    "\e[32m"
-#define BLUE     "\e[34m"
-#define CLRDOWN  "\e[K"
-#define HIDE     "\e[?25l"
-#define SHOW     "\e[?25h"
-#define UP(n)    "\e["#n"A"
-#define RIGHT(n) "\e["#n"G"
+#define CLR       "\e[2J"
+#define HOME      "\e[H"
+#define RESET     "\e[0m"
+#define BOLD      "\e[1m"
+#define FAINT     "\e[2m"
+#define UNDERLINE "\e[4m"
+#define RED       "\e[31m"
+#define GREEN     "\e[32m"
+#define BLUE      "\e[34m"
+#define CLRDOWN   "\e[K"
+#define HIDE      "\e[?25l"
+#define SHOW      "\e[?25h"
+#define UP(n)     "\e["#n"A"
+#define RIGHT(n)  "\e["#n"G"
 
 #define ERR_PROMPT RED BOLD"→"RESET
 #define PROMPT BOLD"→"RESET
@@ -58,6 +59,11 @@ void append_static_answer(Answers *answers, const char *id, const char *value) {
 char quoted_answer_buffer[BUFFER_LEN+2];
 void append_quoted_answer(Answers *answers, const char *id, const char *value) {
     sprintf(quoted_answer_buffer, "\"%s\"", value);
+    append_answer(answers, id, quoted_answer_buffer);
+}
+
+void append_date_answer(Answers *answers, const char *id, struct tm *t) {
+    strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d\"", t);
     append_answer(answers, id, quoted_answer_buffer);
 }
 void append_datetime_answer(Answers *answers, const char *id, struct tm *t) {
@@ -371,6 +377,164 @@ Color read_color(void) {
         }
     }
     return c;
+}
+
+void set_default_date(struct tm *result, const date_t *d, const struct tm* current) {
+    if (d->is_today) {
+        result->tm_year = current->tm_year;
+        result->tm_mon = current->tm_mon;
+        result->tm_mday = current->tm_mday;
+    }
+    else if (d->dt != NULL) {
+        struct tm *x = d->dt;
+        result->tm_year = x->tm_year;
+        result->tm_mon = x->tm_mon;
+        result->tm_mday = x->tm_mday;
+    }
+    else {
+        result->tm_year = 0;
+        result->tm_mon = 0;
+        result->tm_mday = 1;
+    }
+    result->tm_hour = 12;
+}
+
+bool is_leap_year(int real_year) {
+    return real_year % 4 == 0 || real_year % 100 == 0;
+}
+
+int compare_dates(struct tm t1, struct tm t2) {
+    time_t time1 = mktime(&t1);
+    time_t time2 = mktime(&t2);
+
+    if (time1 == (time_t)-1 || time2 == (time_t)-1) {
+        return 0;  // invalid date
+    }
+
+    if      (time1 <  time2) return -1;   // date1 is earlier
+    else if (time1 >  time2) return  1;   // date1 is later
+    else                     return  0;   // equal
+}
+
+int days_in_month(int month, int real_year) {
+    static const int monthly_days[] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31,
+    };
+    if (month == 0) return 31;
+    return month == 2 && is_leap_year(real_year) ? 29 : monthly_days[month-1];
+}
+
+bool is_valid_date(int real_year, int month, int day, const struct tm *start, const struct tm *end) {
+    if (month > 0 && day > 0
+        && BETWEEN(day, 1, days_in_month(month, real_year))
+        && BETWEEN(FAKE_YEAR(real_year), start->tm_year, end->tm_year)) {
+        struct tm d = {0};
+        d.tm_year = FAKE_YEAR(real_year);
+        d.tm_mon = month-1;
+        d.tm_mday = day;
+        d.tm_hour = 12;
+        return compare_dates(d, *start) >= 0 && compare_dates(d, *end) <= 0;
+    }
+    return false;
+}
+
+bool read_date(const Field *f, struct tm *value) {
+    static const char* month_names[] = {
+        "<Month>",
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
+    };
+
+    fprintf(tty_out, HIDE);
+    int pos = 0;
+
+    time_t now = time(NULL);
+    struct tm *current_time = localtime(&now);
+    struct tm start_date = {0}, end_date = {0};
+    set_default_date(&start_date, &f->date.start_date, current_time);
+    set_default_date(&end_date, &f->date.end_date, current_time);
+
+    char buffer[12];
+    strftime(buffer, sizeof(buffer), "%m/%d/%Y", &start_date);
+    fprintf(tty_out, "%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
+    strftime(buffer, sizeof(buffer), "%m/%d/%Y", &end_date);
+    fprintf(tty_out, "%s]\r\n", buffer);
+    fflush(tty_out);
+
+    const uint16_t default_year = CLAMP(current_time->tm_year, start_date.tm_year, end_date.tm_year);
+    uint16_t year = default_year;
+    uint8_t month = 0, day = 0;
+
+    while (1) {
+        if (pos == 0) {
+            fprintf(tty_out, "\r> "UNDERLINE"%9s"RESET" ", month_names[month]);
+        }
+        else {
+            fprintf(tty_out, "\r> %3s ", month_names[month]);
+        }
+        if (day == 0) {
+            fprintf(tty_out, pos == 1 ? UNDERLINE"dd"RESET : "dd");
+        }
+        else {
+            fprintf(tty_out, pos == 1 ? UNDERLINE"%d"RESET : "%d", day);
+        }
+        if (pos == 2) {
+            fprintf(tty_out, ", "UNDERLINE"%d"RESET CLRDOWN, REAL_YEAR(year));
+        }
+        else {
+            fprintf(tty_out, ", %d"CLRDOWN, REAL_YEAR(year));
+        }
+        make_prompt_red(tty_out, 3, f->date.required && !is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date));
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            write_nl(tty_out);
+            exit(EXIT_FAILURE);
+        }
+        if (k.type == key_enter) {
+            if (is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date)) {
+                fprintf(tty_out, "\r> %s %d, %d"CLRDOWN SHOW, month_names[month], day, REAL_YEAR(year));
+                write_nl(tty_out);
+
+                value->tm_year = year;
+                value->tm_mon = month-1;
+                value->tm_mday = day;
+                value->tm_hour = 12;
+                return true;
+            }
+            else if (!f->date.required) {
+                fprintf(tty_out, "\r> (null)"CLRDOWN SHOW);
+                write_nl(tty_out);
+
+                return false;
+            }
+        }
+
+        if (k.type == key_escape) {
+            pos = 0;
+            month = 0;
+            day = 0;
+            year = default_year;
+        }
+        else if (k.type == key_arrow_up) {
+            if (pos == 0 && month < 12) month++;
+            else if (pos == 1 && day < days_in_month(month, REAL_YEAR(year))) day++;
+            else if (pos == 2 && year < end_date.tm_year) year++;
+        }
+        else if (k.type == key_arrow_down) {
+            if (pos == 0 && month > 0) month--;
+            else if (pos == 1 && day > 0) day--;
+            else if (pos == 2 && year > start_date.tm_year) year--;
+        }
+        else if (k.type == key_arrow_left) {
+            if (pos > 0) pos--;
+        }
+        else if (k.type == key_arrow_right) {
+            if (pos < 2) pos++;
+        }
+    }
 }
 
 bool read_bool(void) {
@@ -875,6 +1039,16 @@ int main(void) {
             } while (fails_multiselect_checks(f, opts.count));
 
             append_multiselect_answer(&answers, f->id, &opts);
+        } break;
+
+        case ft_date: {
+            struct tm d;
+            if (read_date(f, &d)) {
+                append_date_answer(&answers, f->id, &d);
+            }
+            else {
+                append_static_answer(&answers, f->id, "null");
+            }
         } break;
 
         case ft_counter: {

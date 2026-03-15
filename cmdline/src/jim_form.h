@@ -6,6 +6,10 @@
 
 #include <math.h>
 #include <regex.h>
+#include <time.h>
+
+#define REAL_YEAR(year) (NOB_ASSERT((year) < 1900), (year)+1900)
+#define FAKE_YEAR(year) (NOB_ASSERT((year) > 1900), (year)-1900)
 
 void jim_field_type(Jim *jim, FieldType t) {
     switch (t) {
@@ -22,6 +26,28 @@ FieldType parse_type(const char *type_str) {
     FIELDTYPES
 #undef X
     NOB_UNREACHABLE("Unidentified type!");
+}
+
+bool parse_yyyy_mm_dd(const char *str, int *real_year, int *month, int *day) {
+    if (sscanf(str, "%d-%d-%d", real_year, month, day) == 3) {
+        // TODO: Better validation
+        if (*real_year  >= 1 && *real_year  <= 9999 &&
+            *month >= 1 && *month <= 12 &&
+            *day   >= 1 && *day   <= 31) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool parse_to_tm(const char *str, struct tm* tm) {
+    int real_year, m, d;
+    if (!parse_yyyy_mm_dd(str, &real_year, &m, &d)) return false;
+    tm->tm_year = FAKE_YEAR(real_year);
+    tm->tm_mon  = m - 1;
+    tm->tm_mday = d;
+    tm->tm_hour = 12;
+    return true;
 }
 
 void jim_form(Jim *jim, const Form *f) {
@@ -85,6 +111,31 @@ void jim_form(Jim *jim, const Form *f) {
                 if (p.max != UINT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
             } break;
 
+            case ft_date: {
+                static char date_buffer[11];
+                DateFieldMembers p = x->date;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+                if (p.start_date.is_today) {
+                    jim_member_key(jim, "start_date");
+                    jim_string(jim, "[today]");
+                }
+                else if (p.start_date.dt) {
+                    jim_member_key(jim, "start_date");
+                    strftime(date_buffer, sizeof(date_buffer), "%Y-%m-%d", p.start_date.dt);
+                    jim_string(jim, date_buffer);
+                }
+                if (p.end_date.is_today) {
+                    jim_member_key(jim, "end_date");
+                    jim_string(jim, "[today]");
+                }
+                else if (p.end_date.dt) {
+                    jim_member_key(jim, "end_date");
+                    strftime(date_buffer, sizeof(date_buffer), "%Y-%m-%d", p.end_date.dt);
+                    jim_string(jim, date_buffer);
+                }
+            } break;
+
             case ft_counter:
                 jim_member_key(jim, "question"); jim_string(jim, x->counter.question);
                 break;
@@ -133,8 +184,13 @@ void field_set_defaults(Field *field) {
             field->multiselect.options.capacity = 0;
             field->multiselect.options.count = 0;
             field->multiselect.options.items = NULL;
-            field->multiselect.min = 0;
             field->multiselect.max = UINT_MAX;
+            break;
+
+        case ft_date:
+            field->date.required = true;
+            field->date.start_date.dt = NULL;
+            field->date.end_date.dt = NULL;
             break;
 
         case ft_counter:
@@ -264,6 +320,45 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         field->multiselect.max = (uint32_t)jimp->number;
                     }
                     break;
+
+                case ft_date:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->date.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->date.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "start_date") == 0) {
+                        if (jimp_is_null_ahead(jimp)) {
+                            field->date.start_date.is_today = false;
+                            field->date.start_date.dt = NULL;
+                            break;
+                        }
+                        if (!jimp_string(jimp)) return false;
+                        field->date.start_date.is_today = strcmp(jimp->string, "[today]") == 0;
+                        if (!field->date.start_date.is_today) {
+                            struct tm *dt = (struct tm*)malloc(sizeof(struct tm));
+                            if (!parse_to_tm(jimp->string, dt)) return false;
+                            field->date.start_date.dt = dt;
+                        }
+                    }
+                    else if (strcmp(jimp->string, "end_date") == 0) {
+                        if (jimp_is_null_ahead(jimp)) {
+                            field->date.end_date.is_today = false;
+                            field->date.end_date.dt = NULL;
+                            break;
+                        }
+                        if (!jimp_string(jimp)) return false;
+                        field->date.end_date.is_today = strcmp(jimp->string, "[today]") == 0;
+                        if (!field->date.end_date.is_today) {
+                            struct tm *dt = (struct tm*)malloc(sizeof(struct tm));
+                            if (!parse_to_tm(jimp->string, dt)) return false;
+                            field->date.end_date.dt = dt;
+                        }
+                    }
+                break;
 
                 case ft_counter:
                     if (strcmp(jimp->string, "question") == 0) {
