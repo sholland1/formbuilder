@@ -131,36 +131,19 @@ uint64_t to_int(const char* str) {
 }
 
 bool fails_multiselect_checks(const Field *f, uint32_t opts_count) {
+    NOB_ASSERT(f->type == ft_multiselect);
     MultiSelectFieldMembers p = f->multiselect;
     return !BETWEEN(opts_count, p.min, p.max);
 }
 
-bool fails_checks(const Field *f, const char *answer) {
+bool fails_number_checks(const Field *f, const char *answer) {
+    NOB_ASSERT(f->type == ft_number);
+    NumberFieldMembers p = f->number;
     bool empty = is_empty(answer);
-    switch (f->type) {
-        case ft_text: {
-            TextFieldMembers p = f->text;
-            return empty
-                ? p.required
-                : !is_match(p.regex, answer);
-        } break;
-
-        case ft_number: {
-            NumberFieldMembers p = f->number;
-            bool req = p.required;
-            bool isnum = !empty && is_numeric(answer);
-            bool between = isnum && BETWEEN(to_double(answer), p.min, p.max);
-            return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
-        }
-
-        case ft_counter:
-        case ft_color:
-        case ft_bool:
-            return false;
-
-        default: break;
-    }
-    NOB_UNREACHABLE("Unidentified type!");
+    bool req = p.required;
+    bool isnum = !empty && is_numeric(answer);
+    bool between = isnum && BETWEEN(to_double(answer), p.min, p.max);
+    return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
 }
 
 static struct termios original_termios;
@@ -260,17 +243,6 @@ void write_prompt_with_buffer(FILE *stream, const char *buffer) {
     fflush(stream);
 }
 
-void write_placeholder(FILE *stream, const char *ph) {
-    fprintf(stream, "\r"PROMPT" "FAINT"%s"RESET"\r"RIGHT(3), ph);
-    fflush(stream);
-}
-
-#define write_question(stream, field) \
-    do { \
-        fprintf(stream, "%s%s\r\n", (field).question, (field).required ? "*" : ""); \
-        fflush(stream); \
-    } while (0)
-
 void write_nl(FILE *stream) {
     putc('\r', stream);
     putc('\n', stream);
@@ -296,6 +268,8 @@ void color_to_str(char* buffer, Color c) {
     ( (rgb) & ~(0xFu << (component)) ) | ( ((value) & 0xFu) << (component) )
 
 Color read_color(const Field *f) {
+    NOB_ASSERT(f->type == ft_color);
+
     static const uint8_t component_locations[] = {3, 4, 8, 9, 13, 14};
 
     fprintf(tty_out, "%s\r\n "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", f->color.question);
@@ -434,6 +408,8 @@ bool is_valid_date(int real_year, int month, int day, const struct tm *start, co
 }
 
 bool read_date(const Field *f, struct tm *value) {
+    NOB_ASSERT(f->type == ft_date);
+
     static const char* month_names[] = {
         "<Month>",
         "January", "February", "March", "April", "May", "June",
@@ -530,6 +506,8 @@ bool read_date(const Field *f, struct tm *value) {
 }
 
 bool read_bool(const Field *f) {
+    NOB_ASSERT(f->type == ft_bool);
+
     fprintf(tty_out, HIDE"%s\r\n", f->boolean.question);
 
     bool choice = true;
@@ -556,6 +534,8 @@ bool read_bool(const Field *f) {
 }
 
 void read_select(const Field *f, char *buffer) {
+    NOB_ASSERT(f->type == ft_select);
+
     SelectOptions opts = f->select.options;
     fprintf(tty_out, HIDE"%s%s\r\n", f->select.question, f->select.required ? "*" : "");
 
@@ -615,6 +595,8 @@ void read_select(const Field *f, char *buffer) {
 }
 
 void read_multiselect(const Field *f, SelectOptions *selected_opts) {
+    NOB_ASSERT(f->type == ft_multiselect);
+
     MultiSelectFieldMembers p = f->multiselect;
     fprintf(tty_out, HIDE"%s ", p.question);
     if (p.max == UINT_MAX) {
@@ -692,6 +674,8 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
 }
 
 uint64_t read_counter(const Field *f) {
+    NOB_ASSERT(f->type == ft_counter);
+
     fprintf(tty_out, HIDE"%s\r\n0", f->counter.question);
     fflush(tty_out);
 
@@ -724,158 +708,202 @@ uint64_t read_counter(const Field *f) {
     }
 }
 
-void read_input(char *buffer, const Field *field) {
-    size_t pos = 0;
-    size_t end = 0;
-    buffer[0] = '\0';
+typedef struct {
+    size_t position;
+    size_t end;
+    char *buffer;
+} TextBuffer;
 
+bool fails_text_checks(const Field *f, char *answer) {
+    NOB_ASSERT(f->type == ft_text);
+    TextFieldMembers p = f->text;
+    return is_empty(answer)
+        ? p.required
+        : !is_match(p.regex, answer);
+}
+
+void place_char_in_text_buffer(TextBuffer *tb, char c) {
+    if (tb->position < tb->end) {
+        for (size_t i = tb->end+1; i >= tb->position+1; i--) {
+            tb->buffer[i] = tb->buffer[i-1];
+        }
+    }
+    tb->buffer[tb->position++] = c;
+    tb->buffer[++tb->end] = '\0';
+}
+
+void handle_text_buffer(TextBuffer *tb, Key k) {
+    if (k.type == key_escape) {
+        tb->buffer[0] = '\0';
+        tb->position = 0;
+        tb->end = 0;
+    }
+    else if (k.type == key_backspace) {
+        if (tb->position > 0) {
+            for (size_t i = tb->position; i < tb->end; i++) {
+                tb->buffer[i-1] = tb->buffer[i];
+            }
+            tb->position--;
+            tb->buffer[--tb->end] = '\0';
+        }
+    }
+    else if (k.type == key_ctrl_backspace) {
+        int orig_pos = tb->position;
+        while (tb->position > 0 && is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
+        while (tb->position > 0 && !is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
+        int del_len = orig_pos-tb->position;
+        for (size_t i = orig_pos; i < tb->end; i++) {
+            tb->buffer[i-del_len] = tb->buffer[i];
+        }
+        tb->end -= del_len;
+        tb->buffer[tb->end] = '\0';
+    }
+    else if (k.type == key_delete) {
+        if (tb->position < tb->end) {
+            for (size_t i = tb->position + 1; i < tb->end; i++) {
+                tb->buffer[i-1] = tb->buffer[i];
+            }
+            tb->buffer[--tb->end] = '\0';
+        }
+    }
+    else if (k.type == key_ctrl_delete) {
+        int orig_pos = tb->position;
+        while (tb->position < tb->end && !is_word_boundary(tb->buffer[tb->position])) tb->position++;
+        while (tb->position < tb->end && is_word_boundary(tb->buffer[tb->position])) tb->position++;
+        int del_len = tb->position-orig_pos;
+        for (size_t i = tb->position; i < tb->end; i++) {
+            tb->buffer[i-del_len] = tb->buffer[i];
+        }
+        tb->end -= del_len;
+        tb->position = orig_pos;
+        tb->buffer[tb->end] = '\0';
+    }
+    else if (k.type == key_home) {
+        tb->position = 0;
+    }
+    else if (k.type == key_end) {
+        tb->position = tb->end;
+    }
+    else if (k.type == key_arrow_right) {
+        if (tb->position < tb->end) tb->position++;
+    }
+    else if (k.type == key_arrow_left) {
+        if (tb->position > 0) tb->position--;
+    }
+    else if (k.type == key_ctrl_right) {
+        while (tb->position < tb->end && !is_word_boundary(tb->buffer[tb->position])) tb->position++;
+        while (tb->position < tb->end && is_word_boundary(tb->buffer[tb->position])) tb->position++;
+    }
+    else if (k.type == key_ctrl_left) {
+        while (tb->position > 0 && is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
+        while (tb->position > 0 && !is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
+    }
+}
+
+void read_text(const Field *f, char *buffer) {
+    NOB_ASSERT(f->type == ft_text);
+
+    TextBuffer tb = {
+        .position = 0,
+        .end = 0,
+        .buffer = buffer,
+    };
+
+    fprintf(tty_out, "%s%s\r\n", f->text.question, f->text.required ? "*" : "");
+
+    const char *ph = f->text.placeholder;
     while (1) {
-        if (field->type == ft_text) {
-            const char *ph = field->text.placeholder;
-            if (end == 0 && ph) {
-                write_placeholder(tty_out, ph);
-            }
-            else {
-                write_prompt_with_buffer(tty_out, buffer);
-            }
+        bool failed_checks = fails_text_checks(f, buffer);
+        if (tb.end == 0 && ph) {
+            fprintf(tty_out, "\r"PROMPT" "FAINT"%s"RESET CLRDOWN"\r"RIGHT(3), ph);
         }
-        else if (field->type == ft_number) {
-            write_prompt_with_buffer(tty_out, buffer);
+        else {
+            fprintf(tty_out, "\r"PROMPT" %s" CLRDOWN, buffer);
         }
-        make_prompt_red(tty_out, pos, fails_checks(field, buffer));
+        make_prompt_red(tty_out, tb.position, failed_checks);
 
         Key k = read_key(tty_in);
         if (k.type == key_exit) {
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
-            buffer[end] = '\0';
+            if (failed_checks) {
+                tb.buffer[0] = '\0';
+                tb.position = 0;
+                tb.end = 0;
+                continue;
+            }
+            tb.buffer[tb.end] = '\0';
+            write_nl(tty_out);
             return;
         }
 
-        if (k.type == key_backspace) {
-            if (pos > 0) {
-                for (size_t i = pos; i < end; i++) {
-                    buffer[i-1] = buffer[i];
-                }
-                pos--;
-                buffer[--end] = '\0';
-                write_prompt_with_buffer(tty_out, buffer);
-            }
-        }
-        else if (k.type == key_ctrl_backspace) {
-            int orig_pos = pos;
-            while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
-            while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
-            int del_len = orig_pos-pos;
-            for (size_t i = orig_pos; i < end; i++) {
-                buffer[i-del_len] = buffer[i];
-            }
-            end -= del_len;
-            buffer[end] = '\0';
-            write_prompt_with_buffer(tty_out, buffer);
-        }
-        else if (k.type == key_delete) {
-            if (pos < end) {
-                for (size_t i = pos + 1; i < end; i++) {
-                    buffer[i-1] = buffer[i];
-                }
-                buffer[--end] = '\0';
-                write_prompt_with_buffer(tty_out, buffer);
-            }
-        }
-        else if (k.type == key_ctrl_delete) {
-            int orig_pos = pos;
-            while (pos < end && !is_word_boundary(buffer[pos])) pos++;
-            while (pos < end && is_word_boundary(buffer[pos])) pos++;
-            int del_len = pos-orig_pos;
-            for (size_t i = pos; i < end; i++) {
-                buffer[i-del_len] = buffer[i];
-            }
-            end -= del_len;
-            pos = orig_pos;
-            buffer[end] = '\0';
-            write_prompt_with_buffer(tty_out, buffer);
-        }
-        else if (k.type == key_home) {
-            pos = 0;
-        }
-        else if (k.type == key_end) {
-            pos = end;
-        }
-        else if (k.type == key_arrow_right) {
-            if (pos < end) pos++;
-        }
-        else if (k.type == key_arrow_left) {
-            if (pos > 0) pos--;
-        }
-        else if (k.type == key_ctrl_right) {
-            while (pos < end && !is_word_boundary(buffer[pos])) pos++;
-            while (pos < end && is_word_boundary(buffer[pos])) pos++;
-        }
-        else if (k.type == key_ctrl_left) {
-            while (pos > 0 && is_word_boundary(buffer[pos-1])) pos--;
-            while (pos > 0 && !is_word_boundary(buffer[pos-1])) pos--;
-        }
-        else if (field->type == ft_text) {
-            if (k.type == key_char && pos < field->text.maxlength - 1) {
-                if (pos < end) {
-                    for (size_t i = end+1; i >= pos+1; i--) {
-                        buffer[i] = buffer[i-1];
-                    }
-                    buffer[pos++] = k.ch;
-                    buffer[++end] = '\0';
-                    write_prompt_with_buffer(tty_out, buffer);
-                }
-                else {
-                    buffer[pos++] = k.ch;
-                    buffer[++end] = '\0';
-                    putc(k.ch, tty_out);
-                    fflush(tty_out);
-                }
-            }
-        }
-        else if (field->type == ft_number) {
-            NumberFieldMembers p = field->number;
-            if (k.type == key_char) {
-                if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
-                    // if (pos < BUFFER_LEN - 1) {
-                    if (pos < end) {
-                        for (size_t i = end+1; i >= pos+1; i--) {
-                            buffer[i] = buffer[i-1];
-                        }
-                        buffer[pos++] = k.ch;
-                        buffer[++end] = '\0';
-                        write_prompt_with_buffer(tty_out, buffer);
-                    }
-                    else {
-                        buffer[pos++] = k.ch;
-                        buffer[++end] = '\0';
-                        putc(k.ch, tty_out);
-                        fflush(tty_out);
-                    }
-                }
-            }
-            else {
-                double signed_step;
-                if (k.type == key_arrow_up) {
-                    signed_step = p.step;
-                }
-                else if (k.type == key_arrow_down) {
-                    signed_step = -p.step;
-                }
-                else break;
-                double current = round(to_double(buffer) / p.step) * p.step;
-                snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
-                write_prompt_with_buffer(tty_out, buffer);
-                pos = strlen(buffer);
-                end = pos;
-            }
+        handle_text_buffer(&tb, k);
+
+        if (k.type == key_char && tb.position < f->text.maxlength - 1) {
+            place_char_in_text_buffer(&tb, k.ch);
         }
     }
+}
 
-    // If we somehow exit loop without \n
-    buffer[end] = '\0';
+void read_number(const Field *f, char *buffer) {
+    NOB_ASSERT(f->type == ft_number);
+
+    TextBuffer tb = {
+        .position = 0,
+        .end = 0,
+        .buffer = buffer,
+    };
+
+    NumberFieldMembers p = f->number;
+    fprintf(tty_out, "%s%s\r\n", p.question, p.required ? "*" : "");
+
+    while (1) {
+        bool failed_checks = fails_number_checks(f, buffer);
+        write_prompt_with_buffer(tty_out, buffer);
+        make_prompt_red(tty_out, tb.position, failed_checks);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
+        if (k.type == key_enter) {
+            if (failed_checks) {
+                tb.buffer[0] = '\0';
+                tb.position = 0;
+                tb.end = 0;
+                continue;
+            }
+            tb.buffer[tb.end] = '\0';
+            write_nl(tty_out);
+            return;
+        }
+
+        if (k.type == key_char) {
+            if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
+                // if (pos < BUFFER_LEN - 1) {
+                place_char_in_text_buffer(&tb, k.ch);
+            }
+        }
+        else {
+            double signed_step;
+            if (k.type == key_arrow_up) {
+                signed_step = p.step;
+            }
+            else if (k.type == key_arrow_down) {
+                signed_step = -p.step;
+            }
+            else {
+                handle_text_buffer(&tb, k);
+                continue;
+            }
+
+            double current = round(to_double(buffer) / p.step) * p.step;
+            snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
+            tb.position = strlen(buffer);
+            tb.end = tb.position;
+        }
+    }
 }
 
 void terminal_deinit(void) {
@@ -966,16 +994,11 @@ int main(void) {
 
     const char *timestamp_field_id = NULL;
     nob_da_foreach(Field, f, &form.fields) {
+        answer_buffer[0] = '\0';
+
         switch (f->type) {
         case ft_text: {
-            write_question(tty_out, f->text);
-
-            do {
-                read_input(answer_buffer, f);
-            } while (fails_checks(f, answer_buffer));
-
-            write_nl(tty_out);
-
+            read_text(f, answer_buffer);
             if (is_empty(answer_buffer)) {
                 append_static_answer(&answers, f->id, "null");
             }
@@ -985,14 +1008,7 @@ int main(void) {
         } break;
 
         case ft_number: {
-            write_question(tty_out, f->number);
-
-            do {
-                read_input(answer_buffer, f);
-            } while (fails_checks(f, answer_buffer));
-
-            write_nl(tty_out);
-
+            read_number(f, answer_buffer);
             if (is_empty(answer_buffer)) {
                 append_static_answer(&answers, f->id, "null");
             }
