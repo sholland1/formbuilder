@@ -444,7 +444,6 @@ bool read_date(const Field *f, struct tm *value) {
         "July", "August", "September", "October", "November", "December",
     };
 
-    fprintf(tty_out, HIDE);
     int pos = 0;
 
     time_t now = time(NULL);
@@ -455,7 +454,7 @@ bool read_date(const Field *f, struct tm *value) {
 
     char buffer[12];
     strftime(buffer, sizeof(buffer), "%m/%d/%Y", &start_date);
-    fprintf(tty_out, "%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
+    fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
     strftime(buffer, sizeof(buffer), "%m/%d/%Y", &end_date);
     fprintf(tty_out, "%s]\r\n", buffer);
     fflush(tty_out);
@@ -536,7 +535,7 @@ bool read_date(const Field *f, struct tm *value) {
 }
 
 bool read_bool(const Field *f) {
-    fprintf(tty_out, "%s\r\n"HIDE, f->boolean.question);
+    fprintf(tty_out, HIDE"%s\r\n", f->boolean.question);
 
     bool choice = true;
     while (1) {
@@ -564,7 +563,7 @@ bool read_bool(const Field *f) {
 
 void read_select(const Field *f, char *buffer) {
     SelectOptions opts = f->select.options;
-    fprintf(tty_out, "%s%s\r\n"HIDE, f->select.question, f->select.required ? "*" : "");
+    fprintf(tty_out, HIDE"%s%s\r\n", f->select.question, f->select.required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
@@ -622,13 +621,23 @@ void read_select(const Field *f, char *buffer) {
     }
 }
 
-void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, const Field *field, bool first_time) {
-    fprintf(tty_out, HIDE);
+void read_multiselect(const Field *f, SelectOptions *selected_opts) {
+    MultiSelectFieldMembers p = f->multiselect;
+    fprintf(tty_out, HIDE"%s ", p.question);
+    if (p.max == UINT_MAX) {
+        if (p.min == 0) {
+            fprintf(tty_out, "(any)\r\n");
+        }
+        else {
+            fprintf(tty_out, "(at least %d)\r\n", p.min);
+        }
+    }
+    else {
+        fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
+    }
 
-    SelectOptions opts = field->multiselect.options;
-    if (!first_time)
-        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
-
+    const SelectOptions opts = p.options;
+    bool selected_indexes[100] = {0};
     size_t pos = 0;
     while (1) {
         int selected_opt_count = 0;
@@ -637,7 +646,7 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
                 selected_opt_count++;
             }
         }
-        bool fail_checks = fails_multiselect_checks(field, selected_opt_count);
+        bool fail_checks = fails_multiselect_checks(f, selected_opt_count);
         for (size_t i = 0; i < opts.count; i++) {
             fprintf(tty_out, "\r%s %s %s\r\n",
                 pos == i
@@ -650,6 +659,10 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
 
         Key k = read_key(tty_in);
         if (k.type == key_enter || k.type == key_tab) {
+            if (fail_checks) {
+                fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
+                continue;
+            }
             fprintf(tty_out, SHOW);
             for (size_t i = 0; i < opts.count; i++) {
                 if (selected_indexes[i]) {
@@ -687,7 +700,7 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
 }
 
 uint64_t read_counter(const Field *f) {
-    fprintf(tty_out, "%s\r\n0"HIDE, f->counter.question);
+    fprintf(tty_out, HIDE"%s\r\n0", f->counter.question);
     fflush(tty_out);
 
     uint64_t value = 0;
@@ -1010,29 +1023,8 @@ int main(void) {
         } break;
 
         case ft_multiselect: {
-            MultiSelectFieldMembers p = f->multiselect;
-            fprintf(tty_out, "%s ", p.question);
-            if (p.max == UINT_MAX) {
-                if (p.min == 0) {
-                    fprintf(tty_out, "(any)\r\n");
-                }
-                else {
-                    fprintf(tty_out, "(at least %d)\r\n", p.min);
-                }
-            }
-            else {
-                fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
-            }
-
-            bool first_time = true;
             SelectOptions opts = {0};
-            bool selected_indexes[100] = {0};
-            do {
-                opts.count = 0;
-                read_multiselect(selected_indexes, &opts, f, first_time);
-                first_time = false;
-            } while (fails_multiselect_checks(f, opts.count));
-
+            read_multiselect(f, &opts);
             append_multiselect_answer(&answers, f->id, &opts);
         } break;
 
