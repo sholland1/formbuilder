@@ -22,8 +22,8 @@
 #define UP(n)     "\033["#n"A"
 #define RIGHT(n)  "\033["#n"G"
 
-#define ERR_PROMPT RED BOLD"→"RESET
-#define PROMPT         BOLD"→"RESET
+#define ERR_PROMPT RED PROMPT
+#define PROMPT     BOLD"→"RESET
 
 #define CHECK   "[✘]"
 #define UNCHECK "[ ]"
@@ -150,6 +150,11 @@ static struct termios original_termios;
 static FILE *tty_in = NULL;
 static FILE *tty_out = NULL;
 
+void user_exit(void) {
+    fprintf(tty_out, "\r\n");
+    exit(EXIT_FAILURE);
+}
+
 void make_prompt_red(FILE *stream, size_t pos, bool b) {
     // move to beginning of line
     putc('\r', stream);
@@ -238,11 +243,6 @@ bool is_word_boundary(char c) {
     return c == ' ' || c == '.';
 }
 
-void write_prompt_with_buffer(FILE *stream, const char *buffer) {
-    fprintf(stream, "\r"PROMPT" %s" CLRDOWN, buffer);
-    fflush(stream);
-}
-
 void write_nl(FILE *stream) {
     putc('\r', stream);
     putc('\n', stream);
@@ -282,9 +282,7 @@ Color read_color(const Field *f) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             write_nl(tty_out);
             return c;
@@ -436,34 +434,30 @@ bool read_date(const Field *f, struct tm *value) {
     uint8_t month = 0, day = 0;
 
     while (1) {
-        if (pos == 0) {
-            fprintf(tty_out, "\r> "UNDERLINE"%9s"RESET" ", month_names[month]);
-        }
-        else {
-            fprintf(tty_out, "\r> %3s ", month_names[month]);
-        }
-        if (day == 0) {
-            fprintf(tty_out, pos == 1 ? UNDERLINE"dd"RESET : "dd");
-        }
-        else {
-            fprintf(tty_out, pos == 1 ? UNDERLINE"%d"RESET : "%d", day);
-        }
-        if (pos == 2) {
-            fprintf(tty_out, ", "UNDERLINE"%d"RESET CLRDOWN, REAL_YEAR(year));
-        }
-        else {
-            fprintf(tty_out, ", %d"CLRDOWN, REAL_YEAR(year));
-        }
-        make_prompt_red(tty_out, 3, f->date.required && !is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date));
+        bool failed_checks = f->date.required && !is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date);
+        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        if (pos == 0) fprintf(tty_out, UNDERLINE);
+        fprintf(tty_out, pos == 0 ? "%9s" : "%3s" , month_names[month]);
+        if (pos == 0) fprintf(tty_out, RESET);
+        fprintf(tty_out, " ");
+
+        if (pos == 1) fprintf(tty_out, UNDERLINE);
+        if (day == 0) fprintf(tty_out, "dd");
+        else fprintf(tty_out, "%d", day);
+        if (pos == 1) fprintf(tty_out, RESET);
+        fprintf(tty_out, ", ");
+
+        if (pos == 2) fprintf(tty_out, UNDERLINE);
+        fprintf(tty_out, "%d", REAL_YEAR(year));
+        if (pos == 2) fprintf(tty_out, RESET);
+        fprintf(tty_out, CLRDOWN);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date)) {
-                fprintf(tty_out, "\r> %s %d, %d"CLRDOWN SHOW, month_names[month], day, REAL_YEAR(year));
+                fprintf(tty_out, "\r"PROMPT" %s %d, %d"CLRDOWN SHOW, month_names[month], day, REAL_YEAR(year));
                 write_nl(tty_out);
 
                 value->tm_year = year;
@@ -473,7 +467,7 @@ bool read_date(const Field *f, struct tm *value) {
                 return true;
             }
             else if (!f->date.required) {
-                fprintf(tty_out, "\r> (null)"CLRDOWN SHOW);
+                fprintf(tty_out, "\r"ERR_PROMPT" (null)"CLRDOWN SHOW);
                 write_nl(tty_out);
 
                 return false;
@@ -518,9 +512,7 @@ bool read_bool(const Field *f) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             fprintf(tty_out, SHOW);
             return choice;
@@ -550,9 +542,7 @@ void read_select(const Field *f, char *buffer) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (pos == 0 && f->select.required) {
                 fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
@@ -633,9 +623,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter || k.type == key_tab) {
             if (fail_checks) {
                 fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
@@ -683,9 +671,7 @@ uint64_t read_counter(const Field *f) {
 
     while (1) {
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             fprintf(tty_out, SHOW);
             write_nl(tty_out);
@@ -823,9 +809,7 @@ void read_text(const Field *f, char *buffer) {
         make_prompt_red(tty_out, tb.position, failed_checks);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (failed_checks) {
                 tb.buffer[0] = '\0';
@@ -860,13 +844,12 @@ void read_number(const Field *f, char *buffer) {
 
     while (1) {
         bool failed_checks = fails_number_checks(f, buffer);
-        write_prompt_with_buffer(tty_out, buffer);
+        fprintf(tty_out, "\r"PROMPT" %s" CLRDOWN, buffer);
         make_prompt_red(tty_out, tb.position, failed_checks);
+        fflush(tty_out);
 
         Key k = read_key(tty_in);
-        if (k.type == key_exit) {
-            exit(EXIT_FAILURE);
-        }
+        if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (failed_checks) {
                 tb.buffer[0] = '\0';
@@ -913,7 +896,7 @@ void terminal_deinit(void) {
         tty_in = NULL;
     }
     if (tty_out) {
-        fprintf(tty_out, "\r\n"RESET SHOW);
+        fprintf(tty_out, RESET SHOW);
         fflush(tty_out);
         fclose(tty_out);
         tty_out = NULL;
