@@ -153,9 +153,6 @@ bool fails_checks(const Field *f, const char *answer) {
             return (between && !isnum && !req) || (isnum && !between && !req) || (!empty && !isnum && !req);
         }
 
-        case ft_select:
-            return empty && f->select.required;
-
         case ft_counter:
         case ft_color:
         case ft_bool:
@@ -298,12 +295,13 @@ void color_to_str(char* buffer, Color c) {
 #define RGB_SET(rgb, component, value)  \
     ( (rgb) & ~(0xFu << (component)) ) | ( ((value) & 0xFu) << (component) )
 
-Color read_color(void) {
+Color read_color(const Field *f) {
     static const uint8_t component_locations[] = {3, 4, 8, 9, 13, 14};
+
+    fprintf(tty_out, "%s\r\n "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", f->color.question);
 
     Color c = {0};
     int pos = 1;
-    fprintf(tty_out, " "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n");
     while (1) {
         fprintf(tty_out, "\r"CLRDOWN"0x%.2X 0x%.2X 0x%.2X : "RGB_BG"   "RESET, c.r, c.g, c.b, c.r, c.g, c.b);
         fprintf(tty_out, "\r"RIGHT(%d), component_locations[pos]);
@@ -537,8 +535,8 @@ bool read_date(const Field *f, struct tm *value) {
     }
 }
 
-bool read_bool(void) {
-    fprintf(tty_out, HIDE);
+bool read_bool(const Field *f) {
+    fprintf(tty_out, "%s\r\n"HIDE, f->boolean.question);
 
     bool choice = true;
     while (1) {
@@ -564,17 +562,14 @@ bool read_bool(void) {
     }
 }
 
-void read_select(char *buffer, const Field *field, bool first_time) {
-    fprintf(tty_out, HIDE);
-
-    SelectOptions opts = field->select.options;
-    if (!first_time)
-        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
+void read_select(const Field *f, char *buffer) {
+    SelectOptions opts = f->select.options;
+    fprintf(tty_out, "%s%s\r\n"HIDE, f->select.question, f->select.required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
         fprintf(tty_out, "\r%s\r\n", pos == 0
-            ? field->select.required ? ERR_PROMPT : PROMPT
+            ? f->select.required ? ERR_PROMPT : PROMPT
             : " ");
         for (size_t i = 1; i < opts.count+1; i++) {
             fprintf(tty_out, "\r%s %s\r\n", pos == i ? PROMPT : " ", opts.items[i-1]);
@@ -583,13 +578,18 @@ void read_select(char *buffer, const Field *field, bool first_time) {
 
         Key k = read_key(tty_in);
         if (k.type == key_enter) {
-            fprintf(tty_out, SHOW);
+            if (pos == 0 && f->select.required) {
+                fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
+                continue;
+            }
+
             if (pos == 0) {
                 buffer[0] = 0;
             }
             else {
                 strcpy(buffer, opts.items[pos-1]);
             }
+            fprintf(tty_out, SHOW);
             return;
         }
         if (k.type == key_tab) {
@@ -686,8 +686,8 @@ void read_multiselect(bool *selected_indexes, SelectOptions *selected_opts, cons
     }
 }
 
-uint64_t read_counter() {
-    fprintf(tty_out, "0"HIDE);
+uint64_t read_counter(const Field *f) {
+    fprintf(tty_out, "%s\r\n0"HIDE, f->counter.question);
     fflush(tty_out);
 
     uint64_t value = 0;
@@ -999,12 +999,7 @@ int main(void) {
         } break;
 
         case ft_select: {
-            write_question(tty_out, f->select);
-            bool first_time = true;
-            do {
-                read_select(answer_buffer, f, first_time);
-                first_time = false;
-            } while (fails_checks(f, answer_buffer));
+            read_select(f, answer_buffer);
 
             if (is_empty(answer_buffer)) {
                 append_static_answer(&answers, f->id, "null");
@@ -1052,24 +1047,16 @@ int main(void) {
         } break;
 
         case ft_counter: {
-            fprintf(tty_out, "%s\r\n", f->counter.question);
-            fflush(tty_out);
-
-            append_integer_answer(&answers, f->id, read_counter());
+            append_integer_answer(&answers, f->id, read_counter(f));
         } break;
 
         case ft_color: {
-            fprintf(tty_out, "%s\r\n", f->color.question);
-            fflush(tty_out);
-
-            color_to_str(answer_buffer, read_color());
+            color_to_str(answer_buffer, read_color(f));
             append_quoted_answer(&answers, f->id, answer_buffer);
         } break;
 
         case ft_bool: {
-            fprintf(tty_out, "%s\r\n", f->boolean.question);
-            fflush(tty_out);
-            append_static_answer(&answers, f->id, read_bool() ? "true" : "false");
+            append_static_answer(&answers, f->id, read_bool(f) ? "true" : "false");
         } break;
 
         case ft_timestamp:
