@@ -155,16 +155,6 @@ void user_exit(void) {
     exit(EXIT_FAILURE);
 }
 
-void make_prompt_red(FILE *stream, size_t pos, bool b) {
-    // move to beginning of line
-    putc('\r', stream);
-    // put red or normal prompt
-    fprintf(stream, b ? ERR_PROMPT" ": PROMPT" ");
-    // move back to original position
-    fprintf(stream, RIGHT(%zu), pos+3);
-    fflush(stream);
-}
-
 typedef enum {
     key_eof,
     key_char,
@@ -457,8 +447,8 @@ bool read_date(const Field *f, struct tm *value) {
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date)) {
-                fprintf(tty_out, "\r"PROMPT" %s %d, %d"CLRDOWN SHOW, month_names[month], day, REAL_YEAR(year));
-                write_nl(tty_out);
+                fprintf(tty_out, "\r"PROMPT" %s %d, %d"CLRDOWN SHOW"\r\n", month_names[month], day, REAL_YEAR(year));
+                fflush(tty_out);
 
                 value->tm_year = year;
                 value->tm_mon = month-1;
@@ -467,8 +457,8 @@ bool read_date(const Field *f, struct tm *value) {
                 return true;
             }
             else if (!f->date.required) {
-                fprintf(tty_out, "\r"ERR_PROMPT" (null)"CLRDOWN SHOW);
-                write_nl(tty_out);
+                fprintf(tty_out, "\r"ERR_PROMPT" (null)"CLRDOWN SHOW"\r\n");
+                fflush(tty_out);
 
                 return false;
             }
@@ -673,8 +663,8 @@ uint64_t read_counter(const Field *f) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            fprintf(tty_out, SHOW);
-            write_nl(tty_out);
+            fprintf(tty_out, SHOW"\r\n");
+            fflush(tty_out);
             return value;
         }
 
@@ -718,13 +708,13 @@ void place_char_in_text_buffer(TextBuffer *tb, char c) {
     tb->buffer[++tb->end] = '\0';
 }
 
-void handle_text_buffer(TextBuffer *tb, Key k) {
-    if (k.type == key_escape) {
+void handle_text_buffer(TextBuffer *tb, KeyType kt) {
+    if (kt == key_escape) {
         tb->buffer[0] = '\0';
         tb->position = 0;
         tb->end = 0;
     }
-    else if (k.type == key_backspace) {
+    else if (kt == key_backspace) {
         if (tb->position > 0) {
             for (size_t i = tb->position; i < tb->end; i++) {
                 tb->buffer[i-1] = tb->buffer[i];
@@ -733,7 +723,7 @@ void handle_text_buffer(TextBuffer *tb, Key k) {
             tb->buffer[--tb->end] = '\0';
         }
     }
-    else if (k.type == key_ctrl_backspace) {
+    else if (kt == key_ctrl_backspace) {
         int orig_pos = tb->position;
         while (tb->position > 0 && is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
         while (tb->position > 0 && !is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
@@ -744,7 +734,7 @@ void handle_text_buffer(TextBuffer *tb, Key k) {
         tb->end -= del_len;
         tb->buffer[tb->end] = '\0';
     }
-    else if (k.type == key_delete) {
+    else if (kt == key_delete) {
         if (tb->position < tb->end) {
             for (size_t i = tb->position + 1; i < tb->end; i++) {
                 tb->buffer[i-1] = tb->buffer[i];
@@ -752,7 +742,7 @@ void handle_text_buffer(TextBuffer *tb, Key k) {
             tb->buffer[--tb->end] = '\0';
         }
     }
-    else if (k.type == key_ctrl_delete) {
+    else if (kt == key_ctrl_delete) {
         int orig_pos = tb->position;
         while (tb->position < tb->end && !is_word_boundary(tb->buffer[tb->position])) tb->position++;
         while (tb->position < tb->end && is_word_boundary(tb->buffer[tb->position])) tb->position++;
@@ -764,23 +754,23 @@ void handle_text_buffer(TextBuffer *tb, Key k) {
         tb->position = orig_pos;
         tb->buffer[tb->end] = '\0';
     }
-    else if (k.type == key_home) {
+    else if (kt == key_home) {
         tb->position = 0;
     }
-    else if (k.type == key_end) {
+    else if (kt == key_end) {
         tb->position = tb->end;
     }
-    else if (k.type == key_arrow_right) {
+    else if (kt == key_arrow_right) {
         if (tb->position < tb->end) tb->position++;
     }
-    else if (k.type == key_arrow_left) {
+    else if (kt == key_arrow_left) {
         if (tb->position > 0) tb->position--;
     }
-    else if (k.type == key_ctrl_right) {
+    else if (kt == key_ctrl_right) {
         while (tb->position < tb->end && !is_word_boundary(tb->buffer[tb->position])) tb->position++;
         while (tb->position < tb->end && is_word_boundary(tb->buffer[tb->position])) tb->position++;
     }
-    else if (k.type == key_ctrl_left) {
+    else if (kt == key_ctrl_left) {
         while (tb->position > 0 && is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
         while (tb->position > 0 && !is_word_boundary(tb->buffer[tb->position-1])) tb->position--;
     }
@@ -800,13 +790,13 @@ void read_text(const Field *f, char *buffer) {
     const char *ph = f->text.placeholder;
     while (1) {
         bool failed_checks = fails_text_checks(f, buffer);
-        if (tb.end == 0 && ph) {
-            fprintf(tty_out, "\r"PROMPT" "FAINT"%s"RESET CLRDOWN"\r"RIGHT(3), ph);
-        }
-        else {
-            fprintf(tty_out, "\r"PROMPT" %s" CLRDOWN, buffer);
-        }
-        make_prompt_red(tty_out, tb.position, failed_checks);
+        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        if (tb.end == 0 && ph)
+            fprintf(tty_out, FAINT"%s"RESET, ph);
+        else
+            fprintf(tty_out, "%s", buffer);
+        fprintf(tty_out, CLRDOWN"\r"RIGHT(%zu), tb.position+3);
+        fflush(tty_out);
 
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
@@ -822,7 +812,7 @@ void read_text(const Field *f, char *buffer) {
             return;
         }
 
-        handle_text_buffer(&tb, k);
+        handle_text_buffer(&tb, k.type);
 
         if (k.type == key_char && tb.position < f->text.maxlength - 1) {
             place_char_in_text_buffer(&tb, k.ch);
@@ -844,8 +834,7 @@ void read_number(const Field *f, char *buffer) {
 
     while (1) {
         bool failed_checks = fails_number_checks(f, buffer);
-        fprintf(tty_out, "\r"PROMPT" %s" CLRDOWN, buffer);
-        make_prompt_red(tty_out, tb.position, failed_checks);
+        fprintf(tty_out, "\r%s %s" CLRDOWN"\r"RIGHT(%zu), failed_checks ? ERR_PROMPT : PROMPT, buffer, tb.position+3);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -877,7 +866,7 @@ void read_number(const Field *f, char *buffer) {
                 signed_step = -p.step;
             }
             else {
-                handle_text_buffer(&tb, k);
+                handle_text_buffer(&tb, k.type);
                 continue;
             }
 
