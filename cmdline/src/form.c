@@ -308,15 +308,12 @@ Color read_color(const Field *f) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
         if (k.type == key_enter) {
-            fprintf(tty_out, SHOW);
             write_nl(tty_out);
             return c;
-        }
-        if (k.type == key_exit) {
-            fprintf(tty_out, SHOW);
-            write_nl(tty_out);
-            exit(EXIT_FAILURE);
         }
 
         if (k.type == key_tab) {
@@ -374,7 +371,6 @@ Color read_color(const Field *f) {
             }
         }
     }
-    return c;
 }
 
 void set_default_date(struct tm *result, const date_t *d, const struct tm* current) {
@@ -487,7 +483,6 @@ bool read_date(const Field *f, struct tm *value) {
 
         Key k = read_key(tty_in);
         if (k.type == key_exit) {
-            write_nl(tty_out);
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
@@ -545,13 +540,12 @@ bool read_bool(const Field *f) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
         if (k.type == key_enter) {
             fprintf(tty_out, SHOW);
             return choice;
-        }
-        if (k.type == key_exit) {
-            fprintf(tty_out, SHOW);
-            exit(EXIT_FAILURE);
         }
 
         if (k.type == key_arrow_up || k.type == key_arrow_down) {
@@ -576,6 +570,9 @@ void read_select(const Field *f, char *buffer) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
         if (k.type == key_enter) {
             if (pos == 0 && f->select.required) {
                 fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
@@ -595,10 +592,6 @@ void read_select(const Field *f, char *buffer) {
             fprintf(tty_out, SHOW);
             buffer[0] = 0;
             return;
-        }
-        if (k.type == key_exit) {
-            fprintf(tty_out, SHOW);
-            exit(EXIT_FAILURE);
         }
 
         if (k.type == key_arrow_up) {
@@ -658,6 +651,9 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         fflush(tty_out);
 
         Key k = read_key(tty_in);
+        if (k.type == key_exit) {
+            exit(EXIT_FAILURE);
+        }
         if (k.type == key_enter || k.type == key_tab) {
             if (fail_checks) {
                 fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
@@ -673,10 +669,6 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         }
         if (k.type == key_char && k.ch == ' ') {
             selected_indexes[pos] = !selected_indexes[pos];
-        }
-        if (k.type == key_exit) {
-            fprintf(tty_out, SHOW);
-            exit(EXIT_FAILURE);
         }
 
         if (k.type == key_arrow_up) {
@@ -708,7 +700,6 @@ uint64_t read_counter(const Field *f) {
     while (1) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) {
-            write_nl(tty_out);
             exit(EXIT_FAILURE);
         }
         if (k.type == key_enter) {
@@ -894,6 +885,8 @@ void terminal_deinit(void) {
         tty_in = NULL;
     }
     if (tty_out) {
+        fprintf(tty_out, "\r\n"RESET SHOW);
+        fflush(tty_out);
         fclose(tty_out);
         tty_out = NULL;
     }
@@ -961,13 +954,10 @@ int main(void) {
         return 1;
     }
 
+
     terminal_init();
 
-    // Clear console
-    fprintf(tty_out, CLR HOME);
-
-    // Display form title in bold
-    fprintf(tty_out, BOLD"%s"RESET"\r\n", form.title);
+    fprintf(tty_out, CLR HOME BOLD"%s"RESET"\r\n", form.title);
 
     Option option = pretty;
 
