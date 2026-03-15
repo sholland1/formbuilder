@@ -7,29 +7,29 @@
 #include <termios.h>
 #include <locale.h>
 
-#define CLR       "\e[2J"
-#define HOME      "\e[H"
-#define RESET     "\e[0m"
-#define BOLD      "\e[1m"
-#define FAINT     "\e[2m"
-#define UNDERLINE "\e[4m"
-#define RED       "\e[31m"
-#define GREEN     "\e[32m"
-#define BLUE      "\e[34m"
-#define CLRDOWN   "\e[K"
-#define HIDE      "\e[?25l"
-#define SHOW      "\e[?25h"
-#define UP(n)     "\e["#n"A"
-#define RIGHT(n)  "\e["#n"G"
+#define CLR       "\033[2J"
+#define HOME      "\033[H"
+#define RESET     "\033[0m"
+#define BOLD      "\033[1m"
+#define FAINT     "\033[2m"
+#define UNDERLINE "\033[4m"
+#define RED       "\033[31m"
+#define GREEN     "\033[32m"
+#define BLUE      "\033[34m"
+#define CLRDOWN   "\033[K"
+#define HIDE      "\033[?25l"
+#define SHOW      "\033[?25h"
+#define UP(n)     "\033["#n"A"
+#define RIGHT(n)  "\033["#n"G"
 
 #define ERR_PROMPT RED BOLD"→"RESET
-#define PROMPT BOLD"→"RESET
+#define PROMPT         BOLD"→"RESET
 
-#define CHECK "[✘]"
+#define CHECK   "[✘]"
 #define UNCHECK "[ ]"
 
-#define RGB_FG "\e[38;2;%d;%d;%dm"
-#define RGB_BG "\e[48;2;%d;%d;%dm"
+#define RGB_FG "\033[38;2;%d;%d;%dm"
+#define RGB_BG "\033[48;2;%d;%d;%dm"
 
 #define BUFFER_LEN 1024
 
@@ -204,10 +204,10 @@ Key read_key(FILE *stream) {
         if (c >= 32 && c <= 126) return (Key){.type = key_char, .ch = (c)}; // Printable ASCII
         if (c == 127 || c == '\b') return KEY(key_backspace);
         if (c == 23) return KEY(key_ctrl_backspace);
-        if (c == '\e') return KEY(key_escape);
+        if (c == '\033') return KEY(key_escape);
         return KEY(key_unknown);
     }
-    if (c != '\e') return KEY(key_unknown);
+    if (c != '\033') return KEY(key_unknown);
 
     c = buffer[1];
     if (count == 2 && c == 'd') return KEY(key_ctrl_delete);
