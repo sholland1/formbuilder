@@ -342,7 +342,9 @@ void set_default_date(struct tm *result, const date_t *d, const struct tm* curre
 }
 
 bool is_leap_year(int real_year) {
-    return real_year % 4 == 0 || real_year % 100 == 0;
+    if (real_year % 4 != 0) return false;
+    if (real_year % 100 != 0) return true;
+    return real_year % 400 == 0;
 }
 
 int compare_dates(struct tm t1, struct tm t2) {
