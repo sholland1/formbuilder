@@ -38,7 +38,7 @@
 #define CLAMP(x, lower, upper) (MAX((lower), MIN((upper), (x))))
 #define BETWEEN(x, lower, upper) ((x) >= (lower) && (x) <= (upper))
 
-void append_answer(Answers *answers, const char *id, const char *value) {
+void append_raw_answer(Answers *answers, const char *id, const char *value) {
     Answer a = {
         .id = strdup(id),
         .type = ft_text,
@@ -56,25 +56,14 @@ void append_static_answer(Answers *answers, const char *id, const char *value) {
     nob_da_append(answers, a);
 }
 
-char quoted_answer_buffer[BUFFER_LEN+2];
+void append_null_answer(Answers *answers, const char *id) {
+    append_static_answer(answers, id, "null");
+}
+
 void append_quoted_answer(Answers *answers, const char *id, const char *value) {
+    static char quoted_answer_buffer[BUFFER_LEN+2];
     sprintf(quoted_answer_buffer, "\"%s\"", value);
-    append_answer(answers, id, quoted_answer_buffer);
-}
-
-void append_date_answer(Answers *answers, const char *id, struct tm *t) {
-    strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d\"", t);
-    append_answer(answers, id, quoted_answer_buffer);
-}
-void append_datetime_answer(Answers *answers, const char *id, struct tm *t) {
-    strftime(quoted_answer_buffer, sizeof(quoted_answer_buffer), "\"%Y-%m-%d %H:%M:%S\"", t);
-    append_answer(answers, id, quoted_answer_buffer);
-}
-
-char answer_buffer[BUFFER_LEN];
-void append_integer_answer(Answers *answers, const char *id, uint64_t value) {
-    sprintf(answer_buffer, "%lu", value);
-    append_answer(answers, id, answer_buffer);
+    append_raw_answer(answers, id, quoted_answer_buffer);
 }
 
 void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts) {
@@ -930,6 +919,7 @@ int main(void) {
     nob_da_reserve(&answers, form.fields.count);
 
     const char *timestamp_field_id = NULL;
+    char answer_buffer[BUFFER_LEN];
     nob_da_foreach(Field, f, &form.fields) {
         answer_buffer[0] = '\0';
 
@@ -937,7 +927,7 @@ int main(void) {
         case ft_text: {
             read_text(f, answer_buffer);
             if (is_empty(answer_buffer)) {
-                append_static_answer(&answers, f->id, "null");
+                append_null_answer(&answers, f->id);
             }
             else {
                 append_quoted_answer(&answers, f->id, answer_buffer);
@@ -947,18 +937,17 @@ int main(void) {
         case ft_number: {
             read_number(f, answer_buffer);
             if (is_empty(answer_buffer)) {
-                append_static_answer(&answers, f->id, "null");
+                append_null_answer(&answers, f->id);
             }
             else {
-                append_answer(&answers, f->id, answer_buffer);
+                append_raw_answer(&answers, f->id, answer_buffer);
             }
         } break;
 
         case ft_select: {
             read_select(f, answer_buffer);
-
             if (is_empty(answer_buffer)) {
-                append_static_answer(&answers, f->id, "null");
+                append_null_answer(&answers, f->id);
             }
             else {
                 append_quoted_answer(&answers, f->id, answer_buffer);
@@ -974,15 +963,17 @@ int main(void) {
         case ft_date: {
             struct tm d;
             if (read_date(f, &d)) {
-                append_date_answer(&answers, f->id, &d);
+                strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d", &d);
+                append_quoted_answer(&answers, f->id, answer_buffer);
             }
             else {
-                append_static_answer(&answers, f->id, "null");
+                append_null_answer(&answers, f->id);
             }
         } break;
 
         case ft_counter: {
-            append_integer_answer(&answers, f->id, read_counter(f));
+            sprintf(answer_buffer, "%lu", read_counter(f));
+            append_raw_answer(&answers, f->id, answer_buffer);
         } break;
 
         case ft_color: {
@@ -1004,7 +995,9 @@ int main(void) {
 
     if (timestamp_field_id) {
         time_t now = time(NULL);
-        append_datetime_answer(&answers, timestamp_field_id, localtime(&now));
+        struct tm* t = localtime(&now);
+        strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d %H:%M:%S", t);
+        append_quoted_answer(&answers, timestamp_field_id, answer_buffer);
     }
 
     terminal_deinit();
