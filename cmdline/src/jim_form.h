@@ -31,9 +31,9 @@ FieldType parse_type(const char *type_str) {
 bool parse_yyyy_mm_dd(const char *str, int *real_year, int *month, int *day) {
     if (sscanf(str, "%d-%d-%d", real_year, month, day) == 3) {
         // TODO: Better validation
-        if (*real_year  >= 1 && *real_year  <= 9999 &&
-            *month >= 1 && *month <= 12 &&
-            *day   >= 1 && *day   <= 31) {
+        if (*real_year >= 1 && *real_year <= 9999 &&
+            *month     >= 1 && *month     <= 12 &&
+            *day       >= 1 && *day       <= 31) {
             return true;
         }
     }

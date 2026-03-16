@@ -22,8 +22,8 @@
 #define UP(n)     "\033["#n"A"
 #define RIGHT(n)  "\033["#n"G"
 
-#define ERR_PROMPT RED PROMPT
 #define PROMPT     BOLD"→"RESET
+#define ERR_PROMPT RED PROMPT
 
 #define CHECK   "[✘]"
 #define UNCHECK "[ ]"
@@ -150,8 +150,14 @@ static struct termios original_termios;
 static FILE *tty_in = NULL;
 static FILE *tty_out = NULL;
 
+void write_nl(FILE *stream) {
+    putc('\r', stream);
+    putc('\n', stream);
+    fflush(stream);
+}
+
 void user_exit(void) {
-    fprintf(tty_out, "\r\n");
+    write_nl(tty_out);
     exit(EXIT_FAILURE);
 }
 
@@ -196,7 +202,7 @@ Key read_key(FILE *stream) {
         if (c == 3 || c == 4) return KEY(key_exit); // Ctrl+C or Ctrl+D
         if (c == '\n' || c == '\r') return KEY(key_enter);
         if (c == '\t') return KEY(key_tab);
-        if (c >= 32 && c <= 126) return (Key){.type = key_char, .ch = (c)}; // Printable ASCII
+        if (c >= 32 && c <= 126) return (Key){.type = key_char, .ch = c}; // Printable ASCII
         if (c == 127 || c == '\b') return KEY(key_backspace);
         if (c == 23) return KEY(key_ctrl_backspace);
         if (c == '\033') return KEY(key_escape);
@@ -231,12 +237,6 @@ Key read_key(FILE *stream) {
 
 bool is_word_boundary(char c) {
     return c == ' ' || c == '.';
-}
-
-void write_nl(FILE *stream) {
-    putc('\r', stream);
-    putc('\n', stream);
-    fflush(stream);
 }
 
 typedef struct {
@@ -279,26 +279,12 @@ Color read_color(const Field *f) {
         }
 
         if (k.type == key_tab) {
-            if (pos == 0 || pos == 1) {
-                pos = 3;
-            }
-            else if (pos == 2 || pos == 3) {
-                pos = 5;
-            }
-            else if (pos == 4 || pos == 5) {
-                pos = 1;
-            }
+            static const int next_pos[] = {3, 3, 5, 5, 1, 1};
+            pos = next_pos[pos];
         }
         else if (k.type == key_shift_tab) {
-            if (pos == 0 || pos == 1) {
-                pos = 5;
-            }
-            else if (pos == 2 || pos == 3) {
-                pos = 1;
-            }
-            else if (pos == 4 || pos == 5) {
-                pos = 3;
-            }
+            static const int prev_pos[] = {5, 5, 1, 1, 3, 3};
+            pos = prev_pos[pos];
         }
         else if (k.type == key_arrow_left) {
             if (pos == 0) pos = 5;
@@ -555,20 +541,12 @@ void read_select(const Field *f, char *buffer) {
         }
 
         if (k.type == key_arrow_up) {
-            if (pos == 0) {
-                pos = opts.count;
-            }
-            else {
-                pos--;
-            }
+            if (pos == 0) pos = opts.count;
+            else pos--;
         }
         else if (k.type == key_arrow_down) {
-            if (pos == opts.count) {
-                pos = 0;
-            }
-            else {
-                pos++;
-            }
+            if (pos == opts.count) pos = 0;
+            else pos++;
         }
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count+1);
     }
@@ -580,16 +558,10 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
     MultiSelectFieldMembers p = f->multiselect;
     fprintf(tty_out, HIDE"%s ", p.question);
     if (p.max == UINT_MAX) {
-        if (p.min == 0) {
-            fprintf(tty_out, "(any)\r\n");
-        }
-        else {
-            fprintf(tty_out, "(at least %d)\r\n", p.min);
-        }
+        if (p.min == 0) fprintf(tty_out, "(any)\r\n");
+        else fprintf(tty_out, "(at least %d)\r\n", p.min);
     }
-    else {
-        fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
-    }
+    else fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
 
     const SelectOptions opts = p.options;
     bool selected_indexes[100] = {0};
@@ -605,8 +577,8 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         for (size_t i = 0; i < opts.count; i++) {
             fprintf(tty_out, "\r%s %s %s\r\n",
                 pos == i
-                ? fail_checks ? ERR_PROMPT : PROMPT
-                : " ",
+                    ? fail_checks ? ERR_PROMPT : PROMPT
+                    : " ",
                 selected_indexes[i] ? CHECK : UNCHECK,
                 opts.items[i]);
         }
@@ -632,20 +604,12 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         }
 
         if (k.type == key_arrow_up) {
-            if (pos == 0) {
-                pos = opts.count-1;
-            }
-            else {
-                pos--;
-            }
+            if (pos == 0) pos = opts.count-1;
+            else pos--;
         }
         else if (k.type == key_arrow_down) {
-            if (pos == opts.count-1) {
-                pos = 0;
-            }
-            else {
-                pos++;
-            }
+            if (pos == opts.count-1) pos = 0;
+            else pos++;
         }
         fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
     }
@@ -708,11 +672,15 @@ void place_char_in_text_buffer(TextBuffer *tb, char c) {
     tb->buffer[++tb->end] = '\0';
 }
 
+void reset_text_buffer(TextBuffer *tb) {
+    tb->buffer[0] = '\0';
+    tb->position = 0;
+    tb->end = 0;
+}
+
 void handle_text_buffer(TextBuffer *tb, KeyType kt) {
     if (kt == key_escape) {
-        tb->buffer[0] = '\0';
-        tb->position = 0;
-        tb->end = 0;
+        reset_text_buffer(tb);
     }
     else if (kt == key_backspace) {
         if (tb->position > 0) {
@@ -802,9 +770,7 @@ void read_text(const Field *f, char *buffer) {
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (failed_checks) {
-                tb.buffer[0] = '\0';
-                tb.position = 0;
-                tb.end = 0;
+                reset_text_buffer(&tb);
                 continue;
             }
             tb.buffer[tb.end] = '\0';
@@ -812,11 +778,12 @@ void read_text(const Field *f, char *buffer) {
             return;
         }
 
-        handle_text_buffer(&tb, k.type);
-
         if (k.type == key_char && tb.position < f->text.maxlength - 1) {
             place_char_in_text_buffer(&tb, k.ch);
+            continue;
         }
+
+        handle_text_buffer(&tb, k.type);
     }
 }
 
@@ -841,9 +808,7 @@ void read_number(const Field *f, char *buffer) {
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (failed_checks) {
-                tb.buffer[0] = '\0';
-                tb.position = 0;
-                tb.end = 0;
+                reset_text_buffer(&tb);
                 continue;
             }
             tb.buffer[tb.end] = '\0';
@@ -851,30 +816,28 @@ void read_number(const Field *f, char *buffer) {
             return;
         }
 
-        if (k.type == key_char) {
-            if (k.ch == '-' || k.ch == '.' || isdigit(k.ch)) {
-                // if (pos < BUFFER_LEN - 1) {
-                place_char_in_text_buffer(&tb, k.ch);
-            }
+        if (k.type == key_char && (k.ch == '-' || k.ch == '.' || isdigit(k.ch))) {
+            // if (pos < BUFFER_LEN - 1) {
+            place_char_in_text_buffer(&tb, k.ch);
+            continue;
+        }
+
+        double signed_step;
+        if (k.type == key_arrow_up) {
+            signed_step = p.step;
+        }
+        else if (k.type == key_arrow_down) {
+            signed_step = -p.step;
         }
         else {
-            double signed_step;
-            if (k.type == key_arrow_up) {
-                signed_step = p.step;
-            }
-            else if (k.type == key_arrow_down) {
-                signed_step = -p.step;
-            }
-            else {
-                handle_text_buffer(&tb, k.type);
-                continue;
-            }
-
-            double current = round(to_double(buffer) / p.step) * p.step;
-            snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
-            tb.position = strlen(buffer);
-            tb.end = tb.position;
+            handle_text_buffer(&tb, k.type);
+            continue;
         }
+
+        double current = round(to_double(buffer) / p.step) * p.step;
+        snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
+        tb.position = strlen(buffer);
+        tb.end = tb.position;
     }
 }
 
