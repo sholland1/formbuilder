@@ -987,101 +987,80 @@ unsigned int read_timer(const Field *f) {
     }
 }
 
-int main(void) {
-    const char *file_path = "test.json";
-    Nob_String_Builder sb = {0};
-    if (!nob_read_entire_file(file_path, &sb)) return 1;
+void display_form(const Form *form, Answers *answers) {
+    fprintf(tty_out, CLR HOME BOLD"%s"RESET"\r\n", form->title);
 
-    Jimp jimp = {0};
-    jimp_begin(&jimp, file_path, sb.items, sb.count);
-
-    Form form = {0};
-    if (!jimp_form(&jimp, &form)) {
-        fprintf(stderr, "Failed to parse form in %s", file_path);
-        return 1;
-    }
-
-
-    terminal_init();
-
-    fprintf(tty_out, CLR HOME BOLD"%s"RESET"\r\n", form.title);
-
-    Option option = pretty;
-
-    Answers answers = {0};
-    nob_da_reserve(&answers, form.fields.count);
-
+    static char answer_buffer[BUFFER_LEN];
     const char *timestamp_field_id = NULL;
-    char answer_buffer[BUFFER_LEN];
-    nob_da_foreach(Field, f, &form.fields) {
+    nob_da_foreach(Field, f, &form->fields) {
         answer_buffer[0] = '\0';
 
         switch (f->type) {
         case ft_text: {
             read_text(f, answer_buffer);
             if (is_empty(answer_buffer)) {
-                append_null_answer(&answers, f->id);
+                append_null_answer(answers, f->id);
             }
             else {
-                append_quoted_answer(&answers, f->id, answer_buffer);
+                append_quoted_answer(answers, f->id, answer_buffer);
             }
         } break;
 
         case ft_number: {
             read_number(f, answer_buffer);
             if (is_empty(answer_buffer)) {
-                append_null_answer(&answers, f->id);
+                append_null_answer(answers, f->id);
             }
             else {
-                append_raw_answer(&answers, f->id, answer_buffer);
+                append_raw_answer(answers, f->id, answer_buffer);
             }
         } break;
 
         case ft_select: {
             read_select(f, answer_buffer);
             if (is_empty(answer_buffer)) {
-                append_null_answer(&answers, f->id);
+                append_null_answer(answers, f->id);
             }
             else {
-                append_quoted_answer(&answers, f->id, answer_buffer);
+                append_quoted_answer(answers, f->id, answer_buffer);
             }
         } break;
 
         case ft_multiselect: {
             SelectOptions opts = {0};
             read_multiselect(f, &opts);
-            append_multiselect_answer(&answers, f->id, &opts);
+            append_multiselect_answer(answers, f->id, &opts);
         } break;
 
         case ft_date: {
             struct tm d;
             if (read_date(f, &d)) {
                 strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d", &d);
-                append_quoted_answer(&answers, f->id, answer_buffer);
+                append_quoted_answer(answers, f->id, answer_buffer);
             }
             else {
-                append_null_answer(&answers, f->id);
+                append_null_answer(answers, f->id);
             }
         } break;
 
         case ft_counter: {
             sprintf(answer_buffer, "%lu", read_counter(f));
-            append_raw_answer(&answers, f->id, answer_buffer);
+            append_raw_answer(answers, f->id, answer_buffer);
         } break;
 
         case ft_color: {
             color_to_str(answer_buffer, read_color(f));
-            append_quoted_answer(&answers, f->id, answer_buffer);
+            append_quoted_answer(answers, f->id, answer_buffer);
         } break;
 
         case ft_bool: {
-            append_static_answer(&answers, f->id, read_bool(f) ? "true" : "false");
+            append_static_answer(answers, f->id, read_bool(f) ? "true" : "false");
         } break;
 
         case ft_timer: {
             unsigned int duration_in_seconds = read_timer(f);
             sprintf(answer_buffer, "%d", duration_in_seconds);
-            append_quoted_answer(&answers, f->id, answer_buffer);
+            append_quoted_answer(answers, f->id, answer_buffer);
         } break;
 
         case ft_timestamp:
@@ -1096,8 +1075,31 @@ int main(void) {
         time_t now = time(NULL);
         struct tm* t = localtime(&now);
         strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d %H:%M:%S", t);
-        append_quoted_answer(&answers, timestamp_field_id, answer_buffer);
+        append_quoted_answer(answers, timestamp_field_id, answer_buffer);
     }
+}
+
+int main(void) {
+    const char *file_path = "test.json";
+    Option option = pretty;
+    Nob_String_Builder sb = {0};
+    if (!nob_read_entire_file(file_path, &sb)) return 1;
+
+    Jimp jimp = {0};
+    jimp_begin(&jimp, file_path, sb.items, sb.count);
+
+    Form form = {0};
+    if (!jimp_form(&jimp, &form)) {
+        fprintf(stderr, "Failed to parse form in %s", file_path);
+        return 1;
+    }
+
+    terminal_init();
+
+    Answers answers = {0};
+    nob_da_reserve(&answers, form.fields.count);
+
+    display_form(&form, &answers);
 
     terminal_deinit();
 
