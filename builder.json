@@ -230,6 +230,15 @@
                 }
             ]
         },
+        "field_type_timer": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                }
+            ]
+        },
         "field_type_multitext": {
             "fields": [
                 {
