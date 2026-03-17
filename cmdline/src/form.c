@@ -7,6 +7,7 @@
 #include <termios.h>
 #include <locale.h>
 #include <pthread.h>
+#include <inttypes.h>
 
 #define CLR       "\033[2J"
 #define HOME      "\033[H"
@@ -896,20 +897,20 @@ void terminal_init(void) {
 }
 
 volatile bool running = false;
-volatile long long nanoseconds_total = 0;
+volatile uint64_t nanoseconds_total = 0;
 
-#define NANOSEC_PER_SEC 1000000000LL
+#define NANOSEC_PER_SEC 1000000000ULL
 #define NANOSEC_PER_MIN  (60 * NANOSEC_PER_SEC)
 #define NANOSEC_PER_HOUR (60 * NANOSEC_PER_MIN)
-#define NANOSEC_PER_CENTISEC 10000000LL
+#define NANOSEC_PER_CENTISEC 10000000ULL
 #define TIMER_SLEEP_TIME 10000
-void fprint_timer(FILE *stream, long long total) {
-    int hours   = total / NANOSEC_PER_HOUR;
-    int minutes = (total % NANOSEC_PER_HOUR) / NANOSEC_PER_MIN;
-    int seconds = (total % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
-    int centi   = (total % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
+void fprint_timer(FILE *stream, uint64_t total) {
+    uint64_t hours   = total / NANOSEC_PER_HOUR;
+    uint64_t minutes = (total % NANOSEC_PER_HOUR) / NANOSEC_PER_MIN;
+    uint64_t seconds = (total % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
+    uint64_t centi   = (total % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
 
-    fprintf(stream, "\r%02d:%02d:%02d:%02d"CLRDOWN, hours, minutes, seconds, centi);
+    fprintf(stream, "\r%02lu:%02lu:%02lu:%02lu"CLRDOWN, hours, minutes, seconds, centi);
     fflush(stream);
 }
 
@@ -923,7 +924,7 @@ void* timer_thread(void* arg) {
         clock_gettime(CLOCK_MONOTONIC, &now);
 
         // Calculate elapsed time since last update (in nanoseconds)
-        long long elapsed_ns = (now.tv_sec - last.tv_sec) * NANOSEC_PER_SEC +
+        uint64_t elapsed_ns = (now.tv_sec - last.tv_sec) * NANOSEC_PER_SEC +
                                 (now.tv_nsec - last.tv_nsec);
 
         if (elapsed_ns > 0) {
@@ -936,7 +937,7 @@ void* timer_thread(void* arg) {
     return NULL;
 }
 
-unsigned int read_timer(const Field *f) {
+uint64_t read_timer(const Field *f) {
     NOB_ASSERT(f->type == ft_timer);
 
     pthread_t timer_tid;
@@ -985,6 +986,61 @@ unsigned int read_timer(const Field *f) {
             }
         }
     }
+}
+
+
+int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize) {
+    NOB_ASSERT(bufsize > 32);
+    uint64_t hours   = total_ns / NANOSEC_PER_HOUR;
+    uint64_t minutes = (total_ns % NANOSEC_PER_HOUR) / NANOSEC_PER_MIN;
+    uint64_t seconds = (total_ns % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
+    uint64_t centi   = (total_ns % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
+
+    char *p = buf;
+    char *end = buf + bufsize;
+
+    *p++ = 'P';
+    *p++ = 'T';   // we never need days or higher here
+
+    bool wrote_something = false;
+
+    if (hours > 0) {
+        int n = snprintf(p, end - p, "%" PRIu64 "H", hours);
+        if (n <= 0) return -1;
+        p += n;
+        wrote_something = true;
+    }
+
+    if (minutes > 0) {
+        int n = snprintf(p, end - p, "%" PRIu64 "M", minutes);
+        if (n <= 0) return -1;
+        p += n;
+        wrote_something = true;
+    }
+
+    // Always write seconds part if > 0 or if we have fraction
+    if (seconds > 0 || centi > 0 || !wrote_something) {
+        if (centi > 0) {
+            int n = snprintf(p, end - p, "%" PRIu64 ".%02" PRIu64 "S",
+                             seconds, centi);
+            if (n <= 0) return -1;
+            p += n;
+        } else {
+            int n = snprintf(p, end - p, "%" PRIu64 "S", seconds);
+            if (n <= 0) return -1;
+            p += n;
+        }
+        wrote_something = true;
+    }
+
+    // Edge case: exactly zero duration
+    if (!wrote_something) {
+        snprintf(buf, bufsize, "PT0S");
+        return 4;
+    }
+
+    *p = '\0';
+    return (int)(p - buf);
 }
 
 void display_form(const Form *form, Answers *answers) {
@@ -1058,8 +1114,8 @@ void display_form(const Form *form, Answers *answers) {
         } break;
 
         case ft_timer: {
-            unsigned int duration_in_seconds = read_timer(f);
-            sprintf(answer_buffer, "%d", duration_in_seconds);
+            uint64_t duration_in_nanoseconds = read_timer(f);
+            ns_to_iso8601_duration(duration_in_nanoseconds, answer_buffer, BUFFER_LEN);
             append_quoted_answer(answers, f->id, answer_buffer);
         } break;
 
