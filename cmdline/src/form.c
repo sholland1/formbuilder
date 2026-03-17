@@ -6,6 +6,7 @@
 
 #include <termios.h>
 #include <locale.h>
+#include <pthread.h>
 
 #define CLR       "\033[2J"
 #define HOME      "\033[H"
@@ -894,6 +895,98 @@ void terminal_init(void) {
     }
 }
 
+volatile bool running = false;
+volatile long long nanoseconds_total = 0;
+
+#define NANOSEC_PER_SEC 1000000000LL
+#define NANOSEC_PER_MIN  (60 * NANOSEC_PER_SEC)
+#define NANOSEC_PER_HOUR (60 * NANOSEC_PER_MIN)
+#define NANOSEC_PER_CENTISEC 10000000LL
+#define TIMER_SLEEP_TIME 10000
+void fprint_timer(FILE *stream, long long total) {
+    int hours   = total / NANOSEC_PER_HOUR;
+    int minutes = (total % NANOSEC_PER_HOUR) / NANOSEC_PER_MIN;
+    int seconds = (total % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
+    int centi   = (total % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
+
+    fprintf(stream, "\r%02d:%02d:%02d:%02d"CLRDOWN, hours, minutes, seconds, centi);
+    fflush(stream);
+}
+
+void* timer_thread(void* arg) {
+    NOB_UNUSED(arg);
+
+    running = true;
+    struct timespec last, now;
+    clock_gettime(CLOCK_MONOTONIC, &last);
+    while (running) {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+
+        // Calculate elapsed time since last update (in nanoseconds)
+        long long elapsed_ns = (now.tv_sec - last.tv_sec) * NANOSEC_PER_SEC +
+                                (now.tv_nsec - last.tv_nsec);
+
+        if (elapsed_ns > 0) {
+            nanoseconds_total += elapsed_ns;
+            last = now;
+        }
+        fprint_timer(tty_out, nanoseconds_total);
+        usleep(TIMER_SLEEP_TIME);
+    }
+    return NULL;
+}
+
+unsigned int read_timer(const Field *f) {
+    NOB_ASSERT(f->type == ft_timer);
+
+    pthread_t timer_tid;
+    fprintf(tty_out, HIDE"%s\r\n", f->timer.question);
+    fprintf(tty_out, "Press [space] to start, [esc] to reset, or [enter] to submit.\r\n");
+    fprint_timer(tty_out, nanoseconds_total);
+
+    while (1) {
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) user_exit();
+
+        if (running) {
+            if (k.type == key_char && k.ch == ' ') {
+                // Signal timer to stop
+                running = false;
+
+                fprintf(tty_out, UP(1)"\rTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n");
+                fprint_timer(tty_out, nanoseconds_total);
+
+                // Wait for timer thread to finish
+                pthread_join(timer_tid, NULL);
+            }
+            continue;
+        }
+
+        if (k.type == key_enter) {
+            fprintf(tty_out, "\r\n"SHOW);
+            fflush(tty_out);
+            return nanoseconds_total;
+        }
+
+        if (k.type == key_escape) {
+            nanoseconds_total = 0;
+            fprintf(tty_out, UP(1)"\rTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n");
+            fprint_timer(tty_out, nanoseconds_total);
+            continue;
+        }
+
+        if (k.type == key_char && k.ch == ' ') {
+            fprintf(tty_out, UP(1)"\rTimer running. Press [space] to stop."CLRDOWN"\r\n");
+            fprint_timer(tty_out, nanoseconds_total);
+            // Start timer thread
+            if (pthread_create(&timer_tid, NULL, timer_thread, NULL) != 0) {
+                perror("Failed to create timer thread");
+                return -1;
+            }
+        }
+    }
+}
+
 int main(void) {
     const char *file_path = "test.json";
     Nob_String_Builder sb = {0};
@@ -983,6 +1076,12 @@ int main(void) {
 
         case ft_bool: {
             append_static_answer(&answers, f->id, read_bool(f) ? "true" : "false");
+        } break;
+
+        case ft_timer: {
+            unsigned int duration_in_seconds = read_timer(f);
+            sprintf(answer_buffer, "%d", duration_in_seconds);
+            append_quoted_answer(&answers, f->id, answer_buffer);
         } break;
 
         case ft_timestamp:

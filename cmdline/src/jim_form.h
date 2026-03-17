@@ -148,6 +148,10 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
                 break;
 
+            case ft_timer:
+                jim_member_key(jim, "question"); jim_string(jim, x->timer.question);
+                break;
+
             case ft_timestamp: break;
 
             default: NOB_UNREACHABLE("Unidentified type!");
@@ -196,6 +200,7 @@ void field_set_defaults(Field *field) {
         case ft_counter:
         case ft_color:
         case ft_bool:
+        case ft_timer:
         case ft_timestamp:
             break;
 
@@ -386,6 +391,17 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     if (strcmp(jimp->string, "question") == 0) {
                         if (!jimp_string(jimp)) return false;
                         field->boolean.question = strdup(jimp->string);
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
+
+                case ft_timer:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->timer.question = strdup(jimp->string);
                     }
                     else {
                         jimp_unknown_member(jimp);

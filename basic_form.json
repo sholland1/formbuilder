@@ -95,6 +95,11 @@
             "type": "multitext",
             "question": "What are some of your favorite video games?",
             "placeholder": "(Enter a list of options separated by commas.)"
+        },
+        {
+            "id": "breath_held",
+            "type": "timer",
+            "question": "How long can you hold your breath?"
         }
     ]
 }

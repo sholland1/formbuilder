@@ -13,7 +13,8 @@
     X(date) \
     X(counter) \
     X(color) \
-    X(bool)
+    X(bool) \
+    X(timer)
 
 typedef enum {
 #define X(name) ft_##name,
@@ -86,6 +87,7 @@ typedef struct {
         QOnlyFieldMembers counter;
         QOnlyFieldMembers color;
         QOnlyFieldMembers boolean;
+        QOnlyFieldMembers timer;
     };
 } Field;
 
