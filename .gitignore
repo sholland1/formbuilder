@@ -3,5 +3,6 @@ build/
 
 *.old
 *.md
+*test.json
 
 nob
