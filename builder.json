@@ -41,7 +41,8 @@
                         "date",
                         "counter",
                         "color",
-                        "bool"
+                        "bool",
+                        "timer"
                     ]
                 }
             ]
