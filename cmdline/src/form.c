@@ -988,7 +988,6 @@ uint64_t read_timer(const Field *f) {
     }
 }
 
-
 int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize) {
     NOB_ASSERT(bufsize > 32);
     uint64_t hours   = total_ns / NANOSEC_PER_HOUR;
@@ -1041,6 +1040,15 @@ int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize) {
 
     *p = '\0';
     return (int)(p - buf);
+}
+
+bool load_form_from_file(const char *file_path, Form *form) {
+    Nob_String_Builder sb = {0};
+    if (!nob_read_entire_file(file_path, &sb)) return false;
+
+    Jimp jimp = {0};
+    jimp_begin(&jimp, file_path, sb.items, sb.count);
+    return jimp_form(&jimp, form);
 }
 
 void display_form(const Form *form, Answers *answers) {
@@ -1138,15 +1146,10 @@ void display_form(const Form *form, Answers *answers) {
 int main(void) {
     const char *file_path = "test.json";
     Option option = pretty;
-    Nob_String_Builder sb = {0};
-    if (!nob_read_entire_file(file_path, &sb)) return 1;
-
-    Jimp jimp = {0};
-    jimp_begin(&jimp, file_path, sb.items, sb.count);
 
     Form form = {0};
-    if (!jimp_form(&jimp, &form)) {
-        fprintf(stderr, "Failed to parse form in %s", file_path);
+    if (!load_form_from_file(file_path, &form)) {
+        fprintf(stderr, "Failed to parse form in %s\n", file_path);
         return 1;
     }
 
