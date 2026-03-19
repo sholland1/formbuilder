@@ -118,6 +118,7 @@ typedef struct {
     size_t capacity;
 } Answers;
 
-typedef enum {
-    none, one, pretty
-} Option;
+typedef struct {
+    const char *file_path;
+    int pretty_print;
+} AppConfig;

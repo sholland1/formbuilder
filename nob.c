@@ -66,10 +66,14 @@ int main(int argc, char **argv) {
 
         Nob_Cmd cmd = {0};
 
-        nob_cmd_append(&cmd, "cc", "-lm", "-Wall", "-Wextra", "-o", BUILD_FOLDER"form", SRC_FOLDER"form.c");
+        nob_cmd_append(&cmd, "cc", "-lm", "-Wall", "-Wextra");
         if (release) {
             nob_cmd_append(&cmd, "-s", "-O2");
         }
+        else {
+            nob_cmd_append(&cmd, "-DDEBUG=1");
+        }
+        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form", SRC_FOLDER"form.c");
 
         if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
 
