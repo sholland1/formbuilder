@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define REAL_YEAR(year) (NOB_ASSERT((year) < 1900), (year)+1900)
-#define FAKE_YEAR(year) (NOB_ASSERT((year) > 1900), (year)-1900)
+#define FAKE_YEAR(year) (NOB_ASSERT((year) >= 1900), (year)-1900)
 
 void jim_field_type(Jim *jim, FieldType t) {
     switch (t) {
