@@ -70,9 +70,9 @@ void jim_form(Jim *jim, const Form *f) {
             case ft_text: {
                 TextFieldMembers p = x->text;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
                 if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
             } break;
 
@@ -108,7 +108,7 @@ void jim_form(Jim *jim, const Form *f) {
                 }
                 jim_array_end(jim);
                 if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != UINT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+                if (p.max != UINT32_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
             } break;
 
             case ft_date: {
@@ -188,7 +188,7 @@ void field_set_defaults(Field *field) {
             field->multiselect.options.capacity = 0;
             field->multiselect.options.count = 0;
             field->multiselect.options.items = NULL;
-            field->multiselect.max = UINT_MAX;
+            field->multiselect.max = UINT32_MAX;
             break;
 
         case ft_date:
@@ -227,6 +227,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         if (!jimp_string(jimp)) return false;
                         field->text.question = strdup(jimp->string);
                     }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->text.required = jimp->boolean;
+                    }
                     else if (strcmp(jimp->string, "placeholder") == 0) {
                         if (!jimp_string(jimp)) return false;
                         field->text.placeholder = strdup(jimp->string);
@@ -234,10 +238,6 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "maxlength") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->text.maxlength = (size_t)jimp->number;
-                    }
-                    else if (strcmp(jimp->string, "required") == 0) {
-                        if (!jimp_bool(jimp)) return false;
-                        field->text.required = jimp->boolean;
                     }
                     else if (strcmp(jimp->string, "pattern") == 0) {
                         if (!jimp_string(jimp)) return false;

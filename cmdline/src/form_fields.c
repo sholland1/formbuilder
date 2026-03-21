@@ -366,7 +366,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
 
     MultiSelectFieldMembers p = f->multiselect;
     fprintf(tty_out, HIDE"%s ", p.question);
-    if (p.max == UINT_MAX) {
+    if (p.max == UINT32_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)\r\n");
         else fprintf(tty_out, "(at least %d)\r\n", p.min);
     }

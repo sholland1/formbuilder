@@ -28,9 +28,9 @@ typedef enum {
 
 typedef struct {
     const char *question;
+    bool required;
     const char *placeholder;
     size_t maxlength;
-    bool required;
     regex_t *regex;
     const char *pattern;
 } TextFieldMembers;
