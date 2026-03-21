@@ -38,7 +38,7 @@ static double to_double(const char *str) {
     return str ? strtod(str, NULL) : 0.0;
 }
 
-static bool fails_multiselect_checks(const Field *f, uint32_t opts_count) {
+static bool fails_multiselect_checks(const Field *f, int opts_count) {
     NOB_ASSERT(f->type == ft_multiselect);
     MultiSelectFieldMembers p = f->multiselect;
     return !BETWEEN(opts_count, p.min, p.max);
@@ -366,7 +366,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
 
     MultiSelectFieldMembers p = f->multiselect;
     fprintf(tty_out, HIDE"%s ", p.question);
-    if (p.max == UINT32_MAX) {
+    if (p.max == INT_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)\r\n");
         else fprintf(tty_out, "(at least %d)\r\n", p.min);
     }
@@ -426,13 +426,13 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
     }
 }
 
-uint64_t read_counter(const Field *f) {
+int64_t read_counter(const Field *f) {
     NOB_ASSERT(f->type == ft_counter);
 
     fprintf(tty_out, HIDE"%s\r\n0", f->counter.question);
     fflush(tty_out);
 
-    uint64_t value = 0;
+    int64_t value = 0;
     while (1) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
@@ -446,7 +446,7 @@ uint64_t read_counter(const Field *f) {
             value = 0;
         }
         else if (k.type == key_arrow_up || (k.type == key_char && k.ch == ' ')) {
-            if (value < UINT64_MAX) value++;
+            if (value < INT64_MAX) value++;
         }
         else if (k.type == key_arrow_down) {
             if (value > 0) value--;

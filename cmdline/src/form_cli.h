@@ -127,7 +127,7 @@ bool read_date(const Field *f, struct tm *value);
 bool read_bool(const Field *f);
 void read_select(const Field *f, char *buffer);
 void read_multiselect(const Field *f, SelectOptions *selected_opts);
-uint64_t read_counter(const Field *f);
+int64_t read_counter(const Field *f);
 void read_text(const Field *f, char *buffer);
 void read_number(const Field *f, char *buffer);
 

@@ -58,8 +58,8 @@ typedef struct {
 typedef struct {
     const char *question;
     SelectOptions options;
-    uint32_t min;
-    uint32_t max;
+    int min;
+    int max;
 } MultiSelectFieldMembers;
 
 typedef struct {

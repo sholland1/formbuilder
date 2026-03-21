@@ -108,7 +108,7 @@ void jim_form(Jim *jim, const Form *f) {
                 }
                 jim_array_end(jim);
                 if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != UINT32_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
             } break;
 
             case ft_date: {
@@ -188,7 +188,7 @@ void field_set_defaults(Field *field) {
             field->multiselect.options.capacity = 0;
             field->multiselect.options.count = 0;
             field->multiselect.options.items = NULL;
-            field->multiselect.max = UINT32_MAX;
+            field->multiselect.max = INT_MAX;
             break;
 
         case ft_date:
@@ -318,11 +318,11 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     }
                     else if (strcmp(jimp->string, "min") == 0) {
                         if (!jimp_number(jimp)) return false;
-                        field->multiselect.min = (uint32_t)jimp->number;
+                        field->multiselect.min = (int)jimp->number;
                     }
                     else if (strcmp(jimp->string, "max") == 0) {
                         if (!jimp_number(jimp)) return false;
-                        field->multiselect.max = (uint32_t)jimp->number;
+                        field->multiselect.max = (int)jimp->number;
                     }
                     break;
 

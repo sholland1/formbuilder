@@ -52,8 +52,10 @@ static void display_form(const Form *form, Answers *answers) {
 
     static char answer_buffer[BUFFER_LEN];
     const char *timestamp_field_id = NULL;
+    SelectOptions opts = {0};
     nob_da_foreach(Field, f, &form->fields) {
         answer_buffer[0] = '\0';
+        opts.count = 0;
 
         switch (f->type) {
         case ft_text:
@@ -87,7 +89,6 @@ static void display_form(const Form *form, Answers *answers) {
             break;
 
         case ft_multiselect: {
-            SelectOptions opts = {0};
             read_multiselect(f, &opts);
             append_multiselect_answer(answers, f->id, &opts);
         } break;
@@ -148,7 +149,17 @@ static void output_answers(const Answers *answers, const AppConfig *config) {
     fwrite(jim.sink, jim.sink_count, 1, stdout);
 }
 
+static void output_form(const Form *form, const AppConfig *config) {
+    setlocale(LC_NUMERIC, "C");
+
+    Jim jim = {.pp = config->pretty_print};
+    jim_form(&jim, form);
+    fwrite(jim.sink, jim.sink_count, 1, stdout);
+}
+
 int main(int argc, char **argv) {
+    NOB_UNUSED(output_form);
+
     AppConfig config = {0};
     if (!parse_app_config(argc, argv, &config)) return 1;
 
