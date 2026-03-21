@@ -125,7 +125,7 @@ void terminal_deinit(void);
 void color_to_str(char *buffer, Color c);
 Color read_color(const Field *f);
 bool read_date(const Field *f, struct tm *value);
-bool read_bool(const Field *f);
+Tristate read_bool(const Field *f);
 void read_select(const Field *f, char *buffer);
 void read_multiselect(const Field *f, SelectOptions *selected_opts);
 int64_t read_counter(const Field *f);

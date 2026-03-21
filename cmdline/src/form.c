@@ -119,9 +119,14 @@ static void display_form(const Form *form, Answers *answers) {
             append_quoted_answer(answers, f->id, answer_buffer);
             break;
 
-        case ft_bool:
-            append_static_answer(answers, f->id, read_bool(f) ? "true" : "false");
-            break;
+        case ft_bool: {
+            Tristate choice = read_bool(f);
+            switch (choice) {
+                case ts_null: append_null_answer(answers, f->id); break;
+                case ts_true: append_static_answer(answers, f->id, "true"); break;
+                case ts_false: append_static_answer(answers, f->id, "false"); break;
+            }
+        } break;
 
         case ft_timer: {
             uint64_t duration_in_nanoseconds = read_timer(f);

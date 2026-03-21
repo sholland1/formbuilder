@@ -26,6 +26,10 @@ typedef enum {
     FIELD_TYPE_LENGTH,
 } FieldType;
 
+typedef enum {
+    ts_false, ts_true, ts_null
+} Tristate;
+
 typedef struct {
     const char *question;
     bool required;
@@ -61,6 +65,11 @@ typedef struct {
     int min;
     int max;
 } MultiSelectFieldMembers;
+
+typedef struct {
+    const char *question;
+    bool required;
+} BoolFieldMembers;
 
 typedef struct {
     const char *question;
@@ -101,7 +110,7 @@ typedef struct {
         DateFieldMembers date;
         QOnlyFieldMembers counter;
         QOnlyFieldMembers color;
-        QOnlyFieldMembers boolean;
+        BoolFieldMembers boolean;
         QOnlyFieldMembers timer;
     };
 } Field;

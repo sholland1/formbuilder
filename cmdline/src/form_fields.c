@@ -293,16 +293,26 @@ bool read_date(const Field *f, struct tm *value) {
     }
 }
 
-bool read_bool(const Field *f) {
+Tristate read_bool(const Field *f) {
     NOB_ASSERT(f->type == ft_bool);
 
     fprintf(tty_out, HIDE"%s\r\n", f->boolean.question);
 
-    bool choice = true;
+    bool required = f->boolean.required;
+
+    Tristate choice = required ? ts_true : ts_null;
     while (1) {
-        fprintf(tty_out, "\r%s Yes\r\n%s No\r\n",
-            choice ? PROMPT : " ",
-            !choice ? PROMPT : " ");
+        if (required) {
+            fprintf(tty_out, "\r%s Yes\r\n%s No\r\n",
+                choice == ts_true ? PROMPT : " ",
+                choice == ts_false ? PROMPT : " ");
+        }
+        else {
+            fprintf(tty_out, "\r%s\r\n%s Yes\r\n%s No\r\n",
+                choice == ts_null ? PROMPT : "",
+                choice == ts_true ? PROMPT : " ",
+                choice == ts_false ? PROMPT : " ");
+        }
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -312,10 +322,20 @@ bool read_bool(const Field *f) {
             return choice;
         }
 
-        if (k.type == key_arrow_up || k.type == key_arrow_down) {
-            choice = !choice;
+        if (required) {
+            if (k.type == key_arrow_up || k.type == key_arrow_down) {
+                choice = choice == ts_true ? ts_false : ts_true;
+            }
         }
-        fprintf(tty_out, UP(2) CLRDOWN);
+        else if (k.type == key_arrow_up) {
+            if (choice == 2) choice = 0;
+            else choice++;
+        }
+        else if (k.type == key_arrow_down) {
+            if (choice == 0) choice = 2;
+            else choice--;
+        }
+        fprintf(tty_out, UP(%d) CLRDOWN, required ? 2 : 3);
     }
 }
 

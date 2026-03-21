@@ -452,6 +452,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         if (!jimp_string(jimp)) return false;
                         field->boolean.question = strdup(jimp->string);
                     }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->boolean.required = jimp->boolean;
+                    }
                     else {
                         jimp_unknown_member(jimp);
                         return false;
