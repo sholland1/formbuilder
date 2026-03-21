@@ -606,10 +606,7 @@ void read_text(const Field *f, char *buffer) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            if (failed_checks) {
-                reset_text_buffer(&tb);
-                continue;
-            }
+            if (failed_checks) continue;
             tb.buffer[tb.end] = '\0';
             write_nl(tty_out);
             return;
@@ -644,10 +641,7 @@ void read_number(const Field *f, char *buffer) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            if (failed_checks) {
-                reset_text_buffer(&tb);
-                continue;
-            }
+            if (failed_checks) continue;
             tb.buffer[tb.end] = '\0';
             write_nl(tty_out);
             return;
@@ -727,10 +721,7 @@ void read_multitext(const Field *f, char* buffer) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            if (failed_checks) {
-                reset_text_buffer(&tb);
-                continue;
-            }
+            if (failed_checks) continue;
             tb.buffer[tb.end] = '\0';
             write_nl(tty_out);
             return;
