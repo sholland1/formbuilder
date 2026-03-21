@@ -29,10 +29,13 @@ typedef struct {
 #define STRINGIFY_(value) #value
 #define STRINGIFY(value) STRINGIFY_(value)
 
+#define PASS GREEN"✔ "RESET
+#define FAIL RED"✘ "RESET
+
 #define TEST_CHECK(condition, ...) \
     do { \
         if (!(condition)) { \
-            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, FAIL __VA_ARGS__); \
             fprintf(stderr, "\n"); \
             return false; \
         } \
@@ -46,7 +49,7 @@ time_t time(time_t *timer) {
 static void on_script_timeout(int signo) {
     (void) signo;
     static const char message[] =
-        "FAIL scripted test timed out after " STRINGIFY(SCRIPT_TIMEOUT_SECONDS)
+        "scripted test timed out after " STRINGIFY(SCRIPT_TIMEOUT_SECONDS)
         " second(s). Input script likely no longer matches prompts.\n";
     write(STDERR_FILENO, message, sizeof(message) - 1);
     _exit(124);
@@ -81,21 +84,36 @@ static void append_key(InputSteps *steps, const char *sequence) {
 #define ARROW_LEFT "\033[D"
 
 static void build_basic_form_script(InputSteps *steps) {
+    // text field
+    append_char(steps, '\n');
+    append_text(steps, "XXXX");
+    append_char(steps, '\033');
     append_text(steps, "Alice");
     append_char(steps, '\n');
 
+    // text field with pattern
+    append_text(steps, "XXXX");
+    append_char(steps, '\n');
+    for (int i = 0; i < 4; i++) append_char(steps, '\b');
     append_text(steps, "123-45-6789");
     append_char(steps, '\n');
 
-    append_text(steps, "42");
-    append_char(steps, '\n');
-
-    append_text(steps, "180.5");
-    append_char(steps, '\n');
-
+    // number field with step of 1
+    append_text(steps, "12");
+    for (int i = 0; i < 31; ++i) append_key(steps, ARROW_UP);
     append_key(steps, ARROW_DOWN);
     append_char(steps, '\n');
 
+    // number field with step of .1
+    append_text(steps, "180.4");
+    append_key(steps, ARROW_UP);
+    append_char(steps, '\n');
+
+    // select field
+    append_key(steps, ARROW_DOWN);
+    append_char(steps, '\n');
+
+    // multiselect field
     append_char(steps, ' ');
     append_key(steps, ARROW_DOWN);
     append_key(steps, ARROW_DOWN);
@@ -104,6 +122,7 @@ static void build_basic_form_script(InputSteps *steps) {
     append_char(steps, ' ');
     append_char(steps, '\n');
 
+    // date field
     append_key(steps, ARROW_UP);
     append_key(steps, ARROW_RIGHT);
     for (int i = 0; i < 15; ++i) append_key(steps, ARROW_UP);
@@ -111,30 +130,36 @@ static void build_basic_form_script(InputSteps *steps) {
     for (int i = 0; i < 26; ++i) append_key(steps, ARROW_DOWN);
     append_char(steps, '\n');
 
+    // counter field
+    append_char(steps, ' ');
+    append_char(steps, ' ');
     append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_UP);
+    append_key(steps, ARROW_DOWN);
     append_char(steps, '\n');
 
+    // color field #1A2B3C
     append_key(steps, ARROW_LEFT);
-    append_char(steps, '1');
+    append_key(steps, ARROW_UP);
     append_key(steps, ARROW_RIGHT);
-    append_char(steps, 'A');
+    append_char(steps, 'a');
     append_key(steps, ARROW_RIGHT);
-    append_char(steps, '2');
     append_key(steps, ARROW_RIGHT);
-    append_char(steps, 'B');
+    for (int i = 0; i < 0x2B; i++) append_key(steps, ARROW_UP);
     append_key(steps, ARROW_RIGHT);
     append_char(steps, '3');
     append_key(steps, ARROW_RIGHT);
     append_char(steps, 'C');
     append_char(steps, '\n');
 
+    // bool field
     append_key(steps, ARROW_DOWN);
     append_char(steps, '\n');
 
+    // multitext field
     append_text(steps, "mario,zelda");
     append_char(steps, '\n');
 
+    // timer field
     append_char(steps, '\n');
 }
 
@@ -175,7 +200,7 @@ static bool read_stream(FILE *stream, Nob_String_Builder *sb) {
             nob_sb_append_buf(sb, buffer, count);
         }
         if (count < sizeof(buffer)) {
-            TEST_CHECK(feof(stream), "failed reading stream");
+            TEST_CHECK(feof(stream), "reading stream");
             break;
         }
     }
@@ -192,7 +217,7 @@ static void trim_trailing_newlines(Nob_String_Builder *sb) {
 
 static bool test_deserialize_all_fields(const char *path) {
     Form form = {0};
-    TEST_CHECK(load_form_from_file(path, &form), "failed to deserialize %s", path);
+    TEST_CHECK(load_form_from_file(path, &form), "deserialize %s", path);
 
     size_t counts[FIELD_TYPE_LENGTH] = {0};
     nob_da_foreach(Field, field, &form.fields) {
@@ -204,30 +229,30 @@ static bool test_deserialize_all_fields(const char *path) {
         TEST_CHECK(counts[i] > 0, "missing field type index %zu in %s", i, path);
     }
 
-    printf("PASS deserialize %s (%zu fields)\n", path, form.fields.count);
+    printf(PASS"deserialize %s (%zu fields)\n", path, form.fields.count);
     return true;
 }
 
 static bool test_basic_form_script(const char *form_path, const char *answers_path) {
     Form form = {0};
-    TEST_CHECK(load_form_from_file(form_path, &form), "failed to deserialize %s", form_path);
-    TEST_CHECK(signal(SIGALRM, on_script_timeout) != SIG_ERR, "failed to install timeout handler");
+    TEST_CHECK(load_form_from_file(form_path, &form), "deserialize %s", form_path);
+    TEST_CHECK(signal(SIGALRM, on_script_timeout) != SIG_ERR, "install timeout handler");
 
     Nob_String_Builder expected = {0};
-    TEST_CHECK(nob_read_entire_file(answers_path, &expected), "failed to read %s", answers_path);
+    TEST_CHECK(nob_read_entire_file(answers_path, &expected), "read %s", answers_path);
 
     InputSteps steps = {0};
     build_basic_form_script(&steps);
 
     int input_fds[2];
     TEST_CHECK(socketpair(AF_UNIX, SOCK_SEQPACKET, 0, input_fds) == 0,
-        "socketpair failed: %s", strerror(errno));
+        "socketpair: %s", strerror(errno));
 
     FILE *input_stream = fdopen(input_fds[0], "r");
-    TEST_CHECK(input_stream != NULL, "fdopen failed for scripted input: %s", strerror(errno));
+    TEST_CHECK(input_stream != NULL, "fdopen for scripted input: %s", strerror(errno));
 
     FILE *terminal_stream = tmpfile();
-    TEST_CHECK(terminal_stream != NULL, "tmpfile failed: %s", strerror(errno));
+    TEST_CHECK(terminal_stream != NULL, "tmpfile: %s", strerror(errno));
 
     tty_in = input_stream;
     tty_out = terminal_stream;
@@ -238,7 +263,7 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     };
     pthread_t writer_thread;
     TEST_CHECK(pthread_create(&writer_thread, NULL, script_writer_main, &writer) == 0,
-        "pthread_create failed");
+        "pthread_create");
 
     Answers answers = {0};
     nob_da_reserve(&answers, form.fields.count);
@@ -246,14 +271,14 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     display_form(&form, &answers);
     alarm(0);
 
-    TEST_CHECK(pthread_join(writer_thread, NULL) == 0, "pthread_join failed");
+    TEST_CHECK(pthread_join(writer_thread, NULL) == 0, "pthread_join");
 
     FILE *json_stream = tmpfile();
-    TEST_CHECK(json_stream != NULL, "tmpfile failed: %s", strerror(errno));
+    TEST_CHECK(json_stream != NULL, "tmpfile: %s", strerror(errno));
     output_answers(&answers, 0, json_stream);
 
     Nob_String_Builder actual = {0};
-    TEST_CHECK(read_stream(json_stream, &actual), "failed to read generated answers");
+    TEST_CHECK(read_stream(json_stream, &actual), "read generated answers");
     trim_trailing_newlines(&expected);
     trim_trailing_newlines(&actual);
     TEST_CHECK(actual.count == expected.count,
@@ -268,7 +293,7 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     tty_out = NULL;
     free_steps(&steps);
 
-    printf("PASS scripted %s\n", form_path);
+    printf(PASS"scripted %s\n", form_path);
     return true;
 }
 
@@ -283,6 +308,6 @@ int main(void) {
     if (!test_deserialize_all_fields(deserialize_path)) return 1;
     if (!test_basic_form_script(scripted_path, answers_path)) return 1;
 
-    puts("All tests passed.");
+    puts(PASS"All tests passed.");
     return 0;
 }
