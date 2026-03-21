@@ -1,0 +1,1795 @@
+{
+    "id": "basic-form",
+    "title": "All Field Permutations",
+    "fields": [
+        {
+            "id": "text_required-missing_placeholder-no_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-no, maxlength-no, pattern-no"
+        },
+        {
+            "id": "text_required-missing_placeholder-no_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-no, maxlength-no, pattern-yes",
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-missing_placeholder-no_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-no, maxlength-yes, pattern-no",
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-missing_placeholder-no_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-no, maxlength-yes, pattern-yes",
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-missing_placeholder-yes_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-yes, maxlength-no, pattern-no",
+            "placeholder": "(text placeholder)"
+        },
+        {
+            "id": "text_required-missing_placeholder-yes_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-yes, maxlength-no, pattern-yes",
+            "placeholder": "(text placeholder)",
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-missing_placeholder-yes_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-yes, maxlength-yes, pattern-no",
+            "placeholder": "(text placeholder)",
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-missing_placeholder-yes_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-missing, placeholder-yes, maxlength-yes, pattern-yes",
+            "placeholder": "(text placeholder)",
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-True_placeholder-no_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-no, maxlength-no, pattern-no",
+            "required": true
+        },
+        {
+            "id": "text_required-True_placeholder-no_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-no, maxlength-no, pattern-yes",
+            "required": true,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-True_placeholder-no_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-no, maxlength-yes, pattern-no",
+            "required": true,
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-True_placeholder-no_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-no, maxlength-yes, pattern-yes",
+            "required": true,
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-True_placeholder-yes_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-yes, maxlength-no, pattern-no",
+            "required": true,
+            "placeholder": "(text placeholder)"
+        },
+        {
+            "id": "text_required-True_placeholder-yes_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-yes, maxlength-no, pattern-yes",
+            "required": true,
+            "placeholder": "(text placeholder)",
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-True_placeholder-yes_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-yes, maxlength-yes, pattern-no",
+            "required": true,
+            "placeholder": "(text placeholder)",
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-True_placeholder-yes_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-True, placeholder-yes, maxlength-yes, pattern-yes",
+            "required": true,
+            "placeholder": "(text placeholder)",
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-False_placeholder-no_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-no, maxlength-no, pattern-no",
+            "required": false
+        },
+        {
+            "id": "text_required-False_placeholder-no_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-no, maxlength-no, pattern-yes",
+            "required": false,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-False_placeholder-no_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-no, maxlength-yes, pattern-no",
+            "required": false,
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-False_placeholder-no_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-no, maxlength-yes, pattern-yes",
+            "required": false,
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-False_placeholder-yes_maxlength-no_pattern-no",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-yes, maxlength-no, pattern-no",
+            "required": false,
+            "placeholder": "(text placeholder)"
+        },
+        {
+            "id": "text_required-False_placeholder-yes_maxlength-no_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-yes, maxlength-no, pattern-yes",
+            "required": false,
+            "placeholder": "(text placeholder)",
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "text_required-False_placeholder-yes_maxlength-yes_pattern-no",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-yes, maxlength-yes, pattern-no",
+            "required": false,
+            "placeholder": "(text placeholder)",
+            "maxlength": 16
+        },
+        {
+            "id": "text_required-False_placeholder-yes_maxlength-yes_pattern-yes",
+            "type": "text",
+            "question": "Text field: required-False, placeholder-yes, maxlength-yes, pattern-yes",
+            "required": false,
+            "placeholder": "(text placeholder)",
+            "maxlength": 16,
+            "pattern": "^[A-Z]{2}[0-9]{2}$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-no, maxlength-no, pattern-no"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-no, maxlength-no, pattern-yes",
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-no, maxlength-yes, pattern-no",
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-no, maxlength-yes, pattern-yes",
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-yes, maxlength-no, pattern-no",
+            "max": 4
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-yes, maxlength-no, pattern-yes",
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-yes, maxlength-yes, pattern-no",
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-no, max-yes, maxlength-yes, pattern-yes",
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-no, maxlength-no, pattern-no",
+            "min": 1
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-no, maxlength-no, pattern-yes",
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-no, maxlength-yes, pattern-no",
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-no, maxlength-yes, pattern-yes",
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-yes, maxlength-no, pattern-no",
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-yes, maxlength-no, pattern-yes",
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-no",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-no, maxlength-no, pattern-no",
+            "placeholder": "(comma separated values)"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-no, maxlength-no, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-no, maxlength-yes, pattern-no",
+            "placeholder": "(comma separated values)",
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-no, maxlength-yes, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-yes, maxlength-no, pattern-no",
+            "placeholder": "(comma separated values)",
+            "max": 4
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-yes, maxlength-no, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-no",
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-no, maxlength-no, pattern-no",
+            "placeholder": "(comma separated values)",
+            "min": 1
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-no, maxlength-no, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-no",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-no",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-no",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-missing_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-missing, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-no, maxlength-no, pattern-no",
+            "required": true
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-no, maxlength-no, pattern-yes",
+            "required": true,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-no, maxlength-yes, pattern-no",
+            "required": true,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-no, maxlength-yes, pattern-yes",
+            "required": true,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-yes, maxlength-no, pattern-no",
+            "required": true,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-yes, maxlength-no, pattern-yes",
+            "required": true,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-yes, maxlength-yes, pattern-no",
+            "required": true,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-no, max-yes, maxlength-yes, pattern-yes",
+            "required": true,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-no, maxlength-no, pattern-no",
+            "required": true,
+            "min": 1
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-no, maxlength-no, pattern-yes",
+            "required": true,
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-no, maxlength-yes, pattern-no",
+            "required": true,
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-no, maxlength-yes, pattern-yes",
+            "required": true,
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-yes, maxlength-no, pattern-no",
+            "required": true,
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-yes, maxlength-no, pattern-yes",
+            "required": true,
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-no",
+            "required": true,
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "required": true,
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-no, maxlength-no, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-no, maxlength-no, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-no, maxlength-yes, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-no, maxlength-yes, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-yes, maxlength-no, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "max": 4
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-yes, maxlength-no, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-no, maxlength-no, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-no, maxlength-no, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-no",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-True_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-True, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "required": true,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-no, maxlength-no, pattern-no",
+            "required": false
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-no, maxlength-no, pattern-yes",
+            "required": false,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-no, maxlength-yes, pattern-no",
+            "required": false,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-no, maxlength-yes, pattern-yes",
+            "required": false,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-yes, maxlength-no, pattern-no",
+            "required": false,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-yes, maxlength-no, pattern-yes",
+            "required": false,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-yes, maxlength-yes, pattern-no",
+            "required": false,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-no, max-yes, maxlength-yes, pattern-yes",
+            "required": false,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-no, maxlength-no, pattern-no",
+            "required": false,
+            "min": 1
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-no, maxlength-no, pattern-yes",
+            "required": false,
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-no, maxlength-yes, pattern-no",
+            "required": false,
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-no, maxlength-yes, pattern-yes",
+            "required": false,
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-yes, maxlength-no, pattern-no",
+            "required": false,
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-yes, maxlength-no, pattern-yes",
+            "required": false,
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-no",
+            "required": false,
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-no_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-no, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "required": false,
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-no, maxlength-no, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-no, maxlength-no, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-no, maxlength-yes, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-no, maxlength-yes, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-yes, maxlength-no, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "max": 4
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-yes, maxlength-no, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-no_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-no, max-yes, maxlength-yes, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-no_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-no, maxlength-no, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-no_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-no, maxlength-no, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-no_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-no, maxlength-yes, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-yes_maxlength-no_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-yes, maxlength-no, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-no",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-no",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12
+        },
+        {
+            "id": "multitext_required-False_placeholder-yes_min-yes_max-yes_maxlength-yes_pattern-yes",
+            "type": "multitext",
+            "question": "Multitext field: required-False, placeholder-yes, min-yes, max-yes, maxlength-yes, pattern-yes",
+            "required": false,
+            "placeholder": "(comma separated values)",
+            "min": 1,
+            "max": 4,
+            "maxlength": 12,
+            "pattern": "^[a-z]+$"
+        },
+        {
+            "id": "number_required-missing_min-no_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-missing, min-no, max-no, step-no"
+        },
+        {
+            "id": "number_required-missing_min-no_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-missing, min-no, max-no, step-yes",
+            "step": 0.5
+        },
+        {
+            "id": "number_required-missing_min-no_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-missing, min-no, max-yes, step-no",
+            "max": 100
+        },
+        {
+            "id": "number_required-missing_min-no_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-missing, min-no, max-yes, step-yes",
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-missing_min-yes_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-missing, min-yes, max-no, step-no",
+            "min": 0
+        },
+        {
+            "id": "number_required-missing_min-yes_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-missing, min-yes, max-no, step-yes",
+            "min": 0,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-missing_min-yes_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-missing, min-yes, max-yes, step-no",
+            "min": 0,
+            "max": 100
+        },
+        {
+            "id": "number_required-missing_min-yes_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-missing, min-yes, max-yes, step-yes",
+            "min": 0,
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-True_min-no_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-True, min-no, max-no, step-no",
+            "required": true
+        },
+        {
+            "id": "number_required-True_min-no_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-True, min-no, max-no, step-yes",
+            "required": true,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-True_min-no_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-True, min-no, max-yes, step-no",
+            "required": true,
+            "max": 100
+        },
+        {
+            "id": "number_required-True_min-no_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-True, min-no, max-yes, step-yes",
+            "required": true,
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-True_min-yes_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-True, min-yes, max-no, step-no",
+            "required": true,
+            "min": 0
+        },
+        {
+            "id": "number_required-True_min-yes_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-True, min-yes, max-no, step-yes",
+            "required": true,
+            "min": 0,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-True_min-yes_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-True, min-yes, max-yes, step-no",
+            "required": true,
+            "min": 0,
+            "max": 100
+        },
+        {
+            "id": "number_required-True_min-yes_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-True, min-yes, max-yes, step-yes",
+            "required": true,
+            "min": 0,
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-False_min-no_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-False, min-no, max-no, step-no",
+            "required": false
+        },
+        {
+            "id": "number_required-False_min-no_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-False, min-no, max-no, step-yes",
+            "required": false,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-False_min-no_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-False, min-no, max-yes, step-no",
+            "required": false,
+            "max": 100
+        },
+        {
+            "id": "number_required-False_min-no_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-False, min-no, max-yes, step-yes",
+            "required": false,
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-False_min-yes_max-no_step-no",
+            "type": "number",
+            "question": "Number field: required-False, min-yes, max-no, step-no",
+            "required": false,
+            "min": 0
+        },
+        {
+            "id": "number_required-False_min-yes_max-no_step-yes",
+            "type": "number",
+            "question": "Number field: required-False, min-yes, max-no, step-yes",
+            "required": false,
+            "min": 0,
+            "step": 0.5
+        },
+        {
+            "id": "number_required-False_min-yes_max-yes_step-no",
+            "type": "number",
+            "question": "Number field: required-False, min-yes, max-yes, step-no",
+            "required": false,
+            "min": 0,
+            "max": 100
+        },
+        {
+            "id": "number_required-False_min-yes_max-yes_step-yes",
+            "type": "number",
+            "question": "Number field: required-False, min-yes, max-yes, step-yes",
+            "required": false,
+            "min": 0,
+            "max": 100,
+            "step": 0.5
+        },
+        {
+            "id": "select_required-missing",
+            "type": "select",
+            "question": "Select field: required-missing",
+            "options": [
+                "alpha",
+                "beta",
+                "gamma"
+            ]
+        },
+        {
+            "id": "select_required-True",
+            "type": "select",
+            "question": "Select field: required-True",
+            "options": [
+                "alpha",
+                "beta",
+                "gamma"
+            ],
+            "required": true
+        },
+        {
+            "id": "select_required-False",
+            "type": "select",
+            "question": "Select field: required-False",
+            "options": [
+                "alpha",
+                "beta",
+                "gamma"
+            ],
+            "required": false
+        },
+        {
+            "id": "multiselect_min-no_max-no",
+            "type": "multiselect",
+            "question": "Multiselect field: min-no, max-no",
+            "options": [
+                "red",
+                "green",
+                "blue",
+                "orange"
+            ]
+        },
+        {
+            "id": "multiselect_min-no_max-yes",
+            "type": "multiselect",
+            "question": "Multiselect field: min-no, max-yes",
+            "options": [
+                "red",
+                "green",
+                "blue",
+                "orange"
+            ],
+            "max": 3
+        },
+        {
+            "id": "multiselect_min-yes_max-no",
+            "type": "multiselect",
+            "question": "Multiselect field: min-yes, max-no",
+            "options": [
+                "red",
+                "green",
+                "blue",
+                "orange"
+            ],
+            "min": 1
+        },
+        {
+            "id": "multiselect_min-yes_max-yes",
+            "type": "multiselect",
+            "question": "Multiselect field: min-yes, max-yes",
+            "options": [
+                "red",
+                "green",
+                "blue",
+                "orange"
+            ],
+            "min": 1,
+            "max": 3
+        },
+        {
+            "id": "timestamp_basic",
+            "type": "timestamp"
+        },
+        {
+            "id": "date_required-missing_start-date-1900-01-01_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-1900-01-01",
+            "start_date": "1900-01-01",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-1900-01-01_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-[today]",
+            "start_date": "1900-01-01",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-1900-01-01_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-2026-03-19",
+            "start_date": "1900-01-01",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-1900-01-01_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-2099-12-31",
+            "start_date": "1900-01-01",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-1900-01-01_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-missing",
+            "start_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-[today]_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-[today], end-date-1900-01-01",
+            "start_date": "[today]",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-[today]_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-[today], end-date-[today]",
+            "start_date": "[today]",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-[today]_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-[today], end-date-2026-03-19",
+            "start_date": "[today]",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-[today]_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-[today], end-date-2099-12-31",
+            "start_date": "[today]",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-[today]_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-[today], end-date-missing",
+            "start_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-2026-03-19_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-1900-01-01",
+            "start_date": "2026-03-19",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-2026-03-19_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-[today]",
+            "start_date": "2026-03-19",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-2026-03-19_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-2026-03-19",
+            "start_date": "2026-03-19",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-2026-03-19_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-2099-12-31",
+            "start_date": "2026-03-19",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-2026-03-19_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-missing",
+            "start_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-2099-12-31_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-1900-01-01",
+            "start_date": "2099-12-31",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-2099-12-31_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-[today]",
+            "start_date": "2099-12-31",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-2099-12-31_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-2026-03-19",
+            "start_date": "2099-12-31",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-2099-12-31_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-2099-12-31",
+            "start_date": "2099-12-31",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-2099-12-31_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-missing",
+            "start_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-missing_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-missing, end-date-1900-01-01",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-missing_start-date-missing_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-missing, end-date-[today]",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-missing_start-date-missing_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-missing, end-date-2026-03-19",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-missing_start-date-missing_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-missing, end-date-2099-12-31",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-missing_start-date-missing_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-missing, start-date-missing, end-date-missing"
+        },
+        {
+            "id": "date_required-True_start-date-1900-01-01_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-1900-01-01",
+            "required": true,
+            "start_date": "1900-01-01",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-1900-01-01_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-[today]",
+            "required": true,
+            "start_date": "1900-01-01",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-1900-01-01_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-2026-03-19",
+            "required": true,
+            "start_date": "1900-01-01",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-1900-01-01_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-2099-12-31",
+            "required": true,
+            "start_date": "1900-01-01",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-1900-01-01_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-missing",
+            "required": true,
+            "start_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-[today]_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-True, start-date-[today], end-date-1900-01-01",
+            "required": true,
+            "start_date": "[today]",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-[today]_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-True, start-date-[today], end-date-[today]",
+            "required": true,
+            "start_date": "[today]",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-[today]_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-True, start-date-[today], end-date-2026-03-19",
+            "required": true,
+            "start_date": "[today]",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-[today]_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-True, start-date-[today], end-date-2099-12-31",
+            "required": true,
+            "start_date": "[today]",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-[today]_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-True, start-date-[today], end-date-missing",
+            "required": true,
+            "start_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-2026-03-19_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-1900-01-01",
+            "required": true,
+            "start_date": "2026-03-19",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-2026-03-19_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-[today]",
+            "required": true,
+            "start_date": "2026-03-19",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-2026-03-19_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-2026-03-19",
+            "required": true,
+            "start_date": "2026-03-19",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-2026-03-19_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-2099-12-31",
+            "required": true,
+            "start_date": "2026-03-19",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-2026-03-19_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-missing",
+            "required": true,
+            "start_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-2099-12-31_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-1900-01-01",
+            "required": true,
+            "start_date": "2099-12-31",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-2099-12-31_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-[today]",
+            "required": true,
+            "start_date": "2099-12-31",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-2099-12-31_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-2026-03-19",
+            "required": true,
+            "start_date": "2099-12-31",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-2099-12-31_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-2099-12-31",
+            "required": true,
+            "start_date": "2099-12-31",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-2099-12-31_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-missing",
+            "required": true,
+            "start_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-missing_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-True, start-date-missing, end-date-1900-01-01",
+            "required": true,
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-True_start-date-missing_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-True, start-date-missing, end-date-[today]",
+            "required": true,
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-True_start-date-missing_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-True, start-date-missing, end-date-2026-03-19",
+            "required": true,
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-True_start-date-missing_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-True, start-date-missing, end-date-2099-12-31",
+            "required": true,
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-True_start-date-missing_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-True, start-date-missing, end-date-missing",
+            "required": true
+        },
+        {
+            "id": "date_required-False_start-date-1900-01-01_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-1900-01-01",
+            "required": false,
+            "start_date": "1900-01-01",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-1900-01-01_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-[today]",
+            "required": false,
+            "start_date": "1900-01-01",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-1900-01-01_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-2026-03-19",
+            "required": false,
+            "start_date": "1900-01-01",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-1900-01-01_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-2099-12-31",
+            "required": false,
+            "start_date": "1900-01-01",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-1900-01-01_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-missing",
+            "required": false,
+            "start_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-[today]_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-False, start-date-[today], end-date-1900-01-01",
+            "required": false,
+            "start_date": "[today]",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-[today]_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-False, start-date-[today], end-date-[today]",
+            "required": false,
+            "start_date": "[today]",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-[today]_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-False, start-date-[today], end-date-2026-03-19",
+            "required": false,
+            "start_date": "[today]",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-[today]_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-False, start-date-[today], end-date-2099-12-31",
+            "required": false,
+            "start_date": "[today]",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-[today]_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-False, start-date-[today], end-date-missing",
+            "required": false,
+            "start_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-2026-03-19_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-1900-01-01",
+            "required": false,
+            "start_date": "2026-03-19",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-2026-03-19_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-[today]",
+            "required": false,
+            "start_date": "2026-03-19",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-2026-03-19_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-2026-03-19",
+            "required": false,
+            "start_date": "2026-03-19",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-2026-03-19_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-2099-12-31",
+            "required": false,
+            "start_date": "2026-03-19",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-2026-03-19_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-missing",
+            "required": false,
+            "start_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-2099-12-31_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-1900-01-01",
+            "required": false,
+            "start_date": "2099-12-31",
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-2099-12-31_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-[today]",
+            "required": false,
+            "start_date": "2099-12-31",
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-2099-12-31_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-2026-03-19",
+            "required": false,
+            "start_date": "2099-12-31",
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-2099-12-31_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-2099-12-31",
+            "required": false,
+            "start_date": "2099-12-31",
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-2099-12-31_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-missing",
+            "required": false,
+            "start_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-missing_end-date-1900-01-01",
+            "type": "date",
+            "question": "Date field: required-False, start-date-missing, end-date-1900-01-01",
+            "required": false,
+            "end_date": "1900-01-01"
+        },
+        {
+            "id": "date_required-False_start-date-missing_end-date-[today]",
+            "type": "date",
+            "question": "Date field: required-False, start-date-missing, end-date-[today]",
+            "required": false,
+            "end_date": "[today]"
+        },
+        {
+            "id": "date_required-False_start-date-missing_end-date-2026-03-19",
+            "type": "date",
+            "question": "Date field: required-False, start-date-missing, end-date-2026-03-19",
+            "required": false,
+            "end_date": "2026-03-19"
+        },
+        {
+            "id": "date_required-False_start-date-missing_end-date-2099-12-31",
+            "type": "date",
+            "question": "Date field: required-False, start-date-missing, end-date-2099-12-31",
+            "required": false,
+            "end_date": "2099-12-31"
+        },
+        {
+            "id": "date_required-False_start-date-missing_end-date-missing",
+            "type": "date",
+            "question": "Date field: required-False, start-date-missing, end-date-missing",
+            "required": false
+        },
+        {
+            "id": "counter_basic",
+            "type": "counter",
+            "question": "Counter field"
+        },
+        {
+            "id": "color_basic",
+            "type": "color",
+            "question": "Color field"
+        },
+        {
+            "id": "bool_required-missing",
+            "type": "bool",
+            "question": "Boolean field: required-missing"
+        },
+        {
+            "id": "bool_required-True",
+            "type": "bool",
+            "question": "Boolean field: required-True",
+            "required": true
+        },
+        {
+            "id": "bool_required-False",
+            "type": "bool",
+            "question": "Boolean field: required-False",
+            "required": false
+        },
+        {
+            "id": "timer_basic",
+            "type": "timer",
+            "question": "Timer field"
+        }
+    ]
+}

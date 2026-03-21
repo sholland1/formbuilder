@@ -4,6 +4,25 @@
 #define BUILD_FOLDER "cmdline/build/"
 #define SRC_FOLDER   "cmdline/src/"
 
+static void append_common_cli_sources(Nob_Cmd *cmd) {
+    nob_cmd_append(cmd,
+        SRC_FOLDER"form_answers.c",
+        SRC_FOLDER"form_terminal.c",
+        SRC_FOLDER"form_fields.c",
+        SRC_FOLDER"form_timer.c",
+        SRC_FOLDER"form_app.c");
+}
+
+static void append_compile_flags(Nob_Cmd *cmd, bool release) {
+    nob_cmd_append(cmd, "cc", "-Wall", "-Wextra", "-lm", "-pthread");
+    if (release) {
+        nob_cmd_append(cmd, "-s", "-O2");
+    }
+    else {
+        nob_cmd_append(cmd, "-DDEBUG=1");
+    }
+}
+
 static bool is_port_arg(const char *arg) {
     if (arg == NULL || *arg == '\0') return false;
     for (const char *p = arg; *p; ++p) {
@@ -38,6 +57,8 @@ int main(int argc, char **argv) {
     bool release = false;
     bool run = false;
     bool serve = false;
+    bool test = false;
+    bool gen_test_form = false;
     const char *serve_port = "8000";
     while (argc > 0) {
         const char *arg = nob_shift_args(&argc, &argv);
@@ -53,33 +74,29 @@ int main(int argc, char **argv) {
                 serve_port = nob_shift_args(&argc, &argv);
             }
         }
+        else if (strcmp(arg, "test") == 0) {
+            test = true;
+        }
+        else if (strcmp(arg, "gen-test-form") == 0) {
+            gen_test_form = true;
+        }
         else {
             nob_log(NOB_ERROR, "Unknown arg %s", arg);
-            nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]]", program_name);
+            nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form]", program_name);
             return 1;
         }
     }
 
-    bool should_build = !serve || run || release;
-    if (should_build) {
+    bool should_build_form = (!serve && !test && !gen_test_form) || run || release;
+    if (should_build_form) {
         if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
 
         Nob_Cmd cmd = {0};
 
-        nob_cmd_append(&cmd, "cc", "-Wall", "-Wextra", "-lm", "-pthread");
-        if (release) {
-            nob_cmd_append(&cmd, "-s", "-O2");
-        }
-        else {
-            nob_cmd_append(&cmd, "-DDEBUG=1");
-        }
+        append_compile_flags(&cmd, release);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form");
-        nob_cmd_append(&cmd,
-            SRC_FOLDER"form.c",
-            SRC_FOLDER"form_answers.c",
-            SRC_FOLDER"form_terminal.c",
-            SRC_FOLDER"form_fields.c",
-            SRC_FOLDER"form_timer.c");
+        nob_cmd_append(&cmd, SRC_FOLDER"form.c");
+        append_common_cli_sources(&cmd);
 
         if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
 
@@ -87,6 +104,35 @@ int main(int argc, char **argv) {
             nob_cmd_append(&cmd, BUILD_FOLDER"form");
             if (!nob_cmd_run(&cmd)) return 1;
         }
+    }
+
+    if (test || gen_test_form) {
+        if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
+    }
+
+    if (test) {
+        Nob_Cmd cmd = {0};
+        append_compile_flags(&cmd, false);
+        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"test");
+        nob_cmd_append(&cmd, SRC_FOLDER"test.c");
+        append_common_cli_sources(&cmd);
+
+        if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
+
+        nob_cmd_append(&cmd, BUILD_FOLDER"test");
+        if (!nob_cmd_run(&cmd)) return 1;
+    }
+
+    if (gen_test_form) {
+        Nob_Cmd cmd = {0};
+        append_compile_flags(&cmd, false);
+        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"generate_test_form");
+        nob_cmd_append(&cmd, SRC_FOLDER"generate_test_form.c");
+
+        if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
+
+        nob_cmd_append(&cmd, BUILD_FOLDER"generate_test_form");
+        if (!nob_cmd_run(&cmd)) return 1;
     }
 
     if (serve) {
