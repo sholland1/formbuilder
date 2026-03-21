@@ -66,14 +66,20 @@ int main(int argc, char **argv) {
 
         Nob_Cmd cmd = {0};
 
-        nob_cmd_append(&cmd, "cc", "-lm", "-Wall", "-Wextra");
+        nob_cmd_append(&cmd, "cc", "-Wall", "-Wextra", "-lm", "-pthread");
         if (release) {
             nob_cmd_append(&cmd, "-s", "-O2");
         }
         else {
             nob_cmd_append(&cmd, "-DDEBUG=1");
         }
-        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form", SRC_FOLDER"form.c");
+        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form");
+        nob_cmd_append(&cmd,
+            SRC_FOLDER"form.c",
+            SRC_FOLDER"form_answers.c",
+            SRC_FOLDER"form_terminal.c",
+            SRC_FOLDER"form_fields.c",
+            SRC_FOLDER"form_timer.c");
 
         if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
 

@@ -1,3 +1,6 @@
+#ifndef TYPES_H_
+#define TYPES_H_
+
 #include <regex.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -122,3 +125,5 @@ typedef struct {
     const char *file_path;
     int pretty_print;
 } AppConfig;
+
+#endif
