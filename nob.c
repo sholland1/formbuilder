@@ -4,6 +4,16 @@
 #define BUILD_FOLDER "cmdline/build/"
 #define SRC_FOLDER   "cmdline/src/"
 
+typedef struct {
+    const char *program_name;
+    bool release;
+    bool run;
+    bool serve;
+    bool test;
+    bool gen_test_form;
+    const char *serve_port;
+} Build_Config;
+
 static void append_common_cli_sources(Nob_Cmd *cmd) {
     nob_cmd_append(cmd,
         SRC_FOLDER"form_answers.c",
@@ -23,11 +33,46 @@ static void append_compile_flags(Nob_Cmd *cmd, bool release) {
     }
 }
 
+static void log_usage(const Build_Config *config) {
+    nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form]", config->program_name);
+}
+
 static bool is_port_arg(const char *arg) {
     if (arg == NULL || *arg == '\0') return false;
     for (const char *p = arg; *p; ++p) {
         if (!isdigit((unsigned char)*p)) return false;
     }
+    return true;
+}
+
+static bool parse_build_config(Build_Config *config, int argc, char **argv) {
+    while (argc > 0) {
+        const char *arg = nob_shift_args(&argc, &argv);
+        if (strcmp(arg, "release") == 0) {
+            config->release = true;
+        }
+        else if (strcmp(arg, "run") == 0) {
+            config->run = true;
+        }
+        else if (strcmp(arg, "serve") == 0) {
+            config->serve = true;
+            if (argc > 0 && is_port_arg(argv[0])) {
+                config->serve_port = nob_shift_args(&argc, &argv);
+            }
+        }
+        else if (strcmp(arg, "test") == 0) {
+            config->test = true;
+        }
+        else if (strcmp(arg, "gen-test-form") == 0) {
+            config->gen_test_form = true;
+        }
+        else {
+            nob_log(NOB_ERROR, "Unknown arg %s", arg);
+            log_usage(config);
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -40,77 +85,44 @@ static bool open_in_browser(const char *url) {
         return nob_cmd_run(&cmd);
     }
 
-#ifdef _WIN32
+    #ifdef _WIN32
     nob_cmd_append(&cmd, "cmd", "/c", "start", "", url);
-#elif defined(__APPLE__)
+    #elif defined(__APPLE__)
     nob_cmd_append(&cmd, "open", url);
-#else
+    #else
     nob_cmd_append(&cmd, "xdg-open", url);
-#endif
+    #endif
     return nob_cmd_run(&cmd);
 }
 
 int main(int argc, char **argv) {
     NOB_GO_REBUILD_URSELF(argc, argv);
-    const char *program_name = nob_shift_args(&argc, &argv);
+    Build_Config config = {
+        .program_name = nob_shift_args(&argc, &argv),
+        .serve_port = "8000",
+    };
 
-    bool release = false;
-    bool run = false;
-    bool serve = false;
-    bool test = false;
-    bool gen_test_form = false;
-    const char *serve_port = "8000";
-    while (argc > 0) {
-        const char *arg = nob_shift_args(&argc, &argv);
-        if (strcmp(arg, "release") == 0) {
-            release = true;
-        }
-        else if (strcmp(arg, "run") == 0) {
-            run = true;
-        }
-        else if (strcmp(arg, "serve") == 0) {
-            serve = true;
-            if (argc > 0 && is_port_arg(argv[0])) {
-                serve_port = nob_shift_args(&argc, &argv);
-            }
-        }
-        else if (strcmp(arg, "test") == 0) {
-            test = true;
-        }
-        else if (strcmp(arg, "gen-test-form") == 0) {
-            gen_test_form = true;
-        }
-        else {
-            nob_log(NOB_ERROR, "Unknown arg %s", arg);
-            nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form]", program_name);
-            return 1;
-        }
-    }
+    if (!parse_build_config(&config, argc, argv)) return 1;
+    if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
 
-    bool should_build_form = (!serve && !test && !gen_test_form) || run || release;
+    bool should_build_form = (!config.serve && !config.test && !config.gen_test_form) || config.run || config.release;
     if (should_build_form) {
-        if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
-
         Nob_Cmd cmd = {0};
 
-        append_compile_flags(&cmd, release);
+        append_compile_flags(&cmd, config.release);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form");
         nob_cmd_append(&cmd, SRC_FOLDER"form.c");
         append_common_cli_sources(&cmd);
 
         if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
 
-        if (run) {
+        if (config.run) {
             nob_cmd_append(&cmd, BUILD_FOLDER"form");
             if (!nob_cmd_run(&cmd)) return 1;
         }
     }
 
-    if (test || gen_test_form) {
-        if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
-    }
-
-    if (test) {
+    if (config.test) {
         Nob_Cmd cmd = {0};
         append_compile_flags(&cmd, false);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"test");
@@ -123,7 +135,7 @@ int main(int argc, char **argv) {
         if (!nob_cmd_run(&cmd)) return 1;
     }
 
-    if (gen_test_form) {
+    if (config.gen_test_form) {
         Nob_Cmd cmd = {0};
         append_compile_flags(&cmd, false);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"generate_test_form");
@@ -135,13 +147,13 @@ int main(int argc, char **argv) {
         if (!nob_cmd_run(&cmd)) return 1;
     }
 
-    if (serve) {
-        const char *url = nob_temp_sprintf("http://localhost:%s/form.html?preview=true", serve_port);
+    if (config.serve) {
+        const char *url = nob_temp_sprintf("http://localhost:%s/form.html?preview=true", config.serve_port);
         Nob_Cmd server_cmd = {0};
         Nob_Procs procs = {0};
 
         nob_log(NOB_INFO, "Serving repository root at %s", url);
-        nob_cmd_append(&server_cmd, "python3", "-m", "http.server", serve_port);
+        nob_cmd_append(&server_cmd, "python3", "-m", "http.server", config.serve_port);
         if (!nob_cmd_run(&server_cmd, .async = &procs)) return 1;
 
         if (!open_in_browser(url)) {
