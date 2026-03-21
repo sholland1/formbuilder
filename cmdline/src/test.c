@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -24,6 +25,9 @@ typedef struct {
 } ScriptWriter;
 
 #define FIXED_TEST_TIME ((time_t)1772368496)
+#define SCRIPT_TIMEOUT_SECONDS 1
+#define STRINGIFY_(value) #value
+#define STRINGIFY(value) STRINGIFY_(value)
 
 #define TEST_CHECK(condition, ...) \
     do { \
@@ -37,6 +41,15 @@ typedef struct {
 time_t time(time_t *timer) {
     if (timer != NULL) *timer = FIXED_TEST_TIME;
     return FIXED_TEST_TIME;
+}
+
+static void on_script_timeout(int signo) {
+    (void) signo;
+    static const char message[] =
+        "FAIL scripted test timed out after " STRINGIFY(SCRIPT_TIMEOUT_SECONDS)
+        " second(s). Input script likely no longer matches prompts.\n";
+    write(STDERR_FILENO, message, sizeof(message) - 1);
+    _exit(124);
 }
 
 static void append_step(InputSteps *steps, const char *bytes, size_t len) {
@@ -198,6 +211,7 @@ static bool test_deserialize_all_fields(const char *path) {
 static bool test_basic_form_script(const char *form_path, const char *answers_path) {
     Form form = {0};
     TEST_CHECK(load_form_from_file(form_path, &form), "failed to deserialize %s", form_path);
+    TEST_CHECK(signal(SIGALRM, on_script_timeout) != SIG_ERR, "failed to install timeout handler");
 
     Nob_String_Builder expected = {0};
     TEST_CHECK(nob_read_entire_file(answers_path, &expected), "failed to read %s", answers_path);
@@ -228,7 +242,9 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
 
     Answers answers = {0};
     nob_da_reserve(&answers, form.fields.count);
+    alarm(SCRIPT_TIMEOUT_SECONDS);
     display_form(&form, &answers);
+    alarm(0);
 
     TEST_CHECK(pthread_join(writer_thread, NULL) == 0, "pthread_join failed");
 
