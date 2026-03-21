@@ -79,6 +79,17 @@ typedef struct {
 } DateFieldMembers;
 
 typedef struct {
+    const char *question;
+    bool required;
+    const char *placeholder;
+    int min;
+    int max;
+    size_t maxlength;
+    regex_t *regex;
+    const char *pattern;
+} MultiTextFieldMembers;
+
+typedef struct {
     const char *id;
     FieldType type;
     union {
@@ -86,6 +97,7 @@ typedef struct {
         NumberFieldMembers number;
         SelectFieldMembers select;
         MultiSelectFieldMembers multiselect;
+        MultiTextFieldMembers multitext;
         DateFieldMembers date;
         QOnlyFieldMembers counter;
         QOnlyFieldMembers color;

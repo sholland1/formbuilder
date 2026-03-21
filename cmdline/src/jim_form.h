@@ -111,6 +111,17 @@ void jim_form(Jim *jim, const Form *f) {
                 if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
             } break;
 
+            case ft_multitext: {
+                MultiTextFieldMembers p = x->multitext;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+                if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
+                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+                if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
+                if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
+            } break;
+
             case ft_date: {
                 static char date_buffer[11];
                 DateFieldMembers p = x->date;
@@ -189,6 +200,12 @@ void field_set_defaults(Field *field) {
             field->multiselect.options.count = 0;
             field->multiselect.options.items = NULL;
             field->multiselect.max = INT_MAX;
+            break;
+
+        case ft_multitext:
+            field->multitext.required = true;
+            field->multitext.max = INT_MAX;
+            field->multitext.maxlength = SIZE_MAX;
             break;
 
         case ft_date:
@@ -323,6 +340,49 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "max") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->multiselect.max = (int)jimp->number;
+                    }
+                    break;
+
+                case ft_multitext:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->multitext.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->multitext.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "placeholder") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->multitext.placeholder = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "min") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->multitext.min = (int)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "max") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->multitext.max = (int)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "maxlength") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->multitext.maxlength = (size_t)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "pattern") == 0) {
+                        if (!jimp_string(jimp)) return false;
+
+                        regex_t regex;
+                        int ret = regcomp(&regex, jimp->string, REG_EXTENDED | REG_NOSUB);
+                        if (ret) {
+                            char errbuf[256];
+                            regerror(ret, &regex, errbuf, sizeof(errbuf));
+                            fprintf(stderr, "regcomp failed: %s\n", errbuf);
+                            return 1;
+                        }
+
+                        field->multitext.regex = (regex_t *)malloc(sizeof(regex_t));
+                        *field->multitext.regex = regex;
+                        field->multitext.pattern = strdup(jimp->string);
                     }
                     break;
 

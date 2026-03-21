@@ -9,6 +9,15 @@ static bool is_match(const regex_t *regex, const char *s) {
     return !regex || !regexec(regex, s, 0, NULL, 0);
 }
 
+static bool is_sv_match(const regex_t *regex, Nob_String_View sv) {
+    if (!regex) return true;
+
+    static char buffer[BUFFER_LEN];
+    snprintf(buffer, sv.count+1, "%.*s", SV_Arg(sv));
+
+    return !regexec(regex, buffer, 0, NULL, 0);
+}
+
 static bool is_numeric(const char *str) {
     if (str == NULL || *str == '\0') return false;
 
@@ -645,5 +654,73 @@ void read_number(const Field *f, char *buffer) {
         snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
         tb.position = strlen(buffer);
         tb.end = tb.position;
+    }
+}
+
+static bool fails_multitext_checks(const Field *f, const char *answer) {
+    NOB_ASSERT(f->type == ft_multitext);
+
+    MultiTextFieldMembers p = f->multitext;
+
+    Nob_String_View answer_sv = nob_sv_from_cstr(answer);
+    int count = 0;
+    while (answer_sv.count > 0) {
+        Nob_String_View sv = nob_sv_chop_by_delim(&answer_sv, ',');
+        if (sv.count > p.maxlength || (++count) > p.max || !is_sv_match(p.regex, sv)) return true;
+    }
+    return count < p.min;
+}
+
+void read_multitext(const Field *f, char* buffer) {
+    NOB_ASSERT(f->type == ft_multitext);
+
+    MultiTextFieldMembers p = f->multitext;
+
+    TextBuffer tb = {
+        .position = 0,
+        .end = 0,
+        .buffer = buffer,
+    };
+
+    fprintf(tty_out, "%s%s\r\n", p.question, p.required ? "*" : "");
+    if (p.max == INT_MAX) {
+        if (p.min == 0) fprintf(tty_out, "(any)\r\n");
+        else fprintf(tty_out, "(at least %d)\r\n", p.min);
+    }
+    else {
+        fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
+    }
+
+    const char *ph = p.placeholder;
+    while (1) {
+        bool failed_checks = fails_multitext_checks(f, buffer);
+        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        if (tb.end == 0 && ph) {
+            fprintf(tty_out, FAINT"%s"RESET, ph);
+        }
+        else {
+            fprintf(tty_out, "%s", buffer);
+        }
+        fprintf(tty_out, CLRDOWN"\r"RIGHT(%zu), tb.position + 3);
+        fflush(tty_out);
+
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) user_exit();
+        if (k.type == key_enter) {
+            if (failed_checks) {
+                reset_text_buffer(&tb);
+                continue;
+            }
+            tb.buffer[tb.end] = '\0';
+            write_nl(tty_out);
+            return;
+        }
+
+        if (k.type == key_char) {
+            place_char_in_text_buffer(&tb, (char) k.ch);
+            continue;
+        }
+
+        handle_text_buffer(&tb, k.type);
     }
 }

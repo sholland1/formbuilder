@@ -93,6 +93,11 @@ static void display_form(const Form *form, Answers *answers) {
             append_multiselect_answer(answers, f->id, &opts);
         } break;
 
+        case ft_multitext: {
+            read_multitext(f, answer_buffer);
+            append_multitext_answer(answers, f->id, answer_buffer);
+        } break;
+
         case ft_date: {
             struct tm d;
             if (read_date(f, &d)) {

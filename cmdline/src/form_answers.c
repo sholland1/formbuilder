@@ -42,6 +42,22 @@ void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *
     nob_da_append(answers, a);
 }
 
+void append_multitext_answer(Answers *answers, const char *id, const char *values) {
+    Answer a = {
+        .id = strdup(id),
+        .type = ft_multiselect,
+    };
+    a.options.capacity = 0;
+    a.options.count = 0;
+    a.options.items = NULL;
+    Nob_String_View values_sv = nob_sv_from_cstr(values);
+    while (values_sv.count > 0) {
+        Nob_String_View sv = nob_sv_chop_by_delim(&values_sv, ',');
+        nob_da_append(&a.options, nob_temp_strndup(sv.data, sv.count));
+    }
+    nob_da_append(answers, a);
+}
+
 bool is_empty(const char *s) {
     return !s || !*s;
 }

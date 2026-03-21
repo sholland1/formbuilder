@@ -112,6 +112,7 @@ void append_static_answer(Answers *answers, const char *id, const char *value);
 void append_null_answer(Answers *answers, const char *id);
 void append_quoted_answer(Answers *answers, const char *id, const char *value);
 void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts);
+void append_multitext_answer(Answers *answers, const char *id, const char *values);
 
 bool is_empty(const char *s);
 
@@ -130,6 +131,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts);
 int64_t read_counter(const Field *f);
 void read_text(const Field *f, char *buffer);
 void read_number(const Field *f, char *buffer);
+void read_multitext(const Field *f, char *buffer);
 
 uint64_t read_timer(const Field *f);
 int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize);
