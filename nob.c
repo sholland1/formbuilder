@@ -137,13 +137,8 @@ int main(int argc, char **argv) {
 
     if (config.gen_test_form) {
         Nob_Cmd cmd = {0};
-        append_compile_flags(&cmd, false);
-        nob_cmd_append(&cmd, "-o", BUILD_FOLDER"generate_test_form");
-        nob_cmd_append(&cmd, SRC_FOLDER"generate_test_form.c");
+        nob_cmd_append(&cmd, "python3", "generate_test_form.py");
 
-        if (!nob_cmd_run_sync_and_reset(&cmd)) return 1;
-
-        nob_cmd_append(&cmd, BUILD_FOLDER"generate_test_form");
         if (!nob_cmd_run(&cmd)) return 1;
     }
 
