@@ -17,6 +17,10 @@ typedef struct {
 
 static void append_common_cli_sources(Nob_Cmd *cmd) {
     nob_cmd_append(cmd,
+        SRC_FOLDER"libregexp/libregexp.c",
+        SRC_FOLDER"libregexp/libunicode.c",
+        SRC_FOLDER"libregexp/cutils.c",
+        SRC_FOLDER"regex.c",
         SRC_FOLDER"form_answers.c",
         SRC_FOLDER"form_terminal.c",
         SRC_FOLDER"form_fields.c",
@@ -25,7 +29,7 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
 }
 
 static void append_compile_flags(Nob_Cmd *cmd, bool release) {
-    nob_cmd_append(cmd, "cc", "-Wall", "-Wextra", "-lm", "-pthread");
+    nob_cmd_append(cmd, "cc", "-Wall", "-lm", "-pthread");
     if (release) {
         nob_cmd_append(cmd, "-s", "-O2");
     }

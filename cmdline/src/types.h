@@ -1,7 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#include <regex.h>
+#include "regex.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -35,7 +35,7 @@ typedef struct {
     bool required;
     const char *placeholder;
     size_t maxlength;
-    regex_t *regex;
+    CompiledRegex regex;
     const char *pattern;
 } TextFieldMembers;
 
@@ -94,7 +94,7 @@ typedef struct {
     int min;
     int max;
     size_t maxlength;
-    regex_t *regex;
+    CompiledRegex regex;
     const char *pattern;
 } MultiTextFieldMembers;
 

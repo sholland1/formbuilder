@@ -9,7 +9,10 @@
 #include "types.h"
 #endif
 
-#include <regex.h>
+#ifndef REGEX_H
+#include "regex.h"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

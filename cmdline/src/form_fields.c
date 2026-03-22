@@ -5,19 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static bool is_match(const regex_t *regex, const char *s) {
-    return !regex || !regexec(regex, s, 0, NULL, 0);
-}
-
-static bool is_sv_match(const regex_t *regex, Nob_String_View sv) {
-    if (!regex) return true;
-
-    static char buffer[BUFFER_LEN];
-    snprintf(buffer, sv.count+1, "%.*s", SV_Arg(sv));
-
-    return !regexec(regex, buffer, 0, NULL, 0);
-}
-
 static bool is_numeric(const char *str) {
     if (str == NULL || *str == '\0') return false;
 
@@ -494,7 +481,7 @@ static bool fails_text_checks(const Field *f, char *answer) {
     TextFieldMembers p = f->text;
     return is_empty(answer)
         ? p.required
-        : !is_match(p.regex, answer);
+        : !is_match(&p.regex, answer);
 }
 
 static void place_char_in_text_buffer(TextBuffer *tb, char c) {
@@ -680,7 +667,7 @@ static bool fails_multitext_checks(const Field *f, const char *answer) {
     int count = 0;
     while (answer_sv.count > 0) {
         Nob_String_View sv = nob_sv_chop_by_delim(&answer_sv, ',');
-        if (sv.count > p.maxlength || (++count) > p.max || !is_sv_match(p.regex, sv)) return true;
+        if (sv.count > p.maxlength || (++count) > p.max || !is_sv_match(&p.regex, sv)) return true;
     }
     return count < p.min;
 }

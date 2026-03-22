@@ -49,7 +49,7 @@ time_t time(time_t *timer) {
 static void on_script_timeout(int signo) {
     (void) signo;
     static const char message[] =
-        "scripted test timed out after " STRINGIFY(SCRIPT_TIMEOUT_SECONDS)
+        FAIL"scripted test timed out after " STRINGIFY(SCRIPT_TIMEOUT_SECONDS)
         " second(s). Input script likely no longer matches prompts.\n";
     write(STDERR_FILENO, message, sizeof(message) - 1);
     _exit(124);

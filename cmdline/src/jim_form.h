@@ -1,11 +1,11 @@
 #include "jimp.h"
 #include "jim.h"
-#include "nob.h"
+#include "libregexp/libregexp.h"
 
+#include "regex.h"
 #include "types.h"
 
 #include <math.h>
-#include <regex.h>
 #include <time.h>
 
 #define REAL_YEAR(year) (NOB_ASSERT((year) < 1900), (year)+1900)
@@ -259,17 +259,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "pattern") == 0) {
                         if (!jimp_string(jimp)) return false;
 
-                        regex_t regex;
-                        int ret = regcomp(&regex, jimp->string, REG_EXTENDED | REG_NOSUB);
-                        if (ret) {
-                            char errbuf[256];
-                            regerror(ret, &regex, errbuf, sizeof(errbuf));
-                            fprintf(stderr, "regcomp failed: %s\n", errbuf);
-                            return 1;
-                        }
-
-                        field->text.regex = (regex_t *)malloc(sizeof(regex_t));
-                        *field->text.regex = regex;
+                        field->text.regex = compile_regex(jimp->string, LRE_FLAG_DOTALL);
                         field->text.pattern = strdup(jimp->string);
                     }
                     break;
@@ -371,17 +361,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "pattern") == 0) {
                         if (!jimp_string(jimp)) return false;
 
-                        regex_t regex;
-                        int ret = regcomp(&regex, jimp->string, REG_EXTENDED | REG_NOSUB);
-                        if (ret) {
-                            char errbuf[256];
-                            regerror(ret, &regex, errbuf, sizeof(errbuf));
-                            fprintf(stderr, "regcomp failed: %s\n", errbuf);
-                            return 1;
-                        }
-
-                        field->multitext.regex = (regex_t *)malloc(sizeof(regex_t));
-                        *field->multitext.regex = regex;
+                        field->multitext.regex = compile_regex(jimp->string, LRE_FLAG_DOTALL);
                         field->multitext.pattern = strdup(jimp->string);
                     }
                     break;
