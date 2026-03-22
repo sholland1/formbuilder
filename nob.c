@@ -11,6 +11,7 @@ typedef struct {
     bool serve;
     bool test;
     bool gen_test_form;
+    bool gen_prompt;
     const char *serve_port;
 } Build_Config;
 
@@ -66,6 +67,9 @@ static bool parse_build_config(Build_Config *config, int argc, char **argv) {
         else if (strcmp(arg, "gen-test-form") == 0) {
             config->gen_test_form = true;
         }
+        else if (strcmp(arg, "gen-prompt") == 0) {
+            config->gen_prompt = true;
+        }
         else {
             nob_log(NOB_ERROR, "Unknown arg %s", arg);
             log_usage(config);
@@ -105,7 +109,7 @@ int main(int argc, char **argv) {
     if (!parse_build_config(&config, argc, argv)) return 1;
     if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
 
-    bool should_build_form = (!config.serve && !config.test && !config.gen_test_form) || config.run || config.release;
+    bool should_build_form = (!config.serve && !config.test && !config.gen_test_form && !config.gen_prompt) || config.run || config.release;
     if (should_build_form) {
         Nob_Cmd cmd = {0};
 
@@ -138,7 +142,12 @@ int main(int argc, char **argv) {
     if (config.gen_test_form) {
         Nob_Cmd cmd = {0};
         nob_cmd_append(&cmd, "python3", "generate_test_form.py");
+        if (!nob_cmd_run(&cmd)) return 1;
+    }
 
+    if (config.gen_prompt) {
+        Nob_Cmd cmd = {0};
+        nob_cmd_append(&cmd, "python3", "generate_prompt.py");
         if (!nob_cmd_run(&cmd)) return 1;
     }
 
