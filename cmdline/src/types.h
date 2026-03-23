@@ -1,5 +1,5 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef TYPES_H
+#define TYPES_H
 
 #include "regex.h"
 #include <stdbool.h>

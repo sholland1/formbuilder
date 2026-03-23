@@ -5,7 +5,7 @@
 #include "nob.h"
 #endif
 
-#ifndef TYPES_H_
+#ifndef TYPES_H
 #include "types.h"
 #endif
 
