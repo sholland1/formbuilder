@@ -379,11 +379,11 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
     MultiSelectFieldMembers p = f->multiselect;
     fprintf(tty_out, HIDE"%s ", p.question);
     if (p.max == INT_MAX) {
-        if (p.min == 0) fprintf(tty_out, "(any)\r\n");
-        else fprintf(tty_out, "(at least %d)\r\n", p.min);
+        if (p.min == 0) fprintf(tty_out, "(any)");
+        else fprintf(tty_out, "(at least %d)", p.min);
     }
     else {
-        fprintf(tty_out, "(%d-%d)\r\n", p.min, p.max);
+        fprintf(tty_out, "(%d-%d)", p.min, p.max);
     }
 
     const SelectOptions opts = p.options;
@@ -398,7 +398,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         }
         bool fail_checks = fails_multiselect_checks(f, selected_opt_count);
         for (size_t i = 0; i < opts.count; i++) {
-            fprintf(tty_out, "\r%s %s %s\r\n",
+            fprintf(tty_out, "\r\n%s %s %s",
                 pos == i
                     ? fail_checks ? ERR_PROMPT : PROMPT
                     : " ",
@@ -411,10 +411,10 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter || k.type == key_tab) {
             if (fail_checks) {
-                fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
+                fprintf(tty_out, UP(%zu), opts.count);
                 continue;
             }
-            fprintf(tty_out, SHOW);
+            fprintf(tty_out, SHOW"\r\n");
             for (size_t i = 0; i < opts.count; i++) {
                 if (selected_indexes[i]) {
                     nob_da_append(selected_opts, opts.items[i]);
@@ -434,7 +434,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
             if (pos == opts.count - 1) pos = 0;
             else pos++;
         }
-        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count);
+        fprintf(tty_out, UP(%zu), opts.count);
     }
 }
 
