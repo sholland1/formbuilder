@@ -330,33 +330,29 @@ void read_select(const Field *f, char *buffer) {
     NOB_ASSERT(f->type == ft_select);
 
     SelectOptions opts = f->select.options;
-    fprintf(tty_out, HIDE"%s%s\r\n", f->select.question, f->select.required ? "*" : "");
+    bool required = f->select.required;
+    fprintf(tty_out, HIDE"%s%s", f->select.question, required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
-        fprintf(tty_out, "\r%s\r\n", pos == 0
-            ? f->select.required ? ERR_PROMPT : PROMPT
-            : " ");
-        for (size_t i = 1; i < opts.count + 1; i++) {
-            fprintf(tty_out, "\r%s %s\r\n", pos == i ? PROMPT : " ", opts.items[i - 1]);
+        if (!required) {
+            fprintf(tty_out, "\r\n%s", pos == 0 ? PROMPT : " ");
+        }
+        for (size_t i = !required; i < opts.count + !required; i++) {
+            fprintf(tty_out, "\r\n%s %s", pos == i ? PROMPT : " ", opts.items[i - !required]);
         }
         fflush(tty_out);
 
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            if (pos == 0 && f->select.required) {
-                fprintf(tty_out, UP(%zu) CLRDOWN, opts.count + 1);
-                continue;
-            }
-
             if (pos == 0) {
                 buffer[0] = 0;
             }
             else {
-                strcpy(buffer, opts.items[pos - 1]);
+                strcpy(buffer, opts.items[pos - !required]);
             }
-            fprintf(tty_out, SHOW);
+            fprintf(tty_out, SHOW"\r\n");
             return;
         }
         if (k.type == key_tab) {
@@ -366,14 +362,14 @@ void read_select(const Field *f, char *buffer) {
         }
 
         if (k.type == key_arrow_up) {
-            if (pos == 0) pos = opts.count;
+            if (pos == 0) pos = opts.count - required;
             else pos--;
         }
         else if (k.type == key_arrow_down) {
-            if (pos == opts.count) pos = 0;
+            if (pos == opts.count - required) pos = 0;
             else pos++;
         }
-        fprintf(tty_out, UP(%zu) CLRDOWN, opts.count + 1);
+        fprintf(tty_out, UP(%zu), opts.count + !required);
     }
 }
 
