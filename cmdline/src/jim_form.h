@@ -190,15 +190,9 @@ void field_set_defaults(Field *field) {
 
         case ft_select:
             field->select.required = true;
-            field->select.options.capacity = 0;
-            field->select.options.count = 0;
-            field->select.options.items = NULL;
             break;
 
         case ft_multiselect:
-            field->multiselect.options.capacity = 0;
-            field->multiselect.options.count = 0;
-            field->multiselect.options.items = NULL;
             field->multiselect.max = INT_MAX;
             break;
 
