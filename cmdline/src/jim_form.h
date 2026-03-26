@@ -459,6 +459,15 @@ bool jimp_field(Jimp *jimp, Field *field) {
             }
         }
     }
+    if (field->type == ft_number && field->number.max < field->number.min) return false;
+    if (field->type == ft_multiselect && field->multiselect.max < field->multiselect.min) return false;
+    if (field->type == ft_multitext && field->multitext.max < field->multitext.min) return false;
+    if (field->type == ft_date) {
+        DateFieldMembers d = field->date;
+        if (!d.start_date.is_today && !d.end_date.is_today
+            && !d.start_date.dt && !d.end_date.dt
+            && d.end_date.dt < d.start_date.dt) return false;
+    }
     return jimp_object_end(jimp);
 }
 

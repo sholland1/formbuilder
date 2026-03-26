@@ -1283,13 +1283,6 @@
             "start_date": "[today]"
         },
         {
-            "id": "date_required-missing_start-date-2026-03-19_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-missing, start-date-2026-03-19, end-date-1900-01-01",
-            "start_date": "2026-03-19",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-missing_start-date-2026-03-19_end-date-[today]",
             "type": "date",
             "question": "Date field: required-missing, start-date-2026-03-19, end-date-[today]",
@@ -1317,25 +1310,11 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-missing_start-date-2099-12-31_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-missing, start-date-2099-12-31, end-date-1900-01-01",
-            "start_date": "2099-12-31",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-missing_start-date-2099-12-31_end-date-[today]",
             "type": "date",
             "question": "Date field: required-missing, start-date-2099-12-31, end-date-[today]",
             "start_date": "2099-12-31",
             "end_date": "[today]"
-        },
-        {
-            "id": "date_required-missing_start-date-2099-12-31_end-date-2026-03-19",
-            "type": "date",
-            "question": "Date field: required-missing, start-date-2099-12-31, end-date-2026-03-19",
-            "start_date": "2099-12-31",
-            "end_date": "2026-03-19"
         },
         {
             "id": "date_required-missing_start-date-2099-12-31_end-date-2099-12-31",
@@ -1458,14 +1437,6 @@
             "start_date": "[today]"
         },
         {
-            "id": "date_required-True_start-date-2026-03-19_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-True, start-date-2026-03-19, end-date-1900-01-01",
-            "required": true,
-            "start_date": "2026-03-19",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-True_start-date-2026-03-19_end-date-[today]",
             "type": "date",
             "question": "Date field: required-True, start-date-2026-03-19, end-date-[today]",
@@ -1497,28 +1468,12 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-True_start-date-2099-12-31_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-True, start-date-2099-12-31, end-date-1900-01-01",
-            "required": true,
-            "start_date": "2099-12-31",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-True_start-date-2099-12-31_end-date-[today]",
             "type": "date",
             "question": "Date field: required-True, start-date-2099-12-31, end-date-[today]",
             "required": true,
             "start_date": "2099-12-31",
             "end_date": "[today]"
-        },
-        {
-            "id": "date_required-True_start-date-2099-12-31_end-date-2026-03-19",
-            "type": "date",
-            "question": "Date field: required-True, start-date-2099-12-31, end-date-2026-03-19",
-            "required": true,
-            "start_date": "2099-12-31",
-            "end_date": "2026-03-19"
         },
         {
             "id": "date_required-True_start-date-2099-12-31_end-date-2099-12-31",
@@ -1648,14 +1603,6 @@
             "start_date": "[today]"
         },
         {
-            "id": "date_required-False_start-date-2026-03-19_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-False, start-date-2026-03-19, end-date-1900-01-01",
-            "required": false,
-            "start_date": "2026-03-19",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-False_start-date-2026-03-19_end-date-[today]",
             "type": "date",
             "question": "Date field: required-False, start-date-2026-03-19, end-date-[today]",
@@ -1687,28 +1634,12 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-False_start-date-2099-12-31_end-date-1900-01-01",
-            "type": "date",
-            "question": "Date field: required-False, start-date-2099-12-31, end-date-1900-01-01",
-            "required": false,
-            "start_date": "2099-12-31",
-            "end_date": "1900-01-01"
-        },
-        {
             "id": "date_required-False_start-date-2099-12-31_end-date-[today]",
             "type": "date",
             "question": "Date field: required-False, start-date-2099-12-31, end-date-[today]",
             "required": false,
             "start_date": "2099-12-31",
             "end_date": "[today]"
-        },
-        {
-            "id": "date_required-False_start-date-2099-12-31_end-date-2026-03-19",
-            "type": "date",
-            "question": "Date field: required-False, start-date-2099-12-31, end-date-2026-03-19",
-            "required": false,
-            "start_date": "2099-12-31",
-            "end_date": "2026-03-19"
         },
         {
             "id": "date_required-False_start-date-2099-12-31_end-date-2099-12-31",

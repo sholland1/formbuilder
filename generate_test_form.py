@@ -1,5 +1,6 @@
 import json
 from itertools import product
+from datetime import datetime
 from pathlib import Path
 
 
@@ -155,12 +156,33 @@ def build_timestamp_fields():
 
 
 def build_date_fields():
+    values = ["missing", True, False]
+    dates = ["1900-01-01", "[today]", "2026-03-19", "2099-12-31", "missing"]
+
+    def parse_date(d):
+        if d == "missing" or d == "[today]":
+            return None
+        try:
+            return datetime.strptime(d, "%Y-%m-%d").date()
+        except ValueError:
+            return None
+
+    def end_is_before_start(start_str: str, end_str: str) -> bool:
+        start = parse_date(start_str)
+        end = parse_date(end_str)
+
+        if start is None or end is None:
+            return False                    # Keep combinations with "missing" or invalid dates
+
+        return end < start
+
+    filtered_combinations = [
+        (val, start, end)
+        for val, start, end in product(values, dates, dates)
+        if not end_is_before_start(start, end)
+    ]
     fields = []
-    for req_state, startp, endp in product(
-        ["missing", True, False],
-        ["1900-01-01", "[today]", "2026-03-19", "2099-12-31", "missing"],
-        ["1900-01-01", "[today]", "2026-03-19", "2099-12-31", "missing"],
-    ):
+    for req_state, startp, endp in filtered_combinations:
         labels = [
             f"required-{state_label(req_state)}",
             f"start-date-{startp}",
