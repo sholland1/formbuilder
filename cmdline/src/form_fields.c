@@ -283,46 +283,37 @@ bool read_date(const Field *f, struct tm *value) {
 Tristate read_bool(const Field *f) {
     NOB_ASSERT(f->type == ft_bool);
 
-    fprintf(tty_out, HIDE"%s\r\n", f->boolean.question);
-
+    #define OPTS_LEN 2
+    const char *opts[OPTS_LEN] = {"Yes", "No"};
     bool required = f->boolean.required;
+    fprintf(tty_out, HIDE"%s%s", f->boolean.question, required ? "*" : "");
 
-    Tristate choice = required ? ts_true : ts_null;
+    size_t pos = 0;
     while (1) {
-        if (required) {
-            fprintf(tty_out, "\r%s Yes\r\n%s No\r\n",
-                choice == ts_true ? PROMPT : " ",
-                choice == ts_false ? PROMPT : " ");
+        if (!required) {
+            fprintf(tty_out, "\r\n%s", pos == 0 ? PROMPT : " ");
         }
-        else {
-            fprintf(tty_out, "\r%s\r\n%s Yes\r\n%s No\r\n",
-                choice == ts_null ? PROMPT : "",
-                choice == ts_true ? PROMPT : " ",
-                choice == ts_false ? PROMPT : " ");
+        for (size_t i = !required; i < OPTS_LEN + !required; i++) {
+            fprintf(tty_out, "\r\n%s %s", pos == i ? PROMPT : " ", opts[i - !required]);
         }
         fflush(tty_out);
 
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
-            fprintf(tty_out, SHOW);
-            return choice;
+            fprintf(tty_out, SHOW"\r\n");
+            return (Tristate)(pos + required);
         }
 
-        if (required) {
-            if (k.type == key_arrow_up || k.type == key_arrow_down) {
-                choice = choice == ts_true ? ts_false : ts_true;
-            }
-        }
-        else if (k.type == key_arrow_up) {
-            if (choice == 2) choice = 0;
-            else choice++;
+        if (k.type == key_arrow_up) {
+            if (pos == 0) pos = OPTS_LEN - required;
+            else pos--;
         }
         else if (k.type == key_arrow_down) {
-            if (choice == 0) choice = 2;
-            else choice--;
+            if (pos == OPTS_LEN - required) pos = 0;
+            else pos++;
         }
-        fprintf(tty_out, UP(%d) CLRDOWN, required ? 2 : 3);
+        fprintf(tty_out, UP(%d), OPTS_LEN + !required);
     }
 }
 

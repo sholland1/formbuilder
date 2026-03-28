@@ -27,7 +27,7 @@ typedef enum {
 } FieldType;
 
 typedef enum {
-    ts_false, ts_true, ts_null
+    ts_null, ts_true, ts_false
 } Tristate;
 
 typedef struct {
