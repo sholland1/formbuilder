@@ -4,5 +4,6 @@ build/
 *.old
 *.md
 *test.json
+*.vim
 
 nob
