@@ -31,7 +31,7 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
 static void append_compile_flags(Nob_Cmd *cmd, bool release) {
     nob_cmd_append(cmd, "cc", "-Wall", "-lm", "-pthread");
     if (release) {
-        nob_cmd_append(cmd, "-s", "-O2");
+        nob_cmd_append(cmd, "-s", "-Os", "-flto=auto", "-fdata-sections", "-ffunction-sections", "-Wl,--gc-sections");
     }
     else {
         nob_cmd_append(cmd, "-DDEBUG=1");
