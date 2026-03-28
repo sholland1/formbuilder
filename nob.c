@@ -113,10 +113,9 @@ int main(int argc, char **argv) {
     if (!parse_build_config(&config, argc, argv)) return 1;
     if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
 
-    bool should_build_form = (!config.serve && !config.test && !config.gen_test_form && !config.gen_prompt) || config.run || config.release;
+    bool should_build_form = !config.serve && !config.test && !config.gen_test_form && !config.gen_prompt;
     if (should_build_form) {
         Nob_Cmd cmd = {0};
-
         append_compile_flags(&cmd, config.release);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"form");
         nob_cmd_append(&cmd, SRC_FOLDER"form.c");
@@ -132,7 +131,7 @@ int main(int argc, char **argv) {
 
     if (config.test) {
         Nob_Cmd cmd = {0};
-        append_compile_flags(&cmd, false);
+        append_compile_flags(&cmd, config.release);
         nob_cmd_append(&cmd, "-o", BUILD_FOLDER"test");
         nob_cmd_append(&cmd, SRC_FOLDER"test.c");
         append_common_cli_sources(&cmd);
