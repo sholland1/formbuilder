@@ -84,6 +84,9 @@ export default class FormBuilder {
                     ...["Yes", "No"].map(o => this.element("option", {}, o)))
             ];
         }
+        else {
+            inputElements = ["Unsupported element type: " + item.type];
+        }
 
         return this.element("div", { class: "builder-item builder-" + item.type },
             this.element("label", { for: item.id, class: "builder-question" }, item.question),

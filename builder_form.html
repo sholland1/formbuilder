@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="form.css">
     <style>
-        #builder {
+        #builder-form {
             summary {
                 height:2.2em;
                 align-content:center;
@@ -21,27 +21,50 @@
                 }
             }
         }
+
+        #intro {
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <div id="main">
-        <form id="builder">
-            <h1 id="builder-title"></h1>
-            <details open>
-                <summary>Form Header
-                    <div class="builder-details-buttons">
-                        <button id="add_field" type="button">+ Add field</button>
-                        <button id="toggle_sections" type="button">Expand/Collapse all</button>
-                    </div>
-                </summary>
-                <div id="builder-header"></div>
-            </details>
+    <div class="container">
+        <div id="intro">
+            <h1>Welcome to the Form Builder!</h1>
+            <button id="btn-scratch" type="button">Start Building</button>
+            <button id="btn-gen-ai" type="button">Generate With AI</button>
+            <button id="btn-upload" type="button">Upload Existing Form</button>
+        </div>
 
-            <div id="builder-fields"></div>
-        </form>
-        <button id="download-btn" type="button">Download</button>
-        <button id="preview-btn" type="button">Preview</button>
+        <div id="genai" hidden>
+            <h1>Generate a form with AI</h1>
+            <label for="prompt">Enter your prompt:</label>
+            <textarea id="prompt"></textarea>
+            <button id="btn-generate" type="button">Generate</button>
+            <button id="btn-back-from-generate" type="button">Back</button>
+        </div>
+
+        <div id="builder" hidden>
+            <form id="builder-form">
+                <h1 id="builder-title"></h1>
+                <details open>
+                    <summary>Form Header
+                        <div class="builder-details-buttons">
+                            <button id="add_field" type="button">+ Add field</button>
+                            <button id="toggle_sections" type="button">Expand/Collapse all</button>
+                        </div>
+                    </summary>
+                    <div id="builder-header"></div>
+                </details>
+
+                <div id="builder-fields"></div>
+            </form>
+            <button id="btn-download" type="button">Download</button>
+            <button id="btn-preview" type="button">Preview</button>
+            <button id="btn-clear" type="button">Clear</button>
+            <button id="btn-back-from-build" type="button">Back</button>
+        </div>
     </div>
 </body>
 
@@ -50,9 +73,76 @@
     import FormBuilder from "./FormBuilder.js";
 
     const forms = formObject.forms;
+    const builder = new FormBuilder(document, () => new Date());
+
     let field_index = 0;
 
-    const builder = new FormBuilder(document, () => new Date());
+    function setVisibility(sectionId) {
+        const sectionIds = ['intro', 'builder', 'genai'];
+        for (const id of sectionIds) {
+            document.getElementById(id).hidden = sectionId !== id;
+        }
+    }
+
+    function editForm(formObject) {
+        const header = document.getElementById("builder-header");
+        header.querySelector("#id").value = formObject.id;
+        header.querySelector("#title").value = formObject.title;
+
+        for (const fieldData of formObject.fields) {
+            const field_id = addField();
+
+            const current_field = document.getElementById(field_id);
+
+            for (const propName in fieldData) {
+                const element = current_field.querySelector(`#${propName}`);
+                element.value = fieldData[propName];
+                if (propName === "id") {
+                    element.dispatchEvent(new Event('keyup', { bubbles: true }));
+                }
+                else if (propName === "type") {
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        }
+        setVisibility("builder");
+    }
+
+    function clearForm() {
+        field_index = 0;
+        document.getElementById("builder-header").innerText = '';
+        document.getElementById("builder-fields").innerText = '';
+        builder.build(forms.header, "builder-header");
+    }
+
+    document.getElementById("btn-scratch").addEventListener("mousedown", () => setVisibility("builder"));
+    document.getElementById("btn-gen-ai").addEventListener("mousedown", () => setVisibility("genai"));
+    document.getElementById("btn-upload").addEventListener("mousedown", () => {
+        // open file picker to get json file from user
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json,application/json";
+        input.addEventListener("change", () => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                const uploadedForm = JSON.parse(reader.result);
+                sessionStorage.formObject = JSON.stringify(uploadedForm);
+                clearForm();
+                editForm(uploadedForm);
+            });
+            reader.readAsText(file);
+        });
+      input.click();
+    });
+    document.getElementById("btn-back-from-generate").addEventListener("mousedown", () => setVisibility("intro"));
+    document.getElementById("btn-back-from-build").addEventListener("mousedown", () => setVisibility("intro"));
+    document.getElementById("btn-clear").addEventListener("click", () => {
+        sessionStorage.clear();
+        clearForm();
+    });
+
     builder.build(forms.header, "builder-header");
     const createElementCreator = (tagName) => (a, ...b) => builder.element(tagName, a, ...b);
 
@@ -130,13 +220,13 @@
 
     document.getElementById("add_field").addEventListener("click", addField);
 
-    document.getElementById("toggle_sections").addEventListener("click", () => {
+    document.getElementById("toggle_sections").addEventListener("mousedown", () => {
         const details = document.querySelectorAll("#builder-fields details");
         const anyOpen = Array.from(details).some(d => d.open);
         details.forEach(d => d.open = !anyOpen);
     });
 
-    document.getElementById("download-btn").addEventListener("click", () => {
+    document.getElementById("btn-download").addEventListener("mousedown", () => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -168,7 +258,7 @@
         downloadAnchorNode.click();
     });
 
-    document.getElementById("preview-btn").addEventListener("click", e => {
+    document.getElementById("btn-preview").addEventListener("mousedown", e => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -198,31 +288,10 @@
     document.title = formObject.title;
     document.getElementById("builder-title").innerText = formObject.title;
 
-    const parameters = window.location.search.substring(1).split('&');
-
-    if (parameters.includes("edit=true")) {
-        const formObject = JSON.parse(sessionStorage.formObject);
-        const header = document.getElementById("builder-header");
-        header.querySelector("#id").value = formObject.id;
-        header.querySelector("#title").value = formObject.title;
-
-        for (const fieldData of formObject.fields) {
-            const field_id = addField();
-
-            const current_field = document.getElementById(field_id);
-
-            for (const propName in fieldData) {
-                const element = current_field.querySelector(`#${propName}`);
-                element.value = fieldData[propName];
-                if (propName === "id") {
-                    element.dispatchEvent(new Event('keyup', { bubbles: true }));
-                }
-                else if (propName === "type") {
-                    element.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            }
-        }
+    try {
+        editForm(JSON.parse(sessionStorage.formObject));
     }
+    catch {}
 </script>
 
 </html>

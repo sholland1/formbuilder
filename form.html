@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <div id="main">
+    <div class="container">
         <div id="preview" hidden>
             <span>Preview mode</span>
             <button id="edit-btn">Edit</button>
@@ -20,24 +20,23 @@
 
 <script type="module">
     import FormBuilder from "./FormBuilder.js";
-    import defaultForm from './basic_form.json' with { type: 'json' }
 
-    const parameters = window.location.search.substring(1).split('&');
     let formObject;
     try {
         formObject = JSON.parse(sessionStorage.formObject);
     }
     catch {
-        formObject = defaultForm;
+        window.location = "/builder_form.html"
     }
 
+    const parameters = window.location.search.substring(1).split('&');
     if (parameters.includes("preview=true")) {
         const previewElement = document.getElementById("preview");
         previewElement.hidden = false;
 
         document.getElementById("edit-btn").addEventListener("click", () => {
             sessionStorage.formObject = JSON.stringify(formObject);
-            window.location = "/builder_form.html?edit=true"
+            window.location = "/builder_form.html"
         });
     }
 

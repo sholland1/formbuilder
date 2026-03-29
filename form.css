@@ -11,7 +11,7 @@
 
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;color:#111;background:var(--bg);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-#main{max-width:900px;margin:32px auto;padding:24px;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4)), var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(16,24,40,0.08)}
+.container{max-width:900px;margin:32px auto;padding:24px;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4)), var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(16,24,40,0.08)}
 #builder-title{margin:0 0 var(--gap);font-size:clamp(18px,2.4vw,28px);color:#0f172a}
 
 /* form layout */
@@ -117,7 +117,7 @@ button:hover{background:rgba(0,0,0,0.04)}
 
 /* responsive adjustments */
 @media (max-width:560px){
-    #main{margin:16px;padding:16px}
+    .container{margin:16px;padding:16px}
     .builder-number > div{flex-direction:column;align-items:stretch}
     input[type="number"]{width:100%}
 }
