@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="form.css">
     <style>
-        #builder-form {
+        form#builder-form {
             summary {
                 height:2.2em;
                 align-content:center;
@@ -24,6 +24,12 @@
 
         #intro {
             text-align: center;
+        }
+
+        textarea#prompt {
+            height: 20em;
+            width: 100%;
+            resize: none;
         }
     </style>
 </head>
@@ -82,6 +88,15 @@
         for (const id of sectionIds) {
             document.getElementById(id).hidden = sectionId !== id;
         }
+
+        const selectors = {
+            builder: 'input#id',
+            genai: 'textarea#prompt',
+        };
+        const selector = selectors[sectionId];
+        if (selector) {
+            requestAnimationFrame(() => document.querySelector(selector).focus());
+        }
     }
 
     function editForm(formObject) {
@@ -113,6 +128,7 @@
         document.getElementById("builder-header").innerText = '';
         document.getElementById("builder-fields").innerText = '';
         builder.build(forms.header, "builder-header");
+        document.querySelector('input#id').focus();
     }
 
     document.getElementById("btn-scratch").addEventListener("mousedown", () => setVisibility("builder"));
