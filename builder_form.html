@@ -111,7 +111,12 @@
 
             for (const propName in fieldData) {
                 const element = current_field.querySelector(`#${propName}`);
-                element.value = fieldData[propName];
+                if (propName === 'required') {
+                    element.value = fieldData[propName] !== false ? 'Yes' : 'No';
+                }
+                else {
+                    element.value = fieldData[propName];
+                }
                 if (propName === "id") {
                     element.dispatchEvent(new Event('keyup', { bubbles: true }));
                 }

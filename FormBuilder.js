@@ -30,26 +30,26 @@ export default class FormBuilder {
 
         let inputElements;
         if (item.type === "text") {
-            inputElements = [ this.element("input", { id: item.id, type: "text", pattern: item.pattern, placeholder: item.placeholder ?? "", maxlength: item.maxlength, required: item.required ?? true }) ];
+            inputElements = [ this.element("input", { id: item.id, type: "text", pattern: item.pattern, placeholder: item.placeholder ?? "", maxlength: item.maxlength, required: item.required !== false }) ];
         }
         else if (item.type === "multitext") {
-            inputElements = [ this.element("input", { id: item.id, type: "text", pattern: item.pattern, placeholder: item.placeholder ?? "", required: item.required ?? true }) ];
+            inputElements = [ this.element("input", { id: item.id, type: "text", pattern: item.pattern, placeholder: item.placeholder ?? "", required: item.required !== false }) ];
         }
         else if (item.type === "number") {
             inputElements = [
-                this.element("input", { id: item.id, type: item.type, pattern: "\\d*", min: item.min, max: item.max, step: item.step, required: item.required ?? true,
+                this.element("input", { id: item.id, type: item.type, pattern: "\\d*", min: item.min, max: item.max, step: item.step, required: item.required !== false,
                     oninput: `this.nextElementSibling.value = this.value;`
                 }),
                 this.element("input", {
-                    id: item.id + "-slider", type: "range", min: item.min, max: item.max, step: item.step, required: item.required ?? true,
+                    id: item.id + "-slider", type: "range", min: item.min, max: item.max, step: item.step, required: item.required !== false,
                     oninput: `this.previousElementSibling.value = this.value;`
                 }),
             ];
         }
         else if (item.type === "select") {
             inputElements = [
-                this.element("select", { id: item.id, required: item.required ?? true },
-                this.element("option", {}, ""),
+                this.element("select", { id: item.id, required: item.required !== false },
+                    this.element("option", {}, ""),
                     ...item.options.map(o => this.element("option", {}, o)))
             ];
         }
@@ -64,7 +64,7 @@ export default class FormBuilder {
         else if (item.type === "date") {
             let minDate = item.min === "today" ? currentDateStr : item.min;
             let maxDate = item.max === "today" ? currentDateStr : item.max;
-            inputElements = [ this.element("input", { id: item.id, type: item.type, min: minDate, max: maxDate, required: item.required ?? true }) ];
+            inputElements = [ this.element("input", { id: item.id, type: item.type, min: minDate, max: maxDate, required: item.required !== false }) ];
         }
         else if (item.type === "counter") {
             inputElements = [
@@ -78,10 +78,12 @@ export default class FormBuilder {
             inputElements = [ this.element("input", { id: item.id, type: item.type }) ];
         }
         else if (item.type === "bool") {
+            let required = item.required !== false;
+            let items = required ? [] : [''];
+            items.push('Yes', 'No');
             inputElements = [
-                this.element("select", { id: item.id, required: item.required ?? true },
-                this.element("option", {}, ""),
-                    ...["Yes", "No"].map(o => this.element("option", {}, o)))
+                this.element('select', { id: item.id, required },
+                    ...items.map(o => this.element('option', {}, o)))
             ];
         }
         else {
