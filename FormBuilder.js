@@ -175,6 +175,10 @@ export default class FormBuilder {
         for (const f of formObject.fields) {
             formDiv.appendChild(this.#createComponent(f, currentDateStr));
         }
+
+        const inputs = formDiv.getElementsByTagName('input');
+        if (inputs.length > 0)
+            inputs[0].focus();
     }
 
     getFormData(id) {
