@@ -35,7 +35,7 @@
         .draggable { cursor: grab }
         .dragging { cursor: grabbing !important }
         .dragging-over { border-bottom: dotted }
-        html.dragging details summary * { pointer-events: none }
+        body.dragging details summary * { pointer-events: none }
     </style>
 </head>
 
@@ -195,10 +195,12 @@
 
         const index_copy = field_index;
         field_grip.addEventListener('dragstart', e => {
-            document.documentElement.classList.add('dragging');
+            // setTimeout is necessary to work around Chrome bug where dragend
+            // event triggers immediately if DOM is changed in dragstart handler
+            setTimeout(() => document.body.classList.add('dragging'), 0);
             e.dataTransfer.setData('text/plain', index_copy);
         });
-        field_grip.addEventListener('dragend', e => document.documentElement.classList.remove('dragging'));
+        field_grip.addEventListener('dragend', e => document.body.classList.remove('dragging'));
         field_summary.addEventListener('dragenter', e => field_summary.classList.add('dragging-over'));
         field_summary.addEventListener('dragleave', e => field_summary.classList.remove('dragging-over'));
         field_summary.addEventListener('dragover', e => e.preventDefault());
