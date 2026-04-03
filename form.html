@@ -42,7 +42,7 @@
 
     const form_id = 'basic-form';
     if (formObject) {
-        const builder = new FormBuilder(document, () => new Date());
+        const builder = new FormBuilder(document, () => Temporal.Now.plainDateTimeISO());
         builder.build(formObject, form_id);
 
         document.title = formObject.title;

@@ -86,7 +86,7 @@
     import FormBuilder from './FormBuilder.js';
 
     const forms = formObject.forms;
-    const builder = new FormBuilder(document, () => new Date());
+    const builder = new FormBuilder(document, () => Temporal.Now.plainDateTimeISO());
 
     let field_index = 0;
 

@@ -86,6 +86,76 @@ export default class FormBuilder {
                     ...items.map(o => this.element('option', {}, o)))
             ];
         }
+        else if (item.type === 'timer') {
+            function formatDuration(duration) {
+                // Round to centiseconds (hundredths of a second) for clean tt
+                const rounded = duration.round({
+                    smallestUnit: 'millisecond',   // or 'microsecond' for more precision
+                    roundingIncrement: 10,         // 10 ms = 1 centisecond
+                    roundingMode: 'halfExpand'     // standard rounding
+                });
+
+                // Get total seconds including fractional part
+                const totalSeconds = rounded.total({ unit: 'second' });
+
+                // Extract components
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+
+                // Hundredths of a second (tt)
+                const fractional = totalSeconds % 1;           // e.g. 0.5678
+                const hundredths = Math.round(fractional * 100); // 0–99
+
+                // Zero-pad everything
+                const hh = String(hours).padStart(2, '0');
+                const mm = String(minutes).padStart(2, '0');
+                const ss = String(seconds).padStart(2, '0');
+                const tt = String(hundredths).padStart(2, '0');
+
+                return `${hh}:${mm}:${ss}:${tt}`;
+            }
+
+            let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
+            let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
+            let currentDuration = new Temporal.Duration();
+            startButton.addEventListener('click', e => {
+                if (resetButton.disabled) {
+                    startButton.innerText = 'Start';
+                    resetButton.disabled = false;
+                    return;
+                }
+                startButton.innerText = 'Stop';
+                resetButton.disabled = true;
+
+                let ee = e.target.parentElement.children[0].children[0];
+                let currentTime = this.#getDate();
+                let currentObject = this;
+                function addSec(d) {
+                    if (!resetButton.disabled) {
+                        currentDuration = d;
+                        return;
+                    }
+                    setTimeout(() => {
+                        let newDuration = currentObject.#getDate().since(currentTime).add(currentDuration);
+                        ee.innerText = formatDuration(newDuration);
+                        addSec(newDuration);
+                    }, 10);
+                }
+                addSec(currentDuration);
+            });
+            resetButton.addEventListener('click', e => {
+                let ee = e.target.parentElement.children[0].children[0];
+                currentDuration = new Temporal.Duration();
+                ee.innerText = formatDuration(currentDuration);
+            });
+
+            inputElements = [
+                this.element('div', { id: item.id },
+                    this.element('span', {}, formatDuration(currentDuration))),
+                startButton, resetButton,
+            ];
+        }
         else {
             inputElements = ['Unsupported element type: ' + item.type];
         }
@@ -101,7 +171,7 @@ export default class FormBuilder {
 
         if (formObject.title) formDiv.appendChild(this.element('h1', { id: 'builder-title' }, formObject.title));
 
-        const currentDateStr = this.#getDate().toLocaleDateString('en-CA'); //format date like YYYY-MM-DD
+        const currentDateStr = this.#getDate().toPlainDate().toString(); //format date like YYYY-MM-DD
         for (const f of formObject.fields) {
             formDiv.appendChild(this.#createComponent(f, currentDateStr));
         }
