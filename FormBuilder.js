@@ -87,72 +87,67 @@ export default class FormBuilder {
             ];
         }
         else if (item.type === 'timer') {
-            function formatDuration(duration) {
-                // Round to centiseconds (hundredths of a second) for clean tt
-                const rounded = duration.round({
-                    smallestUnit: 'millisecond',   // or 'microsecond' for more precision
-                    roundingIncrement: 10,         // 10 ms = 1 centisecond
-                    roundingMode: 'halfExpand'     // standard rounding
-                });
+            function formatDuration(ms) {
+                if (typeof ms !== 'number' || isNaN(ms) || ms < 0) {
+                    return "00:00:00:00";
+                }
+                // Convert to centiseconds (1/100th of a second)
+                let totalCentiseconds = Math.trunc(ms / 10);
 
-                // Get total seconds including fractional part
-                const totalSeconds = rounded.total({ unit: 'second' });
+                const hours = Math.trunc(totalCentiseconds / (3600 * 100));
+                totalCentiseconds %= 3600 * 100;
 
-                // Extract components
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = Math.floor(totalSeconds % 60);
+                const minutes = Math.trunc(totalCentiseconds / (60 * 100));
+                totalCentiseconds %= 60 * 100;
 
-                // Hundredths of a second (tt)
-                const fractional = totalSeconds % 1;           // e.g. 0.5678
-                const hundredths = Math.round(fractional * 100); // 0–99
+                const seconds = Math.trunc(totalCentiseconds / 100);
+                const centiseconds = totalCentiseconds % 100;
 
-                // Zero-pad everything
+                // Pad with leading zeros
                 const hh = String(hours).padStart(2, '0');
                 const mm = String(minutes).padStart(2, '0');
                 const ss = String(seconds).padStart(2, '0');
-                const tt = String(hundredths).padStart(2, '0');
+                const tt = String(centiseconds).padStart(2, '0');
 
                 return `${hh}:${mm}:${ss}:${tt}`;
             }
 
             let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
             let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
-            let currentDuration = new Temporal.Duration();
-            startButton.addEventListener('click', e => {
+            let currentDuration = 0;
+            let durationDisplay = this.#document.createTextNode(formatDuration(currentDuration));
+
+            startButton.addEventListener('mousedown', e => {
                 if (resetButton.disabled) {
-                    startButton.innerText = 'Start';
+                    startButton.textContent = 'Start';
                     resetButton.disabled = false;
                     return;
                 }
-                startButton.innerText = 'Stop';
+                startButton.textContent = 'Stop';
                 resetButton.disabled = true;
 
-                let ee = e.target.parentElement.children[0].children[0];
-                let currentTime = this.#getDate();
-                let currentObject = this;
+                let currentTime = performance.now();
                 function addSec(d) {
                     if (!resetButton.disabled) {
                         currentDuration = d;
                         return;
                     }
-                    setTimeout(() => {
-                        let newDuration = currentObject.#getDate().since(currentTime).add(currentDuration);
-                        ee.innerText = formatDuration(newDuration);
+                    requestAnimationFrame(() => {
+                        let newDuration = performance.now() - currentTime  + currentDuration;
+                        durationDisplay.data = formatDuration(newDuration);
                         addSec(newDuration);
-                    }, 10);
+                    });
                 }
                 addSec(currentDuration);
             });
-            resetButton.addEventListener('click', e => {
-                let ee = e.target.parentElement.children[0].children[0];
-                currentDuration = new Temporal.Duration();
-                ee.innerText = formatDuration(currentDuration);
+            resetButton.addEventListener('mousedown', e => {
+                currentDuration = 0;
+                durationDisplay.data = formatDuration(currentDuration);
             });
 
             inputElements = [
                 this.element('div', { id: item.id },
-                    this.element('span', {}, formatDuration(currentDuration))),
+                    this.element('span', {}, durationDisplay)),
                 startButton, resetButton,
             ];
         }
