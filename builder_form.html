@@ -31,6 +31,11 @@
             width: 100%;
             resize: none;
         }
+
+        .draggable { cursor: grab }
+        .dragging { cursor: grabbing !important }
+        .dragging-over { border-bottom: dotted }
+        html.dragging details summary * { pointer-events: none }
     </style>
 </head>
 
@@ -64,7 +69,9 @@
                     <div id='builder-header'></div>
                 </details>
 
-                <div id='builder-fields'></div>
+                <div id='builder-fields'>
+                    <div id='placeholder' style='height:8px'></div>
+                </div>
             </form>
             <button id='btn-download' type='button'>Download</button>
             <button id='btn-preview' type='button'>Preview</button>
@@ -174,20 +181,39 @@
     const button = createElementCreator('button');
 
     function addField() {
-        let field_form = details({ id: `field_${field_index}`, open: false },
-            summary({},
-                span({id: `field_id_${field_index}`}, `Field ${field_index}`),
-                div({class: 'builder-details-buttons'},
-                    button({id: `remove_field_${field_index}`, type: 'button'}, '🗑️ Remove field'),
-                    button({id: `move_field_up_${field_index}`, type: 'button'}, '↑ Move field up'),
-                    button({id: `move_field_down_${field_index}`, type: 'button'}, '↓ Move field down'))),
-                div({id: `field_start_${field_index}`, class: 'builder-field-start'}),
-                div({id: `field_type_${field_index}`}))
+        let field_grip = div({ draggable: true, class: 'draggable', style: 'display:inline' }, '⣿⣿');
+        let field_summary = summary({},
+            span({id: `field_id_${field_index}`}, `Field ${field_index}`),
+            div({class: 'builder-details-buttons'},
+                field_grip,
+                button({id: `remove_field_${field_index}`, type: 'button'}, '🗑️'),
+            ));
+        let field_form = details({ id: `field_${field_index}` },
+            field_summary,
+            div({id: `field_start_${field_index}`, class: 'builder-field-start'}),
+            div({id: `field_type_${field_index}`}));
+
+        const index_copy = field_index;
+        field_grip.addEventListener('dragstart', e => {
+            document.documentElement.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', index_copy);
+        });
+        field_grip.addEventListener('dragend', e => document.documentElement.classList.remove('dragging'));
+        field_summary.addEventListener('dragenter', e => field_summary.classList.add('dragging-over'));
+        field_summary.addEventListener('dragleave', e => field_summary.classList.remove('dragging-over'));
+        field_summary.addEventListener('dragover', e => e.preventDefault());
+        field_summary.addEventListener('drop', e => {
+            e.preventDefault();
+            e.target.classList.remove('dragging-over');
+            let result = Number(e.dataTransfer.getData('text/plain'));
+            if (result === index_copy) return;
+            field_form.after(
+                document.getElementById(`field_${result}`));
+        });
 
         document.getElementById('builder-fields').appendChild(field_form);
         builder.build(forms.field_start, `field_start_${field_index}`);
 
-        const index_copy = field_index;
         const current_field = document.getElementById(`field_${field_index}`);
         current_field.querySelector('#type').addEventListener('change',
             e => builder.build(forms[`field_type_${e.target.value}`], `field_type_${index_copy}`));
@@ -224,21 +250,20 @@
         document.getElementById(`remove_field_${field_index}`).addEventListener('click',
             () => document.getElementById(`field_${index_copy}`).remove());
 
-        document.getElementById(`move_field_up_${field_index}`).addEventListener('click', () => {
-            const field = document.getElementById(`field_${index_copy}`);
-            const previous = field.previousElementSibling;
-            if (previous) field.parentNode.insertBefore(field, previous);
-        });
-
-        document.getElementById(`move_field_down_${field_index}`).addEventListener('click', () => {
-            const field = document.getElementById(`field_${index_copy}`);
-            const next = field.nextElementSibling;
-            if (next) field.parentNode.insertBefore(next, field);
-        });
-
         return `field_${field_index++}`;
     }
 
+    const placeholder = document.getElementById('placeholder');
+    placeholder.addEventListener('dragenter', e => placeholder.classList.add('dragging-over'));
+    placeholder.addEventListener('dragleave', e => placeholder.classList.remove('dragging-over'));
+    placeholder.addEventListener('dragover', e => e.preventDefault());
+    placeholder.addEventListener('drop', e => {
+        e.preventDefault();
+        e.target.classList.remove('dragging-over');
+        let result = Number(e.dataTransfer.getData('text/plain'));
+        placeholder.after(
+            document.getElementById(`field_${result}`));
+    });
     document.getElementById('add_field').addEventListener('click', addField);
 
     document.getElementById('toggle_sections').addEventListener('mousedown', () => {
