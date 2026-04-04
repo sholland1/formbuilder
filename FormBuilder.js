@@ -59,8 +59,8 @@ export default class FormBuilder {
                 ]);
         }
         else if (item.type === 'date') {
-            let minDate = item.min === 'today' ? currentDateStr : item.min;
-            let maxDate = item.max === 'today' ? currentDateStr : item.max;
+            const minDate = item.min === 'today' ? currentDateStr : item.min;
+            const maxDate = item.max === 'today' ? currentDateStr : item.max;
             inputElements = [ this.element('input', { id: item.id, type: item.type, min: minDate, max: maxDate, required: item.required !== false }) ];
         }
         else if (item.type === 'counter') {
@@ -78,7 +78,7 @@ export default class FormBuilder {
             inputElements = [ this.element('input', { id: item.id, type: item.type }) ];
         }
         else if (item.type === 'bool') {
-            let required = item.required !== false;
+            const required = item.required !== false;
             let items = required ? [] : [''];
             items.push('Yes', 'No');
             inputElements = [
@@ -127,7 +127,7 @@ export default class FormBuilder {
                 startButton.textContent = 'Stop';
                 resetButton.disabled = true;
 
-                let currentTime = performance.now();
+                const currentTime = performance.now();
                 function addSec(d) {
                     if (!resetButton.disabled) {
                         currentDuration = d;
@@ -135,13 +135,14 @@ export default class FormBuilder {
                         return;
                     }
                     requestAnimationFrame(() => {
-                        let newDuration = performance.now() - currentTime  + currentDuration;
+                        const newDuration = performance.now() - currentTime  + currentDuration;
                         durationDisplay.data = formatDuration(newDuration);
                         addSec(newDuration);
                     });
                 }
                 addSec(currentDuration);
             });
+
             resetButton.addEventListener('mousedown', e => {
                 currentDuration = 0;
                 durationDisplay.data = formatDuration(currentDuration);
@@ -184,7 +185,7 @@ export default class FormBuilder {
         const items = element.getElementsByClassName('builder-item');
         let formData = {};
         for (const item of items) {
-            let type = Array.from(item.classList).find(c => c !== 'builder-item').replace('builder-', '');
+            const type = Array.from(item.classList).find(c => c !== 'builder-item').replace('builder-', '');
             if (type === 'timestamp') {
                 formData[item.id] = this.#getDate();
                 continue;
@@ -193,7 +194,7 @@ export default class FormBuilder {
             let inputs = Array.from(item.getElementsByTagName('*')).filter(e => e.id)
 
             if (type === 'multiselect') {
-                let actual_id = Array.from(item.getElementsByTagName('label'))
+                const actual_id = Array.from(item.getElementsByTagName('label'))
                     .find(l => l.classList.contains('builder-question'))
                     .getAttribute('for');
                 formData[actual_id] = inputs
