@@ -30,19 +30,16 @@ export default class FormBuilder {
 
         let inputElements;
         if (item.type === 'text') {
-            inputElements = [ this.element('input', { id: item.id, type: 'text', pattern: item.pattern, placeholder: item.placeholder ?? '', maxlength: item.maxlength, required: item.required !== false }) ];
+            inputElements = [ this.element('input', { id: item.id, type: 'text', pattern: item.pattern, placeholder: item.placeholder ?? '', maxlength: String(item.maxlength), required: item.required !== false }) ];
         }
         else if (item.type === 'multitext') {
             inputElements = [ this.element('input', { id: item.id, type: 'text', pattern: item.pattern, placeholder: item.placeholder ?? '', required: item.required !== false }) ];
         }
         else if (item.type === 'number') {
             inputElements = [
-                this.element('input', { id: item.id, type: item.type, pattern: '\\d*', min: item.min, max: item.max, step: item.step, required: item.required !== false,
-                    oninput: `this.nextElementSibling.value = this.value;`
-                }),
                 this.element('input', {
-                    id: item.id + '-slider', type: 'range', min: item.min, max: item.max, step: item.step, required: item.required !== false,
-                    oninput: `this.previousElementSibling.value = this.value;`
+                    id: item.id, type: 'number', required: item.required !== false,
+                    min: String(item.min), max: String(item.max), step: String(item.step)
                 }),
             ];
         }
@@ -67,12 +64,15 @@ export default class FormBuilder {
             inputElements = [ this.element('input', { id: item.id, type: item.type, min: minDate, max: maxDate, required: item.required !== false }) ];
         }
         else if (item.type === 'counter') {
-            inputElements = [
-                this.element('input', { id: item.id, type: 'number', step: 1, value: '0', disabled: true }),
-                this.element('button', { type: 'button', class: 'builder-button-plus', onclick: `let ee = this.parentElement.children[0];ee.value = (+ee.value)+1;` }, '+'),
-                this.element('button', { type: 'button', class: 'builder-button-minus', onclick: `let ee = this.parentElement.children[0];ee.value = (+ee.value) === 0 ? 0 : (+ee.value)-1;` }, '-'),
-                this.element('button', { type: 'button', class: 'builder-button-clear', onclick: `this.parentElement.children[0].value = 0;` }, 'Clear'),
-            ];
+            let inputElement = this.element('input', { id: item.id, type: 'number', step: '1', value: '0', disabled: true });
+            let plusButton = this.element('button', { type: 'button', class: 'builder-button-plus' }, '+');
+            let minusButton = this.element('button', { type: 'button', class: 'builder-button-minus' }, '-');
+            let clearButton = this.element('button', { type: 'button', class: 'builder-button-clear' }, 'Clear');
+            plusButton.addEventListener('click', () => inputElement.value++);
+            minusButton.addEventListener('click', () => inputElement.value = Math.max(inputElement.value-1, 0));
+            clearButton.addEventListener('click', () => inputElement.value = 0);
+
+            inputElements = [ inputElement, plusButton, minusButton, clearButton ];
         }
         else if (item.type === 'color') {
             inputElements = [ this.element('input', { id: item.id, type: item.type }) ];

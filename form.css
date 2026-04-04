@@ -47,24 +47,8 @@ input:focus, select:focus, textarea:focus{
     box-shadow:0 4px 20px rgba(37,99,235,0.12);
 }
 
-/* number + range combo (number + slider are inside a div) */
-.builder-number{display:flex;flex-direction:column;gap:8px}
-.builder-number > div{display:flex;align-items:center;gap:12px}
-.builder-number input[type="number"]{width:120px;padding:8px;text-align:center}
-input[type="range"]{flex:1;height:28px}
-
-/* style range slider */
-input[type="range"]{
-    background:transparent;
-}
-input[type="range"]::-webkit-slider-runnable-track{
-    height:6px;background:#e5e7eb;border-radius:999px;
-}
-input[type="range"]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 2px 6px rgba(37,99,235,0.25);margin-top:-6px;
-}
-input[type="range"]::-moz-range-track{height:6px;background:#e5e7eb;border-radius:999px}
-input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);border:none}
+/* number */
+input[type="number"]{width:120px;padding:8px;text-align:center}
 
 /* select */
 select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);background-position:calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:36px}
