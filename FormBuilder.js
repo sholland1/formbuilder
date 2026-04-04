@@ -115,7 +115,7 @@ export default class FormBuilder {
             let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
             let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
             let currentDuration = 0;
-            let hiddenDurationValue = this.element('span', { id: item.id, hidden: true }, currentDuration);
+            let hiddenDurationValue = this.element('input', { id: item.id, type: 'number', hidden: true, value: '0' });
             let durationDisplay = this.#document.createTextNode(formatDuration(currentDuration));
 
             startButton.addEventListener('mousedown', e => {
@@ -131,7 +131,7 @@ export default class FormBuilder {
                 function addSec(d) {
                     if (!resetButton.disabled) {
                         currentDuration = d;
-                        hiddenDurationValue.textContent = Math.trunc(currentDuration / 10);
+                        hiddenDurationValue.value = Math.trunc(currentDuration / 10);
                         return;
                     }
                     requestAnimationFrame(() => {
@@ -146,7 +146,7 @@ export default class FormBuilder {
             resetButton.addEventListener('mousedown', e => {
                 currentDuration = 0;
                 durationDisplay.data = formatDuration(currentDuration);
-                hiddenDurationValue.textContent = currentDuration;
+                hiddenDurationValue.value = currentDuration;
             });
 
             inputElements = [
@@ -231,7 +231,7 @@ export default class FormBuilder {
                 }
             }
             else if (type === 'timer') {
-                const durationInMs = Number(input.textContent) * 10;
+                const durationInMs = Number(input.value) * 10;
                 formData[input.id] = Temporal.Duration.from({milliseconds: durationInMs});
             }
             else {
