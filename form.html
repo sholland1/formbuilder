@@ -56,7 +56,7 @@
             let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute('href', dataStr);
-            downloadAnchorNode.setAttribute('download', 'form_data.json');
+            downloadAnchorNode.setAttribute('download', `${formObject.id}.answers.json`);
             document.body.appendChild(downloadAnchorNode); // required for firefox
             downloadAnchorNode.click();
         });

@@ -298,9 +298,9 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
 }
 
 int main(void) {
-    const char deserialize_path[] = "comprehensive_test_form.json";
-    const char scripted_path[] = "basic_form.json";
-    const char answers_path[] = "basic_form_answers.json";
+    const char deserialize_path[] = "comprehensive-test-form.json";
+    const char scripted_path[] = "basic-form.json";
+    const char answers_path[] = "basic-form.answers.json";
 
     setenv("TZ", "UTC", 1);
     tzset();

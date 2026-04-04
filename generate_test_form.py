@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-OUTPUT_PATH = Path("comprehensive_test_form.json")
+OUTPUT_PATH = Path("comprehensive-test-form.json")
 
 
 def state_label(value):
@@ -248,7 +248,7 @@ def build_fields():
 
 def main():
     form = {
-        "id": "basic-form",
+        "id": "comprehensive-test-form",
         "title": "All Field Permutations",
         "fields": build_fields(),
     }
