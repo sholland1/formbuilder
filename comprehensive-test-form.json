@@ -1222,9 +1222,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-missing_start-date-1900-01-01_end-date-[today]",
+            "id": "date_required-missing_start-date-1900-01-01_end-date-today",
             "type": "date",
-            "question": "Date field: required-missing, start-date-1900-01-01, end-date-[today]",
+            "question": "Date field: required-missing, start-date-1900-01-01, end-date-today",
             "start_date": "1900-01-01",
             "end_date": "[today]"
         },
@@ -1249,43 +1249,43 @@
             "start_date": "1900-01-01"
         },
         {
-            "id": "date_required-missing_start-date-[today]_end-date-1900-01-01",
+            "id": "date_required-missing_start-date-today_end-date-1900-01-01",
             "type": "date",
-            "question": "Date field: required-missing, start-date-[today], end-date-1900-01-01",
+            "question": "Date field: required-missing, start-date-today, end-date-1900-01-01",
             "start_date": "[today]",
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-missing_start-date-[today]_end-date-[today]",
+            "id": "date_required-missing_start-date-today_end-date-today",
             "type": "date",
-            "question": "Date field: required-missing, start-date-[today], end-date-[today]",
+            "question": "Date field: required-missing, start-date-today, end-date-today",
             "start_date": "[today]",
             "end_date": "[today]"
         },
         {
-            "id": "date_required-missing_start-date-[today]_end-date-2026-03-19",
+            "id": "date_required-missing_start-date-today_end-date-2026-03-19",
             "type": "date",
-            "question": "Date field: required-missing, start-date-[today], end-date-2026-03-19",
+            "question": "Date field: required-missing, start-date-today, end-date-2026-03-19",
             "start_date": "[today]",
             "end_date": "2026-03-19"
         },
         {
-            "id": "date_required-missing_start-date-[today]_end-date-2099-12-31",
+            "id": "date_required-missing_start-date-today_end-date-2099-12-31",
             "type": "date",
-            "question": "Date field: required-missing, start-date-[today], end-date-2099-12-31",
+            "question": "Date field: required-missing, start-date-today, end-date-2099-12-31",
             "start_date": "[today]",
             "end_date": "2099-12-31"
         },
         {
-            "id": "date_required-missing_start-date-[today]_end-date-missing",
+            "id": "date_required-missing_start-date-today_end-date-missing",
             "type": "date",
-            "question": "Date field: required-missing, start-date-[today], end-date-missing",
+            "question": "Date field: required-missing, start-date-today, end-date-missing",
             "start_date": "[today]"
         },
         {
-            "id": "date_required-missing_start-date-2026-03-19_end-date-[today]",
+            "id": "date_required-missing_start-date-2026-03-19_end-date-today",
             "type": "date",
-            "question": "Date field: required-missing, start-date-2026-03-19, end-date-[today]",
+            "question": "Date field: required-missing, start-date-2026-03-19, end-date-today",
             "start_date": "2026-03-19",
             "end_date": "[today]"
         },
@@ -1310,9 +1310,9 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-missing_start-date-2099-12-31_end-date-[today]",
+            "id": "date_required-missing_start-date-2099-12-31_end-date-today",
             "type": "date",
-            "question": "Date field: required-missing, start-date-2099-12-31, end-date-[today]",
+            "question": "Date field: required-missing, start-date-2099-12-31, end-date-today",
             "start_date": "2099-12-31",
             "end_date": "[today]"
         },
@@ -1336,9 +1336,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-missing_start-date-missing_end-date-[today]",
+            "id": "date_required-missing_start-date-missing_end-date-today",
             "type": "date",
-            "question": "Date field: required-missing, start-date-missing, end-date-[today]",
+            "question": "Date field: required-missing, start-date-missing, end-date-today",
             "end_date": "[today]"
         },
         {
@@ -1367,9 +1367,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-True_start-date-1900-01-01_end-date-[today]",
+            "id": "date_required-True_start-date-1900-01-01_end-date-today",
             "type": "date",
-            "question": "Date field: required-True, start-date-1900-01-01, end-date-[today]",
+            "question": "Date field: required-True, start-date-1900-01-01, end-date-today",
             "required": true,
             "start_date": "1900-01-01",
             "end_date": "[today]"
@@ -1398,48 +1398,48 @@
             "start_date": "1900-01-01"
         },
         {
-            "id": "date_required-True_start-date-[today]_end-date-1900-01-01",
+            "id": "date_required-True_start-date-today_end-date-1900-01-01",
             "type": "date",
-            "question": "Date field: required-True, start-date-[today], end-date-1900-01-01",
+            "question": "Date field: required-True, start-date-today, end-date-1900-01-01",
             "required": true,
             "start_date": "[today]",
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-True_start-date-[today]_end-date-[today]",
+            "id": "date_required-True_start-date-today_end-date-today",
             "type": "date",
-            "question": "Date field: required-True, start-date-[today], end-date-[today]",
+            "question": "Date field: required-True, start-date-today, end-date-today",
             "required": true,
             "start_date": "[today]",
             "end_date": "[today]"
         },
         {
-            "id": "date_required-True_start-date-[today]_end-date-2026-03-19",
+            "id": "date_required-True_start-date-today_end-date-2026-03-19",
             "type": "date",
-            "question": "Date field: required-True, start-date-[today], end-date-2026-03-19",
+            "question": "Date field: required-True, start-date-today, end-date-2026-03-19",
             "required": true,
             "start_date": "[today]",
             "end_date": "2026-03-19"
         },
         {
-            "id": "date_required-True_start-date-[today]_end-date-2099-12-31",
+            "id": "date_required-True_start-date-today_end-date-2099-12-31",
             "type": "date",
-            "question": "Date field: required-True, start-date-[today], end-date-2099-12-31",
+            "question": "Date field: required-True, start-date-today, end-date-2099-12-31",
             "required": true,
             "start_date": "[today]",
             "end_date": "2099-12-31"
         },
         {
-            "id": "date_required-True_start-date-[today]_end-date-missing",
+            "id": "date_required-True_start-date-today_end-date-missing",
             "type": "date",
-            "question": "Date field: required-True, start-date-[today], end-date-missing",
+            "question": "Date field: required-True, start-date-today, end-date-missing",
             "required": true,
             "start_date": "[today]"
         },
         {
-            "id": "date_required-True_start-date-2026-03-19_end-date-[today]",
+            "id": "date_required-True_start-date-2026-03-19_end-date-today",
             "type": "date",
-            "question": "Date field: required-True, start-date-2026-03-19, end-date-[today]",
+            "question": "Date field: required-True, start-date-2026-03-19, end-date-today",
             "required": true,
             "start_date": "2026-03-19",
             "end_date": "[today]"
@@ -1468,9 +1468,9 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-True_start-date-2099-12-31_end-date-[today]",
+            "id": "date_required-True_start-date-2099-12-31_end-date-today",
             "type": "date",
-            "question": "Date field: required-True, start-date-2099-12-31, end-date-[today]",
+            "question": "Date field: required-True, start-date-2099-12-31, end-date-today",
             "required": true,
             "start_date": "2099-12-31",
             "end_date": "[today]"
@@ -1498,9 +1498,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-True_start-date-missing_end-date-[today]",
+            "id": "date_required-True_start-date-missing_end-date-today",
             "type": "date",
-            "question": "Date field: required-True, start-date-missing, end-date-[today]",
+            "question": "Date field: required-True, start-date-missing, end-date-today",
             "required": true,
             "end_date": "[today]"
         },
@@ -1533,9 +1533,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-False_start-date-1900-01-01_end-date-[today]",
+            "id": "date_required-False_start-date-1900-01-01_end-date-today",
             "type": "date",
-            "question": "Date field: required-False, start-date-1900-01-01, end-date-[today]",
+            "question": "Date field: required-False, start-date-1900-01-01, end-date-today",
             "required": false,
             "start_date": "1900-01-01",
             "end_date": "[today]"
@@ -1564,48 +1564,48 @@
             "start_date": "1900-01-01"
         },
         {
-            "id": "date_required-False_start-date-[today]_end-date-1900-01-01",
+            "id": "date_required-False_start-date-today_end-date-1900-01-01",
             "type": "date",
-            "question": "Date field: required-False, start-date-[today], end-date-1900-01-01",
+            "question": "Date field: required-False, start-date-today, end-date-1900-01-01",
             "required": false,
             "start_date": "[today]",
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-False_start-date-[today]_end-date-[today]",
+            "id": "date_required-False_start-date-today_end-date-today",
             "type": "date",
-            "question": "Date field: required-False, start-date-[today], end-date-[today]",
+            "question": "Date field: required-False, start-date-today, end-date-today",
             "required": false,
             "start_date": "[today]",
             "end_date": "[today]"
         },
         {
-            "id": "date_required-False_start-date-[today]_end-date-2026-03-19",
+            "id": "date_required-False_start-date-today_end-date-2026-03-19",
             "type": "date",
-            "question": "Date field: required-False, start-date-[today], end-date-2026-03-19",
+            "question": "Date field: required-False, start-date-today, end-date-2026-03-19",
             "required": false,
             "start_date": "[today]",
             "end_date": "2026-03-19"
         },
         {
-            "id": "date_required-False_start-date-[today]_end-date-2099-12-31",
+            "id": "date_required-False_start-date-today_end-date-2099-12-31",
             "type": "date",
-            "question": "Date field: required-False, start-date-[today], end-date-2099-12-31",
+            "question": "Date field: required-False, start-date-today, end-date-2099-12-31",
             "required": false,
             "start_date": "[today]",
             "end_date": "2099-12-31"
         },
         {
-            "id": "date_required-False_start-date-[today]_end-date-missing",
+            "id": "date_required-False_start-date-today_end-date-missing",
             "type": "date",
-            "question": "Date field: required-False, start-date-[today], end-date-missing",
+            "question": "Date field: required-False, start-date-today, end-date-missing",
             "required": false,
             "start_date": "[today]"
         },
         {
-            "id": "date_required-False_start-date-2026-03-19_end-date-[today]",
+            "id": "date_required-False_start-date-2026-03-19_end-date-today",
             "type": "date",
-            "question": "Date field: required-False, start-date-2026-03-19, end-date-[today]",
+            "question": "Date field: required-False, start-date-2026-03-19, end-date-today",
             "required": false,
             "start_date": "2026-03-19",
             "end_date": "[today]"
@@ -1634,9 +1634,9 @@
             "start_date": "2026-03-19"
         },
         {
-            "id": "date_required-False_start-date-2099-12-31_end-date-[today]",
+            "id": "date_required-False_start-date-2099-12-31_end-date-today",
             "type": "date",
-            "question": "Date field: required-False, start-date-2099-12-31, end-date-[today]",
+            "question": "Date field: required-False, start-date-2099-12-31, end-date-today",
             "required": false,
             "start_date": "2099-12-31",
             "end_date": "[today]"
@@ -1664,9 +1664,9 @@
             "end_date": "1900-01-01"
         },
         {
-            "id": "date_required-False_start-date-missing_end-date-[today]",
+            "id": "date_required-False_start-date-missing_end-date-today",
             "type": "date",
-            "question": "Date field: required-False, start-date-missing, end-date-[today]",
+            "question": "Date field: required-False, start-date-missing, end-date-today",
             "required": false,
             "end_date": "[today]"
         },

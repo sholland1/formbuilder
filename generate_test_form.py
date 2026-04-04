@@ -185,8 +185,8 @@ def build_date_fields():
     for req_state, startp, endp in filtered_combinations:
         labels = [
             f"required-{state_label(req_state)}",
-            f"start-date-{startp}",
-            f"end-date-{endp}",
+            f"start-date-{startp.removeprefix('[').removesuffix(']')}",
+            f"end-date-{endp.removeprefix('[').removesuffix(']')}",
         ]
         field = {
             "id": "date_" + "_".join(labels),
