@@ -34,7 +34,7 @@
         const previewElement = document.getElementById('preview');
         previewElement.hidden = false;
 
-        document.getElementById('edit-btn').addEventListener('click', () => {
+        document.getElementById('edit-btn').addEventListener('mousedown', () => {
             sessionStorage.formObject = JSON.stringify(formObject);
             window.location = '/builder_form.html'
         });

@@ -266,7 +266,7 @@
         placeholder.after(
             document.getElementById(`field_${result}`));
     });
-    document.getElementById('add_field').addEventListener('click', addField);
+    document.getElementById('add_field').addEventListener('mousedown', addField);
 
     document.getElementById('toggle_sections').addEventListener('mousedown', () => {
         const details = document.querySelectorAll('#builder-fields details');
