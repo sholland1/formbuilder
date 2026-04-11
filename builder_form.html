@@ -108,6 +108,7 @@
     }
 
     function editForm(formObject) {
+        const currentTime = Temporal.Now.instant();
         const header = document.getElementById('builder-header');
         header.querySelector('#id').value = formObject.id;
         header.querySelector('#title').value = formObject.title;
@@ -134,6 +135,8 @@
             }
         }
         setVisibility('builder');
+        let diff = Temporal.Now.instant().since(currentTime);
+        console.log(diff);
     }
 
     function clearForm() {
