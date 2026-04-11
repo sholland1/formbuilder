@@ -24,7 +24,7 @@ Additional properties depend on the type:
 Single-line text input.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 - **`placeholder`** (text) *(optional)*: placeholder hint text
 - **`maxlength`** (number) *(optional)*: maximum character length; max 8000
 - **`pattern`** (text) *(optional)*: regex the value must match
@@ -35,7 +35,7 @@ Single-line text input.
 Collects a comma-separated list of text entries.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 - **`placeholder`** (text) *(optional)*: placeholder hint text
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
@@ -48,7 +48,7 @@ Collects a comma-separated list of text entries.
 Numeric input.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
 - **`step`** (select) *(optional)*: one of "1", "2", "3", "4", "5", "10", "20", "25", "50", "100", "0.1", "0.2", "0.25", "0.5", "0.01", "0.02", "0.025", "0.05", "0.001", "0.002", "0.0025", "0.005", "0.0001", "0.0002", "0.00025", "0.0005"
@@ -59,7 +59,7 @@ Numeric input.
 Single-choice dropdown.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 - **`options`** (multitext): list of available choices (json array)
 
 ---
@@ -83,7 +83,7 @@ Automatically captures the current date and time when the form is submitted. No 
 Date picker.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 - **`start_date`** (date) *(optional)*: earliest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date
 - **`end_date`** (date) *(optional)*: latest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date
 
@@ -107,7 +107,7 @@ Color picker.
 Yes/No toggle.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool) *(optional)*: whether the field is required (default true)
+- **`required`** (bool): whether the field is required (default true)
 
 ---
 
