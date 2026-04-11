@@ -33,6 +33,8 @@
             resize: none;
         }
 
+        .wait-cursor { cursor:wait }
+
         .draggable { cursor: grab }
         .dragging { cursor: grabbing !important }
         .dragging-over { border-bottom: dotted }
@@ -51,10 +53,20 @@
 
         <div id='genai' hidden>
             <h1>Generate a form with AI</h1>
-            <label for='prompt'>Enter your prompt:</label>
-            <textarea id='prompt'></textarea>
-            <button id='btn-generate' type='button'>Generate</button>
-            <button id='btn-back-from-generate' type='button'>Back</button>
+            <div id='error-message' hidden></div>
+            <div id='prompt-form'>
+                <div>
+                    <label for='api-key'>OpenAI API key:</label>
+                    <input id='api-key' type='password' />
+                </div>
+                <label for='prompt'>Enter your prompt:</label>
+                <textarea id='prompt'></textarea>
+                <button id='btn-generate' type='button'>Generate</button>
+                <button id='btn-back-from-generate' type='button'>Back</button>
+            </div>
+            <div id='loading-message' hidden>
+                <h2>Generating form...</h2>
+            </div>
         </div>
 
         <div id='builder' hidden>
@@ -88,6 +100,7 @@
 
     const forms = formObject.forms;
     const builder = new FormBuilder(document, () => Temporal.Now.plainDateTimeISO());
+    let system_prompt_text = null;
 
     let field_index = 0;
 
@@ -109,6 +122,7 @@
 
     function editForm(formObject) {
         const currentTime = Temporal.Now.instant();
+
         const header = document.getElementById('builder-header');
         header.querySelector('#id').value = formObject.id;
         header.querySelector('#title').value = formObject.title;
@@ -135,6 +149,7 @@
             }
         }
         setVisibility('builder');
+
         let diff = Temporal.Now.instant().since(currentTime);
         console.log(diff);
     }
@@ -167,6 +182,76 @@
             reader.readAsText(file);
         });
       input.click();
+    });
+
+    async function generate_form_json(api_key, prompt) {
+        const url = 'https://api.openai.com/v1/chat/completions';
+
+        system_prompt_text = system_prompt_text ?? await load_prompt();
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${api_key}`,
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                    { role: 'system', content: system_prompt_text},
+                    { role: 'user', content: prompt},
+                ],
+                temperature: 0.0,
+                stream: false,
+            }),
+        });
+
+        const data = await response.json();
+        return JSON.parse(data.choices[0].message.content);
+    }
+
+    async function load_prompt() {
+        const response = await fetch("prompt.md");
+        return await response.text();
+    }
+
+    document.getElementById('btn-generate').addEventListener('mousedown', async () => {
+        const api_key = document.getElementById('api-key').value;
+        let error_message = document.getElementById('error-message');
+
+        if (!api_key) {
+            error_message.textContent = 'Please enter an API key.';
+            error_message.hidden = false;
+            return;
+        }
+        error_message.hidden = true;
+        sessionStorage.apiKey = api_key;
+
+        document.documentElement.classList.add('wait-cursor');
+        document.getElementById('prompt-form').hidden = true;
+        document.getElementById('loading-message').hidden = false;
+
+        const prompt = document.getElementById('prompt').value;
+        try {
+            const generated_form = await generate_form_json(api_key, prompt);
+            console.log(generated_form);
+            sessionStorage.formObject = JSON.stringify(generated_form);
+            clearForm();
+            editForm(generated_form);
+
+            setVisibility('builder');
+        }
+        catch (err) {
+            let error_message = document.getElementById('error-message');
+            error_message.textContent = err.message;
+            error_message.hidden = false;
+            console.log(err);
+        }
+        finally {
+            document.documentElement.classList.remove('wait-cursor');
+            document.getElementById('prompt-form').hidden = false;
+            document.getElementById('loading-message').hidden = true;
+        }
     });
     document.getElementById('btn-back-from-generate').addEventListener('mousedown', () => setVisibility('intro'));
     document.getElementById('btn-back-from-build').addEventListener('mousedown', () => setVisibility('intro'));
@@ -340,6 +425,9 @@
     document.title = formObject.title;
     document.getElementById('builder-title').innerText = formObject.title;
 
+    if (sessionStorage.apiKey) {
+        document.getElementById('api-key').value = sessionStorage.apiKey;
+    }
     try {
         editForm(JSON.parse(sessionStorage.formObject));
     }
