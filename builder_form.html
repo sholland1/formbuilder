@@ -23,10 +23,9 @@
             }
         }
 
-        #intro {
-            text-align: center;
-        }
+        #intro { text-align: center }
 
+        input#api-key { width: 200px }
         textarea#prompt {
             height: 20em;
             width: 100%;
@@ -54,16 +53,16 @@
         <div id='genai' hidden>
             <h1>Generate a form with AI</h1>
             <div id='error-message' hidden></div>
-            <div id='prompt-form'>
+            <form id='prompt-form'>
                 <div>
                     <label for='api-key'>OpenAI API key:</label>
-                    <input id='api-key' type='password' />
+                    <input id='api-key' type='text' required />
                 </div>
-                <label for='prompt'>Enter your prompt:</label>
-                <textarea id='prompt'></textarea>
+                <label for='prompt'>Describe the form you want to make:</label>
+                <textarea id='prompt' required></textarea>
                 <button id='btn-generate' type='button'>Generate</button>
                 <button id='btn-back-from-generate' type='button'>Back</button>
-            </div>
+            </form>
             <div id='loading-message' hidden>
                 <h2>Generating form...</h2>
             </div>
@@ -222,20 +221,16 @@
         return await response.text();
     }
 
-    document.getElementById('btn-generate').addEventListener('mousedown', async () => {
+    document.getElementById('btn-generate').addEventListener('click', async () => {
         const api_key = document.getElementById('api-key').value;
-        let error_message = document.getElementById('error-message');
-
-        if (!api_key) {
-            error_message.textContent = 'Please enter an API key.';
-            error_message.hidden = false;
-            return;
-        }
-        error_message.hidden = true;
         sessionStorage.apiKey = api_key;
 
+        const form = document.getElementById('prompt-form');
+        const isValid = form.reportValidity();
+        if (!isValid) return;
+
         document.documentElement.classList.add('wait-cursor');
-        document.getElementById('prompt-form').hidden = true;
+        form.hidden = true;
         document.getElementById('loading-message').hidden = false;
 
         const prompt = document.getElementById('prompt').value;
@@ -254,7 +249,7 @@
         }
         finally {
             document.documentElement.classList.remove('wait-cursor');
-            document.getElementById('prompt-form').hidden = false;
+            form.hidden = false;
             document.getElementById('loading-message').hidden = true;
         }
     });
@@ -368,7 +363,7 @@
         details.forEach(d => d.open = !anyOpen);
     });
 
-    document.getElementById('btn-download').addEventListener('mousedown', () => {
+    document.getElementById('btn-download').addEventListener('click', () => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -400,7 +395,7 @@
         downloadAnchorNode.click();
     });
 
-    document.getElementById('btn-preview').addEventListener('mousedown', e => {
+    document.getElementById('btn-preview').addEventListener('click', e => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
