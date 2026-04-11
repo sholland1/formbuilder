@@ -39,7 +39,7 @@ static void append_compile_flags(Nob_Cmd *cmd, bool release) {
 }
 
 static void log_usage(const Build_Config *config) {
-    nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form]", config->program_name);
+    nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form] [gen-prompt]", config->program_name);
 }
 
 static bool is_port_arg(const char *arg) {
