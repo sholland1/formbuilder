@@ -110,11 +110,14 @@
             document.getElementById(id).hidden = sectionId !== id;
         }
 
-        const selectors = {
-            builder: 'input#id',
-            genai: 'textarea#prompt',
-        };
-        const selector = selectors[sectionId];
+        let selector;
+        if (sectionId === 'builder') {
+            selector = 'input#id';
+        }
+        else if (sectionId === 'genai') {
+            const api_key = document.getElementById('api-key').value;
+            selector = api_key ? 'textarea#prompt' : 'input#api-key';
+        }
         if (selector) {
             requestAnimationFrame(() => document.querySelector(selector).focus());
         }
@@ -242,8 +245,6 @@
             sessionStorage.formObject = JSON.stringify(generated_form);
             clearForm();
             editForm(generated_form);
-
-            setVisibility('builder');
         }
         catch (err) {
             let error_message = document.getElementById('error-message');
@@ -260,7 +261,7 @@
     document.getElementById('btn-back-from-generate').addEventListener('mousedown', () => setVisibility('intro'));
     document.getElementById('btn-back-from-build').addEventListener('mousedown', () => setVisibility('intro'));
     document.getElementById('btn-clear').addEventListener('click', () => {
-        sessionStorage.clear();
+        sessionStorage.formObject = null;
         clearForm();
     });
 
