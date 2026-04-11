@@ -100,6 +100,10 @@
             "id": "breath_held",
             "type": "timer",
             "question": "How long can you hold your breath?"
+        },
+        {
+            "id": "guid",
+            "type": "guid"
         }
     ]
 }

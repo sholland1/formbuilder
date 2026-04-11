@@ -24,7 +24,7 @@ export default class FormBuilder {
     }
 
     #createComponent(item, currentDateStr) {
-        if (item.type === 'timestamp') {
+        if (item.type === 'timestamp' || item.type === 'guid') {
             return this.element('div', {id: item.id, class: 'builder-item builder-' + item.type })
         }
 
@@ -188,6 +188,10 @@ export default class FormBuilder {
             const type = Array.from(item.classList).find(c => c !== 'builder-item').replace('builder-', '');
             if (type === 'timestamp') {
                 formData[item.id] = this.#getDate();
+                continue;
+            }
+            else if (type === 'guid') {
+                formData[item.id] = crypto.randomUUID();
                 continue;
             }
 

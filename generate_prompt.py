@@ -39,6 +39,7 @@ TYPE_DESCRIPTIONS: dict[str, str] = {
     "counter":     "Integer increment/decrement counter.",
     "color":       "Color picker.",
     "timer":       "Measures elapsed time (e.g. for timed tasks).",
+    "guid":        "Automatically generates a GUID when the form is submitted. No additional properties needed — do not add any.",
 }
 
 

@@ -6,6 +6,7 @@
 #include "form_app.h"
 
 #include <locale.h>
+#include <uuid/uuid.h>
 
 bool load_form_from_file(const char *file_path, Form *form) {
     Nob_String_Builder sb = {0};
@@ -21,6 +22,7 @@ void display_form(const Form *form, Answers *answers) {
 
     static char answer_buffer[BUFFER_LEN];
     const char *timestamp_field_id = NULL;
+    const char *guid_field_id = NULL;
     SelectOptions opts = {0};
     nob_da_foreach(Field, f, &form->fields) {
         answer_buffer[0] = '\0';
@@ -107,6 +109,10 @@ void display_form(const Form *form, Answers *answers) {
             timestamp_field_id = f->id;
             break;
 
+        case ft_guid:
+            guid_field_id = f->id;
+            break;
+
         default:
             NOB_UNREACHABLE("Unidentified type!");
         }
@@ -117,6 +123,13 @@ void display_form(const Form *form, Answers *answers) {
         struct tm *t = localtime(&now);
         strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d %H:%M:%S", t);
         append_quoted_answer(answers, timestamp_field_id, answer_buffer);
+    }
+
+    if (guid_field_id) {
+        uuid_t uuid;
+        uuid_generate(uuid);
+        uuid_unparse_lower(uuid, answer_buffer);
+        append_quoted_answer(answers, guid_field_id, answer_buffer);
     }
 }
 

@@ -155,6 +155,10 @@ def build_timestamp_fields():
     return [{"id": "timestamp_basic", "type": "timestamp"}]
 
 
+def build_guid_fields():
+    return [{"id": "guid_basic", "type": "guid"}]
+
+
 def build_date_fields():
     values = ["missing", True, False]
     dates = ["1900-01-01", "[today]", "2026-03-19", "2099-12-31", "missing"]
@@ -243,6 +247,7 @@ def build_fields():
         + build_color_fields()
         + build_bool_fields()
         + build_timer_fields()
+        + build_guid_fields()
     )
 
 

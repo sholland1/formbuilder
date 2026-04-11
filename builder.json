@@ -42,7 +42,8 @@
                         "counter",
                         "color",
                         "bool",
-                        "timer"
+                        "timer",
+                        "guid"
                     ]
                 }
             ]
@@ -166,6 +167,9 @@
             ]
         },
         "field_type_timestamp": {
+            "fields": []
+        },
+        "field_type_guid": {
             "fields": []
         },
         "field_type_date": {

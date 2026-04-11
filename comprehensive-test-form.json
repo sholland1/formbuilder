@@ -1721,6 +1721,10 @@
             "id": "timer_basic",
             "type": "timer",
             "question": "Timer field"
+        },
+        {
+            "id": "guid_basic",
+            "type": "guid"
         }
     ]
 }

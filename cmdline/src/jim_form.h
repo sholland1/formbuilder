@@ -163,7 +163,9 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "question"); jim_string(jim, x->timer.question);
                 break;
 
-            case ft_timestamp: break;
+            case ft_timestamp:
+            case ft_guid:
+                break;
 
             default: NOB_UNREACHABLE("Unidentified type!");
         }
@@ -213,6 +215,7 @@ void field_set_defaults(Field *field) {
         case ft_bool:
         case ft_timer:
         case ft_timestamp:
+        case ft_guid:
             break;
 
         default: NOB_UNREACHABLE("Unidentified type!");
@@ -447,7 +450,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     }
                     break;
 
-                case ft_timestamp: break;
+                case ft_timestamp:
+                case ft_guid:
+                    break;
 
                 default: NOB_UNREACHABLE("Unidentified type!");
             }

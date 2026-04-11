@@ -14,7 +14,7 @@ Return ONLY a raw JSON object — no markdown, no backticks, no explanation. The
 
 Every field object has two universal properties:
 - **`id`** (text): a unique camelCase or kebab-case identifier for the field, starting with a letter and containing only letters, numbers, underscores, or hyphens.
-- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`
+- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`, `"guid"`
 
 Additional properties depend on the type:
 
@@ -115,6 +115,11 @@ Yes/No toggle.
 Measures elapsed time (e.g. for timed tasks).
 
 - **`question`** (text): the label/prompt shown to the user
+
+---
+
+### type: `"guid"`
+Automatically generates a GUID when the form is submitted. No additional properties needed — do not add any.
 
 ## Rules
 

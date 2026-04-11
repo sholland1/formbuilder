@@ -17,7 +17,8 @@
     X(counter) \
     X(color) \
     X(bool) \
-    X(timer)
+    X(timer) \
+    X(guid)
 
 typedef enum {
 #define X(name) ft_##name,

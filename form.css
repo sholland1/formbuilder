@@ -71,8 +71,8 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, v
 .builder-button-minus:hover{background:rgba(239,68,68,0.06)}
 .builder-button-clear:hover{background:rgba(0,0,0,0.04)}
 
-/* timestamp div */
-.builder-timestamp{display:none}
+/* hidden fields */
+.builder-timestamp, .builder-guid{display:none}
 
 /* color input smaller */
 input[type="color"]{width:56px;height:40px;padding:6px;border-radius:8px}
