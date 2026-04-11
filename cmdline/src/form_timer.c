@@ -19,7 +19,7 @@ static void fprint_timer(FILE *stream, uint64_t total) {
     uint64_t seconds = (total % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
     uint64_t centi = (total % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
 
-    fprintf(stream, "\r%02lu:%02lu:%02lu:%02lu"CLRDOWN, hours, minutes, seconds, centi);
+    fprintf(stream, "\r%02lld:%02lld:%02lld:%02lld"CLRDOWN, hours, minutes, seconds, centi);
     fflush(stream);
 }
 

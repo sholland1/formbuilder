@@ -79,7 +79,7 @@ void display_form(const Form *form, Answers *answers) {
         } break;
 
         case ft_counter:
-            sprintf(answer_buffer, "%lu", read_counter(f));
+            sprintf(answer_buffer, "%lld", read_counter(f));
             append_raw_answer(answers, f->id, answer_buffer);
             break;
 

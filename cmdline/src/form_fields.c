@@ -458,7 +458,7 @@ int64_t read_counter(const Field *f) {
             continue;
         }
 
-        fprintf(tty_out, "\r%lu"CLRDOWN, value);
+        fprintf(tty_out, "\r%lld"CLRDOWN, value);
         fflush(tty_out);
     }
 }
