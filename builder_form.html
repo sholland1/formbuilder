@@ -157,7 +157,11 @@
     function clearForm() {
         field_index = 0;
         document.getElementById('builder-header').innerText = '';
-        document.getElementById('builder-fields').innerText = '';
+
+        let builderFields = document.getElementById('builder-fields');
+        const placeholder = builderFields.firstElementChild;
+        builderFields.replaceChildren(placeholder);
+
         builder.build(forms.header, 'builder-header');
         document.querySelector('input#id').focus();
     }
