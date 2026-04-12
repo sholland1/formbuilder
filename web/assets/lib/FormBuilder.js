@@ -54,7 +54,7 @@ export default class FormBuilder {
             let i = 0;
             inputElements =
                 item.options.flatMap(o => [
-                    this.element('input', { id: item.id + i, type: 'checkbox', value: o, required: item.min > 0 }),
+                    this.element('input', { id: item.id + i, type: 'checkbox', value: o }),
                     this.element('label', { for: item.id + i++ }, o),
                 ]);
         }
