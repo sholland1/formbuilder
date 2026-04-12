@@ -18,7 +18,9 @@
     X(color) \
     X(bool) \
     X(timer) \
-    X(guid)
+    X(guid) \
+    X(file) \
+    X(signature)
 
 typedef enum {
 #define X(name) ft_##name,
@@ -70,7 +72,7 @@ typedef struct {
 typedef struct {
     const char *question;
     bool required;
-} BoolFieldMembers;
+} RequiredQFieldMembers;
 
 typedef struct {
     const char *question;
@@ -100,6 +102,14 @@ typedef struct {
 } MultiTextFieldMembers;
 
 typedef struct {
+    const char *question;
+    size_t maxsize;
+    int min;
+    int max;
+    SelectOptions fileexts;
+} FileFieldMembers;
+
+typedef struct {
     const char *id;
     FieldType type;
     union {
@@ -111,8 +121,10 @@ typedef struct {
         DateFieldMembers date;
         QOnlyFieldMembers counter;
         QOnlyFieldMembers color;
-        BoolFieldMembers boolean;
+        RequiredQFieldMembers boolean;
         QOnlyFieldMembers timer;
+        FileFieldMembers file;
+        RequiredQFieldMembers signature;
     };
 } Field;
 

@@ -155,9 +155,11 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "question"); jim_string(jim, x->color.question);
                 break;
 
-            case ft_bool:
-                jim_member_key(jim, "question"); jim_string(jim, x->boolean.question);
-                break;
+            case ft_bool: {
+                RequiredQFieldMembers p = x->boolean;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            } break;
 
             case ft_timer:
                 jim_member_key(jim, "question"); jim_string(jim, x->timer.question);
@@ -166,6 +168,26 @@ void jim_form(Jim *jim, const Form *f) {
             case ft_timestamp:
             case ft_guid:
                 break;
+
+            case ft_file: {
+                FileFieldMembers p = x->file;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (p.maxsize != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxsize);}
+                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+                jim_member_key(jim, "fileexts");
+                jim_array_begin(jim);
+                nob_da_foreach(char *, x, &p.fileexts) {
+                    jim_string(jim, *x);
+                }
+                jim_array_end(jim);
+            } break;
+
+            case ft_signature: {
+                RequiredQFieldMembers p = x->signature;
+                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            } break;
 
             default: NOB_UNREACHABLE("Unidentified type!");
         }
@@ -210,9 +232,21 @@ void field_set_defaults(Field *field) {
             field->date.end_date.dt = NULL;
             break;
 
+        case ft_bool:
+            field->boolean.required = true;
+            break;
+
+        case ft_file:
+            field->file.maxsize = SIZE_MAX;
+            field->file.max = 1;
+            break;
+
+        case ft_signature:
+            field->signature.required = true;
+            break;
+
         case ft_counter:
         case ft_color:
-        case ft_bool:
         case ft_timer:
         case ft_timestamp:
         case ft_guid:
@@ -454,6 +488,53 @@ bool jimp_field(Jimp *jimp, Field *field) {
                 case ft_guid:
                     break;
 
+                case ft_file:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->file.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "maxsize") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->file.maxsize = (size_t)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "min") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->file.min = (int)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "max") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->file.max = (int)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "fileexts") == 0) {
+                        if (!jimp_array_begin(jimp)) return false;
+                        while (jimp_array_item(jimp)) {
+                            if (!jimp_string(jimp)) return false;
+                            if (jimp->string[0] != '.') return false;
+                            nob_da_append(&field->file.fileexts, strdup(jimp->string));
+                        }
+                        if (!jimp_array_end(jimp)) return false;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
+
+                case ft_signature:
+                    if (strcmp(jimp->string, "question") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->signature.question = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->signature.required = jimp->boolean;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
+
                 default: NOB_UNREACHABLE("Unidentified type!");
             }
         }
@@ -467,6 +548,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
             && !d.start_date.dt && !d.end_date.dt
             && d.end_date.dt < d.start_date.dt) return false;
     }
+    if (field->type == ft_file && field->file.max < field->file.min) return false;
     return jimp_object_end(jimp);
 }
 

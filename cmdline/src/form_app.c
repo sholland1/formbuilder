@@ -20,6 +20,14 @@ bool load_form_from_file(const char *file_path, Form *form) {
 void display_form(const Form *form, Answers *answers) {
     fprintf(tty_out, CLR HOME BOLD"%s"RESET"\r\n", form->title);
 
+    //TODO: implement these field types
+    nob_da_foreach(Field, f, &form->fields) {
+        if (f->type == ft_file)
+            fprintf(tty_out, "Skipping field '%s' because the 'file' field type is unimplemented.\r\n", f->id);
+        else if (f->type == ft_signature)
+            fprintf(tty_out, "Skipping field '%s' because the 'signature' field type is unimplemented.\r\n", f->id);
+    }
+
     static char answer_buffer[BUFFER_LEN];
     const char *timestamp_field_id = NULL;
     const char *guid_field_id = NULL;
@@ -111,6 +119,10 @@ void display_form(const Form *form, Answers *answers) {
 
         case ft_guid:
             guid_field_id = f->id;
+            break;
+
+        case ft_file:
+        case ft_signature:
             break;
 
         default:

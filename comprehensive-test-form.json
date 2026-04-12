@@ -1183,6 +1183,90 @@
             "type": "guid"
         },
         {
+            "id": "file_maxsize-no_min-no_max-no",
+            "type": "file",
+            "question": "File field: maxsize-no, min-no, max-no",
+            "fileexts": [
+                ".json",
+                ".c"
+            ]
+        },
+        {
+            "id": "file_maxsize-no_min-no_max-yes",
+            "type": "file",
+            "question": "File field: maxsize-no, min-no, max-yes",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "max": 4
+        },
+        {
+            "id": "file_maxsize-no_min-yes_max-no",
+            "type": "file",
+            "question": "File field: maxsize-no, min-yes, max-no",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "min": 1
+        },
+        {
+            "id": "file_maxsize-no_min-yes_max-yes",
+            "type": "file",
+            "question": "File field: maxsize-no, min-yes, max-yes",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "min": 1,
+            "max": 4
+        },
+        {
+            "id": "file_maxsize-yes_min-no_max-no",
+            "type": "file",
+            "question": "File field: maxsize-yes, min-no, max-no",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "maxsize": 1024
+        },
+        {
+            "id": "file_maxsize-yes_min-no_max-yes",
+            "type": "file",
+            "question": "File field: maxsize-yes, min-no, max-yes",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "maxsize": 1024,
+            "max": 4
+        },
+        {
+            "id": "file_maxsize-yes_min-yes_max-no",
+            "type": "file",
+            "question": "File field: maxsize-yes, min-yes, max-no",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "maxsize": 1024,
+            "min": 1
+        },
+        {
+            "id": "file_maxsize-yes_min-yes_max-yes",
+            "type": "file",
+            "question": "File field: maxsize-yes, min-yes, max-yes",
+            "fileexts": [
+                ".json",
+                ".c"
+            ],
+            "maxsize": 1024,
+            "min": 1,
+            "max": 4
+        },
+        {
             "id": "signature_required-missing",
             "type": "signature",
             "question": "Signature field: required-missing"

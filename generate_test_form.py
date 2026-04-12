@@ -230,6 +230,35 @@ def build_timer_fields():
     return [{"id": "timer_basic", "type": "timer", "question": "Timer field"}]
 
 
+def build_file_fields():
+    fields = []
+    for maxsize, minp, maxp in product(
+        [False, True],
+        [False, True],
+        [False, True],
+    ):
+        labels = [
+            f"maxsize-{'yes' if maxsize else 'no'}",
+            f"min-{'yes' if minp else 'no'}",
+            f"max-{'yes' if maxp else 'no'}",
+        ]
+        field = {
+            "id": "file_" + "_".join(labels),
+            "type": "file",
+            "question": "File field: " + ", ".join(labels),
+            "fileexts": [".json", ".c"],
+        }
+        if maxsize:
+            field["maxsize"] = 1024
+        if minp:
+            field["min"] = 1
+        if maxp:
+            field["max"] = 4
+        fields.append(field)
+
+    return fields
+
+
 def build_signature_fields():
     fields = []
     for req_state in ["missing", True, False]:
@@ -259,6 +288,7 @@ def build_fields():
         + build_bool_fields()
         + build_timer_fields()
         + build_guid_fields()
+        + build_file_fields()
         + build_signature_fields()
     )
 
