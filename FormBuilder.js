@@ -91,67 +91,105 @@ export default class FormBuilder {
                 if (typeof ms !== 'number' || isNaN(ms) || ms < 0) {
                     return "00:00:00:00";
                 }
-                // Convert to centiseconds (1/100th of a second)
-                let totalCentiseconds = Math.trunc(ms / 10);
 
-                const hours = Math.trunc(totalCentiseconds / (3600 * 100));
-                totalCentiseconds %= 3600 * 100;
+                let cs = Math.trunc(ms / 10);
 
-                const minutes = Math.trunc(totalCentiseconds / (60 * 100));
-                totalCentiseconds %= 60 * 100;
+                const h = Math.trunc(cs / 360000) % 100;
+                cs %= 360000;
+                const m = Math.trunc(cs / 6000);
+                cs %= 6000;
+                const s = Math.trunc(cs / 100);
+                const c = cs % 100;
 
-                const seconds = Math.trunc(totalCentiseconds / 100);
-                const centiseconds = totalCentiseconds % 100;
+                return (
+                    (h < 10 ? '0' : '') + h + ':' +
+                    (m < 10 ? '0' : '') + m + ':' +
+                    (s < 10 ? '0' : '') + s + ':' +
+                    (c < 10 ? '0' : '') + c
+                );
+            }
 
-                // Pad with leading zeros
-                const hh = String(hours).padStart(2, '0');
-                const mm = String(minutes).padStart(2, '0');
-                const ss = String(seconds).padStart(2, '0');
-                const tt = String(centiseconds).padStart(2, '0');
+            let canvas = this.element('canvas',
+                { id: item.id, width: 160, height: 50, style: 'border: solid' });
+            const ctx = canvas.getContext('2d', { alpha: true });
 
-                return `${hh}:${mm}:${ss}:${tt}`;
+            function draw(elapsed) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.save();
+                ctx.font = 'bold 24px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#000000';               // your color
+
+                const text = formatDuration(elapsed);
+                ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+                ctx.restore();
             }
 
             let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
             let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
-            let currentDuration = 0;
             let hiddenDurationValue = this.element('input', { id: item.id, type: 'number', hidden: true, value: '0' });
-            let durationDisplay = this.#document.createTextNode(formatDuration(currentDuration));
 
-            startButton.addEventListener('mousedown', e => {
+            let startTime = 0;
+            let accumulatedTime = 0;
+            let isRunning = false;
+            let rafId = null;
+
+            function updateTimer() {
+                if (!isRunning) return;
+
+                const elapsed = performance.now() - startTime + accumulatedTime;
+
+                draw(elapsed);
+                rafId = requestAnimationFrame(updateTimer);
+            }
+
+            function startTimer() {
+                if (isRunning) return;
+                isRunning = true;
+                startTime = performance.now();
+                updateTimer();
+            }
+
+            function pauseTimer() {
+                if (!isRunning) return;
+                isRunning = false;
+                cancelAnimationFrame(rafId);
+                accumulatedTime += performance.now() - startTime;
+            }
+
+            function resetTimer() {
+                pauseTimer();
+                accumulatedTime = 0;
+            }
+
+            startButton.addEventListener('click', e => {
                 if (resetButton.disabled) {
                     startButton.textContent = 'Start';
                     resetButton.disabled = false;
+                    pauseTimer();
+                    draw(accumulatedTime);
+                    hiddenDurationValue.value = Math.trunc(accumulatedTime / 10);
                     return;
                 }
+
                 startButton.textContent = 'Stop';
                 resetButton.disabled = true;
-
-                const currentTime = performance.now();
-                function addSec(d) {
-                    if (!resetButton.disabled) {
-                        currentDuration = d;
-                        hiddenDurationValue.value = Math.trunc(currentDuration / 10);
-                        return;
-                    }
-                    requestAnimationFrame(() => {
-                        const newDuration = performance.now() - currentTime  + currentDuration;
-                        durationDisplay.data = formatDuration(newDuration);
-                        addSec(newDuration);
-                    });
-                }
-                addSec(currentDuration);
+                startTimer();
             });
 
-            resetButton.addEventListener('mousedown', e => {
-                currentDuration = 0;
-                durationDisplay.data = formatDuration(currentDuration);
-                hiddenDurationValue.value = currentDuration;
+            resetButton.addEventListener('click', e => {
+                resetTimer();
+                draw(0);
+                hiddenDurationValue.value = 0;
             });
+
+            draw(0);
 
             inputElements = [
                 hiddenDurationValue,
-                this.element('div', {}, durationDisplay),
+                this.element('div', {}, canvas),
                 startButton, resetButton,
             ];
         }
