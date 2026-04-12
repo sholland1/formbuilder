@@ -123,8 +123,6 @@
     }
 
     function editForm(formObject) {
-        const currentTime = Temporal.Now.instant();
-
         const header = document.getElementById('builder-header');
         header.querySelector('#id').value = formObject.id;
         header.querySelector('#title').value = formObject.title;
@@ -151,9 +149,6 @@
             }
         }
         setVisibility('builder');
-
-        let diff = Temporal.Now.instant().since(currentTime);
-        console.log(diff);
     }
 
     function clearForm() {
@@ -180,10 +175,15 @@
             if (!file) return;
             const reader = new FileReader();
             reader.addEventListener('load', () => {
+                const currentTime = Temporal.Now.instant();
+
                 const uploadedForm = JSON.parse(reader.result);
                 sessionStorage.formObject = JSON.stringify(uploadedForm);
                 clearForm();
                 editForm(uploadedForm);
+
+                let diff = Temporal.Now.instant().since(currentTime);
+                console.log(diff);
             });
             reader.readAsText(file);
         });
