@@ -43,7 +43,8 @@
                         "color",
                         "bool",
                         "timer",
-                        "guid"
+                        "guid",
+                        "file"
                     ]
                 }
             ]
@@ -98,13 +99,15 @@
                     "id": "min",
                     "type": "number",
                     "question": "Min:",
-                    "required": false
+                    "required": false,
+                    "min": 0
                 },
                 {
                     "id": "max",
                     "type": "number",
                     "question": "Max:",
-                    "required": false
+                    "required": false,
+                    "min": 1
                 },
                 {
                     "id": "step",
@@ -156,13 +159,15 @@
                     "id": "min",
                     "type": "number",
                     "question": "Min:",
-                    "required": false
+                    "required": false,
+                    "min": 0
                 },
                 {
                     "id": "max",
                     "type": "number",
                     "question": "Max:",
-                    "required": false
+                    "required": false,
+                    "min": 1
                 }
             ]
         },
@@ -257,13 +262,15 @@
                     "id": "min",
                     "type": "number",
                     "question": "Min:",
-                    "required": false
+                    "required": false,
+                    "min": 0
                 },
                 {
                     "id": "max",
                     "type": "number",
                     "question": "Max:",
-                    "required": false
+                    "required": false,
+                    "min": 1
                 },
                 {
                     "id": "maxlength",
@@ -277,6 +284,42 @@
                     "type": "text",
                     "question": "Enter a regular expression to match for each option.",
                     "required": false
+                }
+            ]
+        },
+        "field_type_file": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "maxsize",
+                    "type": "number",
+                    "question": "Max size in KB:",
+                    "required": true
+                },
+                {
+                    "id": "min",
+                    "type": "number",
+                    "question": "Min:",
+                    "required": false,
+                    "min": 0
+                },
+                {
+                    "id": "max",
+                    "type": "number",
+                    "question": "Max:",
+                    "required": false,
+                    "min": 1
+                },
+                {
+                    "id": "fileexts",
+                    "type": "multitext",
+                    "question": "Allowed file extensions:",
+                    "required": false,
+                    "pattern": "^(\\.[a-zA-Z0-9]+)(,(\\.[a-zA-Z0-9]+))*$"
                 }
             ]
         }

@@ -104,6 +104,19 @@
         {
             "id": "guid",
             "type": "guid"
+        },
+        {
+            "id": "files",
+            "type": "file",
+            "question": "Upload your files...",
+            "maxsize": 1024,
+            "min": 1,
+            "max": 3,
+            "fileexts": [
+                ".html",
+                ".json",
+                ".c"
+            ]
         }
     ]
 }

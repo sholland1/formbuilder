@@ -155,6 +155,17 @@ export default class FormBuilder {
                 startButton, resetButton,
             ];
         }
+        else if (item.type === 'file') {
+            inputElements = [
+                this.element('input', {
+                    id: item.id,
+                    type: 'file',
+                    required: item.min > 0,
+                    multiple: (item.min || 1) > 1 || (item.max || 1) > 1,
+                    accept: item.fileexts,
+                }),
+            ];
+        }
         else {
             inputElements = ['Unsupported element type: ' + item.type];
         }
@@ -180,9 +191,21 @@ export default class FormBuilder {
             inputs[0].focus();
     }
 
-    getFormData(id) {
+    #readFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async getFormData(id) {
         let element = id ? this.#document.getElementById(id) : this.#document;
         const items = element.getElementsByClassName('builder-item');
+        // TODO: use actual FormData object to upload data and files
         let formData = {};
         for (const item of items) {
             const type = Array.from(item.classList).find(c => c !== 'builder-item').replace('builder-', '');
@@ -237,6 +260,17 @@ export default class FormBuilder {
             else if (type === 'timer') {
                 const durationInMs = Number(input.value) * 10;
                 formData[input.id] = Temporal.Duration.from({milliseconds: durationInMs});
+            }
+            else if (type === 'file') {
+                let files = Array.from(input.files);
+                let readFile = this.#readFile;
+                formData[input.id] = await Promise.all(
+                    files.map(async f => ({
+                        name: f.name,
+                        type: f.type,
+                        size: f.size,
+                        data: await readFile(f),
+                    })));
             }
             else {
                 if (input.required || input.value) {

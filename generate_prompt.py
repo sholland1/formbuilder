@@ -24,6 +24,8 @@ PROP_DESCRIPTIONS: dict[str, str] = {
     "options":     "list of available choices (json array)",
     "start_date":  "earliest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date",
     "end_date":    "latest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date",
+    "maxsize":     "maximum file size in KB",
+    "fileexts":    "list of allowed file extensions, each starts with a period (json array)",
 }
 
 # Human-readable descriptions for each field type.
@@ -40,6 +42,7 @@ TYPE_DESCRIPTIONS: dict[str, str] = {
     "color":       "Color picker.",
     "timer":       "Measures elapsed time (e.g. for timed tasks).",
     "guid":        "Automatically generates a GUID when the form is submitted. No additional properties needed — do not add any.",
+    "file":        "File picker.",
 }
 
 

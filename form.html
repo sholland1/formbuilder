@@ -48,12 +48,12 @@
 
         document.title = formObject.title;
 
-        document.getElementById('submit-btn').addEventListener('click', () => {
+        document.getElementById('submit-btn').addEventListener('click', async () => {
             const form = document.getElementById(form_id);
             const isValid = form.reportValidity();
             if (!isValid) return;
 
-            let formData = builder.getFormData();
+            let formData = await builder.getFormData();
             let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute('href', dataStr);

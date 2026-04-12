@@ -174,7 +174,7 @@
         // open file picker to get json file from user
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.json,application/json';
+        input.accept = '.json';
         input.addEventListener('change', () => {
             const file = input.files[0];
             if (!file) return;
@@ -363,7 +363,7 @@
         details.forEach(d => d.open = !anyOpen);
     });
 
-    document.getElementById('btn-download').addEventListener('click', () => {
+    document.getElementById('btn-download').addEventListener('click', async () => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -379,11 +379,10 @@
         const isValid = form.reportValidity();
         if (!isValid) return;
 
-        let formData = builder.getFormData('builder-header');
-        formData.fields = Array.from(
+        let formData = await builder.getFormData('builder-header');
+        formData.fields = Promise.all(Array.from(
             { length: ids.length - 1 },
-            (_, i) => builder.getFormData(`field_${i}`)
-        );
+            async (_, i) => await builder.getFormData(`field_${i}`)));
 
         const json = JSON.stringify(formData);
 
@@ -395,7 +394,7 @@
         downloadAnchorNode.click();
     });
 
-    document.getElementById('btn-preview').addEventListener('click', e => {
+    document.getElementById('btn-preview').addEventListener('click', async e => {
         const form = document.getElementById(formObject.id);
 
         form.querySelectorAll('[required]').forEach(el => {
@@ -411,12 +410,12 @@
         const isValid = form.reportValidity();
         if (!isValid) return;
 
-        let formData = builder.getFormData('builder-header');
+        let formData = await builder.getFormData('builder-header');
 
         let fieldsElement = document.getElementById('builder-fields');
-        formData.fields = Array.from(
+        formData.fields = await Promise.all(Array.from(
             fieldsElement.querySelectorAll('details[id^="field_"]'),
-            x => builder.getFormData(x.id));
+            async x => await builder.getFormData(x.id)));
 
         sessionStorage.formObject = JSON.stringify(formData);
         window.location = '/form.html?preview=true';
