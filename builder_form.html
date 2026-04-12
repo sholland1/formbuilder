@@ -187,7 +187,7 @@
             });
             reader.readAsText(file);
         });
-      input.click();
+        input.click();
     });
 
     async function generate_form_json(api_key, prompt) {
@@ -392,6 +392,7 @@
         downloadAnchorNode.setAttribute('download', `${formData.id}.json`);
         document.body.appendChild(downloadAnchorNode); // required for firefox
         downloadAnchorNode.click();
+        document.body.removeChild(downloadAnchorNode);
     });
 
     document.getElementById('btn-preview').addEventListener('click', async e => {

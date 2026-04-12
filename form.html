@@ -60,6 +60,7 @@
             downloadAnchorNode.setAttribute('download', `${formObject.id}.answers.json`);
             document.body.appendChild(downloadAnchorNode); // required for firefox
             downloadAnchorNode.click();
+            document.body.removeChild(downloadAnchorNode);
         });
     }
 </script>
