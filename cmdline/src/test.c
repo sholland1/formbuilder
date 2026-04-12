@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <uuid/uuid.h>
 
 typedef struct {
     char *bytes;
@@ -44,6 +45,17 @@ typedef struct {
 time_t time(time_t *timer) {
     if (timer != NULL) *timer = FIXED_TEST_TIME;
     return FIXED_TEST_TIME;
+}
+
+void uuid_generate(uuid_t out) {
+    static const uint8_t fixed_uuid[16] = {
+        0x5b, 0x01, 0xf0, 0x62,
+        0xb8, 0x83,
+        0x45, 0xff,
+        0xa9, 0x34,
+        0x2b, 0x69, 0x29, 0x3c, 0x0b, 0xbe,
+    };
+    memcpy(out, fixed_uuid, sizeof(fixed_uuid));
 }
 
 static void on_script_timeout(int signo) {
@@ -167,14 +179,24 @@ static void *script_writer_main(void *arg) {
     ScriptWriter *writer = (ScriptWriter *) arg;
     for (size_t i = 0; i < writer->steps->count; ++i) {
         InputStep *step = &writer->steps->items[i];
-        ssize_t written = write(writer->fd, step->bytes, step->len);
-        if (written < 0) {
-            perror("write");
-            break;
-        }
-        if ((size_t) written != step->len) {
+        for (;;) {
+            ssize_t written = write(writer->fd, step->bytes, step->len);
+            if ((size_t) written == step->len) {
+                break;
+            }
+            if (written < 0 && (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK || errno == ENOBUFS)) {
+                usleep(500);
+                continue;
+            }
+            if (written < 0) {
+                perror("write");
+                close(writer->fd);
+                return NULL;
+            }
+
             fprintf(stderr, "short write while writing scripted input\n");
-            break;
+            close(writer->fd);
+            return NULL;
         }
     }
     close(writer->fd);
@@ -245,7 +267,12 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     build_basic_form_script(&steps);
 
     int input_fds[2];
-    TEST_CHECK(socketpair(AF_UNIX, SOCK_SEQPACKET, 0, input_fds) == 0,
+#if LINUX
+    int input_socket_type = SOCK_SEQPACKET;
+#else
+    int input_socket_type = SOCK_DGRAM;
+#endif
+    TEST_CHECK(socketpair(AF_UNIX, input_socket_type, 0, input_fds) == 0,
         "socketpair: %s", strerror(errno));
 
     FILE *input_stream = fdopen(input_fds[0], "r");
@@ -281,10 +308,12 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     TEST_CHECK(read_stream(json_stream, &actual), "read generated answers");
     trim_trailing_newlines(&expected);
     trim_trailing_newlines(&actual);
-    TEST_CHECK(actual.count == expected.count,
-        "answer length mismatch: expected %zu, got %zu", expected.count, actual.count);
-    TEST_CHECK(memcmp(actual.items, expected.items, expected.count) == 0,
-        "generated answers do not match %s", answers_path);
+
+    TEST_CHECK(
+        actual.count == expected.count && memcmp(actual.items, expected.items, expected.count) == 0,
+        "generated answers do not match:\nexpected: %.*s\nactual:   %.*s",
+        (int) expected.count, expected.items,
+        (int) actual.count, actual.items);
 
     fclose(json_stream);
     fclose(terminal_stream);
