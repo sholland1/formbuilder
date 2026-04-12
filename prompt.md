@@ -35,7 +35,6 @@ Single-line text input.
 Collects a comma-separated list of text entries.
 
 - **`question`** (text): the label/prompt shown to the user
-- **`required`** (bool): whether the field is required (default true)
 - **`placeholder`** (text) *(optional)*: placeholder hint text
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections

@@ -247,11 +247,6 @@
                     "question": "What is your question?"
                 },
                 {
-                    "id": "required",
-                    "type": "bool",
-                    "question": "Is your field required?"
-                },
-                {
                     "id": "placeholder",
                     "type": "text",
                     "question": "Enter some placeholder text.",
