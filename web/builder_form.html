@@ -4,8 +4,8 @@
 <head>
     <meta charset='utf-8' />
     <meta name='viewport' content='width=device-width, initial-scale=1' />
-    <link rel='stylesheet' href='form.css'>
-    <link rel='icon' href='buildicon.ico' type='image/x-icon'>
+    <link rel='stylesheet' href='assets/styles/form.css'>
+    <link rel='icon' href='assets/images/buildicon.ico' type='image/x-icon'>
     <style>
         form#builder-form {
             summary {
@@ -94,8 +94,8 @@
 </body>
 
 <script type='module'>
-    import formObject from './builder.json' with {type: 'json'};
-    import FormBuilder from './FormBuilder.js';
+    import formObject from './assets/builder.json' with {type: 'json'};
+    import FormBuilder from './assets/lib/FormBuilder.js';
 
     const forms = formObject.forms;
     const builder = new FormBuilder(document, () => Temporal.Now.plainDateTimeISO());
@@ -217,7 +217,7 @@
     }
 
     async function load_prompt() {
-        const response = await fetch("prompt.md");
+        const response = await fetch("assets/prompt.md");
         return await response.text();
     }
 

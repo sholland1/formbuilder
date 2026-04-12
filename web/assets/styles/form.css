@@ -76,7 +76,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, v
 
 /* signature canvas */
 .builder-signature div canvas {
-    cursor: url('hand_pen.ico') 7 24, auto;
+    cursor: url('../images/hand_pen.ico') 7 24, auto;
 }
 
 /* color input smaller */

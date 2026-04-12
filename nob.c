@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
         Nob_Procs procs = {0};
 
         nob_log(NOB_INFO, "Serving repository root at %s", url);
-        nob_cmd_append(&server_cmd, "python3", "-m", "http.server", config.serve_port);
+        nob_cmd_append(&server_cmd, "python3", "-m", "http.server", config.serve_port, "-d", "web");
         if (!nob_cmd_run(&server_cmd, .async = &procs)) return 1;
 
         if (!open_in_browser(url)) {

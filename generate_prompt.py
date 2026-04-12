@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 
-INPUT_PATH = Path("builder.json")
-OUTPUT_PATH = Path("prompt.md")
+INPUT_PATH = Path("web/assets/builder.json")
+OUTPUT_PATH = Path("web/assets/prompt.md")
 
 
 # Properties that every field shares — excluded from per-type documentation
