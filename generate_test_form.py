@@ -46,8 +46,7 @@ def build_text_fields():
 
 def build_multitext_fields():
     fields = []
-    for req_state, placeholder, minp, maxp, maxlength, pattern in product(
-        ["missing", True, False],
+    for placeholder, minp, maxp, maxlength, pattern in product(
         [False, True],
         [False, True],
         [False, True],
@@ -55,7 +54,6 @@ def build_multitext_fields():
         [False, True],
     ):
         labels = [
-            f"required-{state_label(req_state)}",
             f"placeholder-{'yes' if placeholder else 'no'}",
             f"min-{'yes' if minp else 'no'}",
             f"max-{'yes' if maxp else 'no'}",
@@ -67,8 +65,6 @@ def build_multitext_fields():
             "type": "multitext",
             "question": "Multitext field: " + ", ".join(labels),
         }
-        if req_state != "missing":
-            field["required"] = req_state
         if placeholder:
             field["placeholder"] = "(comma separated values)"
         if minp:
