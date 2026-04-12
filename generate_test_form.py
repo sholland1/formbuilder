@@ -232,13 +232,11 @@ def build_timer_fields():
 
 def build_file_fields():
     fields = []
-    for maxsize, minp, maxp in product(
-        [False, True],
+    for minp, maxp in product(
         [False, True],
         [False, True],
     ):
         labels = [
-            f"maxsize-{'yes' if maxsize else 'no'}",
             f"min-{'yes' if minp else 'no'}",
             f"max-{'yes' if maxp else 'no'}",
         ]
@@ -246,10 +244,9 @@ def build_file_fields():
             "id": "file_" + "_".join(labels),
             "type": "file",
             "question": "File field: " + ", ".join(labels),
+            "maxsize": 1024,
             "fileexts": [".json", ".c"],
         }
-        if maxsize:
-            field["maxsize"] = 1024
         if minp:
             field["min"] = 1
         if maxp:

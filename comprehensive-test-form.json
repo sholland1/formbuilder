@@ -1183,18 +1183,20 @@
             "type": "guid"
         },
         {
-            "id": "file_maxsize-no_min-no_max-no",
+            "id": "file_min-no_max-no",
             "type": "file",
-            "question": "File field: maxsize-no, min-no, max-no",
+            "question": "File field: min-no, max-no",
+            "maxsize": 1024,
             "fileexts": [
                 ".json",
                 ".c"
             ]
         },
         {
-            "id": "file_maxsize-no_min-no_max-yes",
+            "id": "file_min-no_max-yes",
             "type": "file",
-            "question": "File field: maxsize-no, min-no, max-yes",
+            "question": "File field: min-no, max-yes",
+            "maxsize": 1024,
             "fileexts": [
                 ".json",
                 ".c"
@@ -1202,9 +1204,10 @@
             "max": 4
         },
         {
-            "id": "file_maxsize-no_min-yes_max-no",
+            "id": "file_min-yes_max-no",
             "type": "file",
-            "question": "File field: maxsize-no, min-yes, max-no",
+            "question": "File field: min-yes, max-no",
+            "maxsize": 1024,
             "fileexts": [
                 ".json",
                 ".c"
@@ -1212,57 +1215,14 @@
             "min": 1
         },
         {
-            "id": "file_maxsize-no_min-yes_max-yes",
+            "id": "file_min-yes_max-yes",
             "type": "file",
-            "question": "File field: maxsize-no, min-yes, max-yes",
-            "fileexts": [
-                ".json",
-                ".c"
-            ],
-            "min": 1,
-            "max": 4
-        },
-        {
-            "id": "file_maxsize-yes_min-no_max-no",
-            "type": "file",
-            "question": "File field: maxsize-yes, min-no, max-no",
-            "fileexts": [
-                ".json",
-                ".c"
-            ],
-            "maxsize": 1024
-        },
-        {
-            "id": "file_maxsize-yes_min-no_max-yes",
-            "type": "file",
-            "question": "File field: maxsize-yes, min-no, max-yes",
-            "fileexts": [
-                ".json",
-                ".c"
-            ],
+            "question": "File field: min-yes, max-yes",
             "maxsize": 1024,
-            "max": 4
-        },
-        {
-            "id": "file_maxsize-yes_min-yes_max-no",
-            "type": "file",
-            "question": "File field: maxsize-yes, min-yes, max-no",
             "fileexts": [
                 ".json",
                 ".c"
             ],
-            "maxsize": 1024,
-            "min": 1
-        },
-        {
-            "id": "file_maxsize-yes_min-yes_max-yes",
-            "type": "file",
-            "question": "File field: maxsize-yes, min-yes, max-yes",
-            "fileexts": [
-                ".json",
-                ".c"
-            ],
-            "maxsize": 1024,
             "min": 1,
             "max": 4
         },

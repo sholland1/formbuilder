@@ -172,9 +172,9 @@ void jim_form(Jim *jim, const Form *f) {
             case ft_file: {
                 FileFieldMembers p = x->file;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
-                if (p.maxsize != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxsize);}
+                jim_member_key(jim, "maxsize"); jim_integer(jim, p.maxsize);
                 if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+                if (p.max != 1) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
                 jim_member_key(jim, "fileexts");
                 jim_array_begin(jim);
                 nob_da_foreach(char *, x, &p.fileexts) {
@@ -237,7 +237,6 @@ void field_set_defaults(Field *field) {
             break;
 
         case ft_file:
-            field->file.maxsize = SIZE_MAX;
             field->file.max = 1;
             break;
 
@@ -549,6 +548,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
             && d.end_date.dt < d.start_date.dt) return false;
     }
     if (field->type == ft_file && field->file.max < field->file.min) return false;
+    if (field->type == ft_file && field->file.maxsize == 0) return false;
     return jimp_object_end(jimp);
 }
 
