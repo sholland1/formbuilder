@@ -43,6 +43,7 @@ TYPE_DESCRIPTIONS: dict[str, str] = {
     "timer":       "Measures elapsed time (e.g. for timed tasks).",
     "guid":        "Automatically generates a GUID when the form is submitted. No additional properties needed — do not add any.",
     "file":        "File picker.",
+    "signature":   "Allows the user to draw their name with the mouse or touchscreen.",
 }
 
 

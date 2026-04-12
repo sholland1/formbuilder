@@ -14,7 +14,7 @@ Return ONLY a raw JSON object — no markdown, no backticks, no explanation. The
 
 Every field object has two universal properties:
 - **`id`** (text): a unique camelCase or kebab-case identifier for the field, starting with a letter and containing only letters, numbers, underscores, or hyphens.
-- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`, `"guid"`, `"file"`
+- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`, `"guid"`, `"file"`, `"signature"`
 
 Additional properties depend on the type:
 
@@ -130,6 +130,14 @@ File picker.
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
 - **`fileexts`** (multitext) *(optional)*: list of allowed file extensions, each starts with a period (json array)
+
+---
+
+### type: `"signature"`
+Allows the user to draw their name with the mouse or touchscreen.
+
+- **`question`** (text): the label/prompt shown to the user
+- **`required`** (bool): whether the field is required (default true)
 
 ## Rules
 

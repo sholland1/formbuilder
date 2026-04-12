@@ -230,6 +230,21 @@ def build_timer_fields():
     return [{"id": "timer_basic", "type": "timer", "question": "Timer field"}]
 
 
+def build_signature_fields():
+    fields = []
+    for req_state in ["missing", True, False]:
+        label = f"required-{state_label(req_state)}"
+        field = {
+            "id": "signature_" + label,
+            "type": "signature",
+            "question": "Signature field: " + label,
+        }
+        if req_state != "missing":
+            field["required"] = req_state
+        fields.append(field)
+    return fields
+
+
 def build_fields():
     return (
         build_text_fields()
@@ -244,6 +259,7 @@ def build_fields():
         + build_bool_fields()
         + build_timer_fields()
         + build_guid_fields()
+        + build_signature_fields()
     )
 
 

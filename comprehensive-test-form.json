@@ -1181,6 +1181,23 @@
         {
             "id": "guid_basic",
             "type": "guid"
+        },
+        {
+            "id": "signature_required-missing",
+            "type": "signature",
+            "question": "Signature field: required-missing"
+        },
+        {
+            "id": "signature_required-True",
+            "type": "signature",
+            "question": "Signature field: required-True",
+            "required": true
+        },
+        {
+            "id": "signature_required-False",
+            "type": "signature",
+            "question": "Signature field: required-False",
+            "required": false
         }
     ]
 }

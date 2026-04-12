@@ -166,6 +166,43 @@ export default class FormBuilder {
                 }),
             ];
         }
+        else if (item.type === 'signature') {
+            let canvas = this.element('canvas',
+                { id: item.id, width: 600, height: 300, style: 'border: solid' });
+            const ctx = canvas.getContext('2d');
+            let dragging = false;
+            let last_position = null;
+
+            let clearButton = this.element('button', { type: 'button' }, 'Clear');
+            clearButton.addEventListener('click', () =>
+                ctx.clearRect(0, 0, canvas.width, canvas.height));
+
+            function drawLine(ctx, last_pos, curr_pos) {
+                ctx.beginPath();
+                ctx.moveTo(last_pos.x, last_pos.y);
+                ctx.lineTo(curr_pos.x, curr_pos.y);
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+
+            canvas.addEventListener('mousedown', e => {
+                dragging = true;
+                last_position = {x: e.offsetX, y: e.offsetY};
+                drawLine(ctx, last_position, last_position);
+            });
+            canvas.addEventListener('mouseup', () => dragging = false);
+            canvas.addEventListener('mouseleave', () => dragging = false);
+            canvas.addEventListener('mousemove', e => {
+                if (!dragging) return;
+
+                let current_position = {x: e.offsetX, y: e.offsetY};
+                drawLine(ctx, last_position, current_position);
+                last_position = current_position;
+            });
+
+            inputElements = [ canvas, this.element('div', {}, clearButton)];
+        }
         else {
             inputElements = ['Unsupported element type: ' + item.type];
         }
@@ -271,6 +308,13 @@ export default class FormBuilder {
                         size: f.size,
                         data: await readFile(f),
                     })));
+            }
+            else if (type === 'signature') {
+                formData[input.id] = {
+                    name: `${input.id}_signature.png`,
+                    type: 'image/png',
+                    data: input.toDataURL('image/png', 1),
+                };
             }
             else {
                 if (input.required || input.value) {

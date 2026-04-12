@@ -44,7 +44,8 @@
                         "bool",
                         "timer",
                         "guid",
-                        "file"
+                        "file",
+                        "signature"
                     ]
                 }
             ]
@@ -320,6 +321,20 @@
                     "question": "Allowed file extensions:",
                     "required": false,
                     "pattern": "^(\\.[a-zA-Z0-9]+)(,(\\.[a-zA-Z0-9]+))*$"
+                }
+            ]
+        },
+        "field_type_signature": {
+            "fields": [
+                {
+                    "id": "question",
+                    "type": "text",
+                    "question": "What is your question?"
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "question": "Is your field required?"
                 }
             ]
         }
