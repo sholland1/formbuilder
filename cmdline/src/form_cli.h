@@ -51,7 +51,7 @@
 #define RGB_FG "\033[38;2;%d;%d;%dm"
 #define RGB_BG "\033[48;2;%d;%d;%dm"
 
-#define BUFFER_LEN 1024
+#define ANSWER_BUFFER_LEN 1024
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))

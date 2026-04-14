@@ -25,8 +25,8 @@ void append_null_answer(Answers *answers, const char *id) {
 }
 
 void append_quoted_answer(Answers *answers, const char *id, const char *value) {
-    static char quoted_answer_buffer[BUFFER_LEN + 2];
-    sprintf(quoted_answer_buffer, "\"%s\"", value);
+    static char quoted_answer_buffer[ANSWER_BUFFER_LEN + 2];
+    snprintf(quoted_answer_buffer, ANSWER_BUFFER_LEN + 2, "\"%s\"", value);
     append_raw_answer(answers, id, quoted_answer_buffer);
 }
 

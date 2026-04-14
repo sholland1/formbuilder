@@ -28,7 +28,7 @@ void display_form(const Form *form, Answers *answers) {
             fprintf(tty_out, "Skipping field '%s' because the 'signature' field type is unimplemented.\r\n", f->id);
     }
 
-    static char answer_buffer[BUFFER_LEN];
+    static char answer_buffer[ANSWER_BUFFER_LEN];
     const char *timestamp_field_id = NULL;
     const char *guid_field_id = NULL;
     SelectOptions opts = {0};
@@ -80,7 +80,7 @@ void display_form(const Form *form, Answers *answers) {
         case ft_date: {
             struct tm d;
             if (read_date(f, &d)) {
-                strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d", &d);
+                strftime(answer_buffer, ANSWER_BUFFER_LEN, "%Y-%m-%d", &d);
                 append_quoted_answer(answers, f->id, answer_buffer);
             }
             else {
@@ -89,7 +89,7 @@ void display_form(const Form *form, Answers *answers) {
         } break;
 
         case ft_counter:
-            sprintf(answer_buffer, "%lld", read_counter(f));
+            snprintf(answer_buffer, ANSWER_BUFFER_LEN, "%lld", read_counter(f));
             append_raw_answer(answers, f->id, answer_buffer);
             break;
 
@@ -109,7 +109,7 @@ void display_form(const Form *form, Answers *answers) {
 
         case ft_timer: {
             uint64_t duration_in_nanoseconds = read_timer(f);
-            ns_to_iso8601_duration(duration_in_nanoseconds, answer_buffer, BUFFER_LEN);
+            ns_to_iso8601_duration(duration_in_nanoseconds, answer_buffer, ANSWER_BUFFER_LEN);
             append_quoted_answer(answers, f->id, answer_buffer);
         } break;
 
@@ -133,7 +133,7 @@ void display_form(const Form *form, Answers *answers) {
     if (timestamp_field_id) {
         time_t now = time(NULL);
         struct tm *t = localtime(&now);
-        strftime(answer_buffer, sizeof(answer_buffer), "%Y-%m-%d %H:%M:%S", t);
+        strftime(answer_buffer, ANSWER_BUFFER_LEN, "%Y-%m-%d %H:%M:%S", t);
         append_quoted_answer(answers, timestamp_field_id, answer_buffer);
     }
 

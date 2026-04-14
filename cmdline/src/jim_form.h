@@ -123,7 +123,8 @@ void jim_form(Jim *jim, const Form *f) {
             } break;
 
             case ft_date: {
-                static char date_buffer[11];
+                const size_t DATE_BUFFER_LEN = 11;
+                char date_buffer[DATE_BUFFER_LEN];
                 DateFieldMembers p = x->date;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
@@ -133,7 +134,7 @@ void jim_form(Jim *jim, const Form *f) {
                 }
                 else if (p.start_date.dt) {
                     jim_member_key(jim, "start_date");
-                    strftime(date_buffer, sizeof(date_buffer), "%Y-%m-%d", p.start_date.dt);
+                    strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.start_date.dt);
                     jim_string(jim, date_buffer);
                 }
                 if (p.end_date.is_today) {
@@ -142,7 +143,7 @@ void jim_form(Jim *jim, const Form *f) {
                 }
                 else if (p.end_date.dt) {
                     jim_member_key(jim, "end_date");
-                    strftime(date_buffer, sizeof(date_buffer), "%Y-%m-%d", p.end_date.dt);
+                    strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.end_date.dt);
                     jim_string(jim, date_buffer);
                 }
             } break;

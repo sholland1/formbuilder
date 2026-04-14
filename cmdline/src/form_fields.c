@@ -55,7 +55,7 @@ static bool is_word_boundary(char c) {
 }
 
 void color_to_str(char *buffer, Color c) {
-    sprintf(buffer, "#%.2X%.2X%.2X", c.r, c.g, c.b);
+    snprintf(buffer, 8, "#%.2X%.2X%.2X", c.r, c.g, c.b);
 }
 
 #define RGB_SET(rgb, component, value) \
@@ -203,10 +203,11 @@ bool read_date(const Field *f, struct tm *value) {
     set_default_date(&start_date, &f->date.start_date, current_time);
     set_default_date(&end_date, &f->date.end_date, current_time);
 
-    char buffer[12];
-    strftime(buffer, sizeof(buffer), "%m/%d/%Y", &start_date);
+    const size_t DATE_BUFFER_LEN = 12;
+    char buffer[DATE_BUFFER_LEN];
+    strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &start_date);
     fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
-    strftime(buffer, sizeof(buffer), "%m/%d/%Y", &end_date);
+    strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &end_date);
     fprintf(tty_out, "%s]\r\n", buffer);
     fflush(tty_out);
 
@@ -341,7 +342,9 @@ void read_select(const Field *f, char *buffer) {
                 buffer[0] = 0;
             }
             else {
-                strcpy(buffer, opts.items[pos - !required]);
+                const char* selection = opts.items[pos - !required];
+                size_t len = strlen(selection)+1;
+                strlcpy(buffer, selection, len);
             }
             fprintf(tty_out, SHOW"\r\n");
             return;
@@ -639,7 +642,7 @@ void read_number(const Field *f, char *buffer) {
         }
 
         double current = round(to_double(buffer) / p.step) * p.step;
-        snprintf(buffer, BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
+        snprintf(buffer, ANSWER_BUFFER_LEN, "%g", CLAMP(current + signed_step, p.min, p.max));
         tb.position = strlen(buffer);
         tb.end = tb.position;
     }
