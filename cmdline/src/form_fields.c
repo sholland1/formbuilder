@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DATE_BUFFER_LEN 11
+
 static bool is_numeric(const char *str) {
     if (str == NULL || *str == '\0') return false;
 
@@ -203,8 +205,7 @@ bool read_date(const Field *f, struct tm *value) {
     set_default_date(&start_date, &f->date.start_date, current_time);
     set_default_date(&end_date, &f->date.end_date, current_time);
 
-    const size_t DATE_BUFFER_LEN = 12;
-    char buffer[DATE_BUFFER_LEN];
+    static char buffer[DATE_BUFFER_LEN];
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &start_date);
     fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &end_date);

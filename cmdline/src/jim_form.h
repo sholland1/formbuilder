@@ -11,6 +11,8 @@
 #define REAL_YEAR(year) (NOB_ASSERT((year) < 1900), (year)+1900)
 #define FAKE_YEAR(year) (NOB_ASSERT((year) >= 1900), (year)-1900)
 
+#define DATE_BUFFER_LEN 11
+
 void jim_field_type(Jim *jim, FieldType t) {
     switch (t) {
 #define X(name) case ft_##name: jim_string(jim, #name); break;
@@ -123,8 +125,7 @@ void jim_form(Jim *jim, const Form *f) {
             } break;
 
             case ft_date: {
-                const size_t DATE_BUFFER_LEN = 11;
-                char date_buffer[DATE_BUFFER_LEN];
+                static char date_buffer[DATE_BUFFER_LEN];
                 DateFieldMembers p = x->date;
                 jim_member_key(jim, "question"); jim_string(jim, p.question);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
