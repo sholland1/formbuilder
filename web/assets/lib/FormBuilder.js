@@ -246,7 +246,7 @@ export default class FormBuilder {
         }
 
         return this.element('div', { class: 'builder-item builder-' + item.type },
-            this.element('label', { for: item.id, class: 'builder-question' }, item.question),
+            this.element('label', { for: item.id, class: 'builder-label' }, item.label),
             this.element('div', {}, ...inputElements));
     }
 
@@ -297,7 +297,7 @@ export default class FormBuilder {
 
             if (type === 'multiselect') {
                 const actual_id = Array.from(item.getElementsByTagName('label'))
-                    .find(l => l.classList.contains('builder-question'))
+                    .find(l => l.classList.contains('builder-label'))
                     .getAttribute('for');
                 formData[actual_id] = inputs
                     .filter(input => input.checked)

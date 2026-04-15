@@ -68,7 +68,7 @@ Color read_color(const Field *f) {
 
     static const uint8_t component_locations[] = {3, 4, 8, 9, 13, 14};
 
-    fprintf(tty_out, "%s\r\n "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", f->color.question);
+    fprintf(tty_out, "%s\r\n "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", f->color.label);
 
     Color c = {0};
     int pos = 1;
@@ -207,7 +207,7 @@ bool read_date(const Field *f, struct tm *value) {
 
     static char buffer[DATE_BUFFER_LEN];
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &start_date);
-    fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.question, f->date.required ? "*" : "", buffer);
+    fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.label, f->date.required ? "*" : "", buffer);
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &end_date);
     fprintf(tty_out, "%s]\r\n", buffer);
     fflush(tty_out);
@@ -288,7 +288,7 @@ Tristate read_bool(const Field *f) {
     #define OPTS_LEN 2
     const char *opts[OPTS_LEN] = {"Yes", "No"};
     bool required = f->boolean.required;
-    fprintf(tty_out, HIDE"%s%s", f->boolean.question, required ? "*" : "");
+    fprintf(tty_out, HIDE"%s%s", f->boolean.label, required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
@@ -324,7 +324,7 @@ void read_select(const Field *f, char *buffer) {
 
     SelectOptions opts = f->select.options;
     bool required = f->select.required;
-    fprintf(tty_out, HIDE"%s%s", f->select.question, required ? "*" : "");
+    fprintf(tty_out, HIDE"%s%s", f->select.label, required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
@@ -372,7 +372,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
     NOB_ASSERT(f->type == ft_multiselect);
 
     MultiSelectFieldMembers p = f->multiselect;
-    fprintf(tty_out, HIDE"%s ", p.question);
+    fprintf(tty_out, HIDE"%s ", p.label);
     if (p.max == INT_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)");
         else fprintf(tty_out, "(at least %d)", p.min);
@@ -436,7 +436,7 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
 int64_t read_counter(const Field *f) {
     NOB_ASSERT(f->type == ft_counter);
 
-    fprintf(tty_out, HIDE"%s\r\n0", f->counter.question);
+    fprintf(tty_out, HIDE"%s\r\n0", f->counter.label);
     fflush(tty_out);
 
     int64_t value = 0;
@@ -566,7 +566,7 @@ void read_text(const Field *f, char *buffer) {
         .buffer = buffer,
     };
 
-    fprintf(tty_out, "%s%s\r\n", f->text.question, f->text.required ? "*" : "");
+    fprintf(tty_out, "%s%s\r\n", f->text.label, f->text.required ? "*" : "");
 
     const char *ph = f->text.placeholder;
     while (1) {
@@ -609,7 +609,7 @@ void read_number(const Field *f, char *buffer) {
     };
 
     NumberFieldMembers p = f->number;
-    fprintf(tty_out, "%s%s\r\n", p.question, p.required ? "*" : "");
+    fprintf(tty_out, "%s%s\r\n", p.label, p.required ? "*" : "");
 
     while (1) {
         bool failed_checks = fails_number_checks(f, buffer);
@@ -674,7 +674,7 @@ void read_multitext(const Field *f, char* buffer) {
         .buffer = buffer,
     };
 
-    fprintf(tty_out, "%s%s\r\n", p.question, p.required ? "*" : "");
+    fprintf(tty_out, "%s%s\r\n", p.label, p.required ? "*" : "");
     if (p.max == INT_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)\r\n");
         else fprintf(tty_out, "(at least %d)\r\n", p.min);

@@ -50,7 +50,7 @@ uint64_t read_timer(const Field *f) {
     NOB_ASSERT(f->type == ft_timer);
 
     pthread_t timer_tid;
-    fprintf(tty_out, HIDE"%s\r\n", f->timer.question);
+    fprintf(tty_out, HIDE"%s\r\n", f->timer.label);
     fprintf(tty_out, "Press [space] to start, [esc] to reset, or [enter] to submit.\r\n");
     fprint_timer(tty_out, nanoseconds_total);
 

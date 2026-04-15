@@ -23,7 +23,7 @@ Additional properties depend on the type:
 ### type: `"text"`
 Single-line text input.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 - **`placeholder`** (text) *(optional)*: placeholder hint text
 - **`maxlength`** (number) *(optional)*: maximum character length; max 8000
@@ -34,7 +34,7 @@ Single-line text input.
 ### type: `"multitext"`
 Collects a comma-separated list of text entries.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`placeholder`** (text) *(optional)*: placeholder hint text
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
@@ -46,7 +46,7 @@ Collects a comma-separated list of text entries.
 ### type: `"number"`
 Numeric input.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
@@ -57,7 +57,7 @@ Numeric input.
 ### type: `"select"`
 Single-choice dropdown.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 - **`options`** (multitext): list of available choices (json array)
 
@@ -66,7 +66,7 @@ Single-choice dropdown.
 ### type: `"multiselect"`
 Multi-choice selector.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`options`** (multitext): list of available choices (json array)
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
@@ -81,7 +81,7 @@ Automatically captures the current date and time when the form is submitted. No 
 ### type: `"date"`
 Date picker.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 - **`start_date`** (date) *(optional)*: earliest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date
 - **`end_date`** (date) *(optional)*: latest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date
@@ -91,21 +91,21 @@ Date picker.
 ### type: `"counter"`
 Integer increment/decrement counter.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 
 ---
 
 ### type: `"color"`
 Color picker.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 
 ---
 
 ### type: `"bool"`
 Yes/No toggle.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 
 ---
@@ -113,7 +113,7 @@ Yes/No toggle.
 ### type: `"timer"`
 Measures elapsed time (e.g. for timed tasks).
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 
 ---
 
@@ -125,7 +125,7 @@ Automatically generates a GUID when the form is submitted. No additional propert
 ### type: `"file"`
 File picker.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`maxsize`** (number): maximum file size in KB
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
@@ -136,13 +136,13 @@ File picker.
 ### type: `"signature"`
 Allows the user to draw their name with the mouse or touchscreen.
 
-- **`question`** (text): the label/prompt shown to the user
+- **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
 
 ## Rules
 
 1. Always include exactly one `"timestamp"` field to record submission time. It must have no properties other than `"id"` and `"type"`. It should be the last field.
-2. Use clear, natural language for `"question"` values.
+2. Use clear, natural language for `"label"` values.
 3. Choose field types that best match the data being collected.
 4. Only include properties that are listed for the chosen field type — do not invent or add extra keys.
 5. All field `"id"` values must be unique within the form.

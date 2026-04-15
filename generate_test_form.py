@@ -30,7 +30,7 @@ def build_text_fields():
         field = {
             "id": "text_" + "_".join(labels),
             "type": "text",
-            "question": "Text field: " + ", ".join(labels),
+            "label": "Text field: " + ", ".join(labels),
         }
         if req_state != "missing":
             field["required"] = req_state
@@ -63,7 +63,7 @@ def build_multitext_fields():
         field = {
             "id": "multitext_" + "_".join(labels),
             "type": "multitext",
-            "question": "Multitext field: " + ", ".join(labels),
+            "label": "Multitext field: " + ", ".join(labels),
         }
         if placeholder:
             field["placeholder"] = "(comma separated values)"
@@ -96,7 +96,7 @@ def build_number_fields():
         field = {
             "id": "number_" + "_".join(labels),
             "type": "number",
-            "question": "Number field: " + ", ".join(labels),
+            "label": "Number field: " + ", ".join(labels),
         }
         if req_state != "missing":
             field["required"] = req_state
@@ -117,7 +117,7 @@ def build_select_fields():
         field = {
             "id": "select_" + label,
             "type": "select",
-            "question": "Select field: " + label,
+            "label": "Select field: " + label,
             "options": ["alpha", "beta", "gamma"],
         }
         if req_state != "missing":
@@ -136,7 +136,7 @@ def build_multiselect_fields():
         field = {
             "id": "multiselect_" + "_".join(labels),
             "type": "multiselect",
-            "question": "Multiselect field: " + ", ".join(labels),
+            "label": "Multiselect field: " + ", ".join(labels),
             "options": ["red", "green", "blue", "orange"],
         }
         if minp:
@@ -191,7 +191,7 @@ def build_date_fields():
         field = {
             "id": "date_" + "_".join(labels),
             "type": "date",
-            "question": "Date field: " + ", ".join(labels),
+            "label": "Date field: " + ", ".join(labels),
         }
         if req_state != "missing":
             field["required"] = req_state
@@ -204,11 +204,11 @@ def build_date_fields():
 
 
 def build_counter_fields():
-    return [{"id": "counter_basic", "type": "counter", "question": "Counter field"}]
+    return [{"id": "counter_basic", "type": "counter", "label": "Counter field"}]
 
 
 def build_color_fields():
-    return [{"id": "color_basic", "type": "color", "question": "Color field"}]
+    return [{"id": "color_basic", "type": "color", "label": "Color field"}]
 
 
 def build_bool_fields():
@@ -218,7 +218,7 @@ def build_bool_fields():
         field = {
             "id": "bool_" + label,
             "type": "bool",
-            "question": "Boolean field: " + label,
+            "label": "Boolean field: " + label,
         }
         if req_state != "missing":
             field["required"] = req_state
@@ -227,7 +227,7 @@ def build_bool_fields():
 
 
 def build_timer_fields():
-    return [{"id": "timer_basic", "type": "timer", "question": "Timer field"}]
+    return [{"id": "timer_basic", "type": "timer", "label": "Timer field"}]
 
 
 def build_file_fields():
@@ -243,7 +243,7 @@ def build_file_fields():
         field = {
             "id": "file_" + "_".join(labels),
             "type": "file",
-            "question": "File field: " + ", ".join(labels),
+            "label": "File field: " + ", ".join(labels),
             "maxsize": 1024,
             "fileexts": [".json", ".c"],
         }
@@ -263,7 +263,7 @@ def build_signature_fields():
         field = {
             "id": "signature_" + label,
             "type": "signature",
-            "question": "Signature field: " + label,
+            "label": "Signature field: " + label,
         }
         if req_state != "missing":
             field["required"] = req_state

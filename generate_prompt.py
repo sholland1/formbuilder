@@ -13,7 +13,7 @@ UNIVERSAL_PROPS = {"id", "type"}
 # Human-readable descriptions for well-known property ids.
 # Extend this dict if builder.json grows new property ids.
 PROP_DESCRIPTIONS: dict[str, str] = {
-    "question":    "the label/prompt shown to the user",
+    "label":    "the label/prompt shown to the user",
     "required":    "whether the field is required (default true)",
     "placeholder": "placeholder hint text",
     "maxlength":   "maximum character length",
@@ -154,7 +154,7 @@ Additional properties depend on the type:
 1. Always include exactly one `"timestamp"` field to record submission time. \
 It must have no properties other than `"id"` and `"type"`. \
 It should be the last field.
-2. Use clear, natural language for `"question"` values.
+2. Use clear, natural language for `"label"` values.
 3. Choose field types that best match the data being collected.
 4. Only include properties that are listed for the chosen field type — \
 do not invent or add extra keys.

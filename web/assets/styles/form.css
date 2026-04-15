@@ -17,9 +17,9 @@ html,body{height:100%;margin:0;font-family:Inter, Roboto, system-ui, -apple-syst
 /* form layout */
 #basic_form{display:flex;flex-direction:column;gap:var(--gap);padding:8px 0}
 
-/* each question block */
+/* each label block */
 .builder-item{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:transparent}
-.builder-question{font-weight:600;color:#0b1220;margin-bottom:6px;display:block}
+.builder-label{font-weight:600;color:#0b1220;margin-bottom:6px;display:block}
 
 /* common controls */
 input[type="text"],

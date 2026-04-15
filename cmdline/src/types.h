@@ -34,7 +34,7 @@ typedef enum {
 } Tristate;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
     const char *placeholder;
     size_t maxlength;
@@ -43,7 +43,7 @@ typedef struct {
 } TextFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
     double min;
     double max;
@@ -57,25 +57,25 @@ typedef struct {
 } SelectOptions;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
     SelectOptions options;
 } SelectFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
     SelectOptions options;
     int min;
     int max;
 } MultiSelectFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
 } RequiredQFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
 } QOnlyFieldMembers;
 
 typedef struct {
@@ -84,14 +84,14 @@ typedef struct {
 } date_t;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
     date_t start_date;
     date_t end_date;
 } DateFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
     bool required;
     const char *placeholder;
     int min;
@@ -102,7 +102,7 @@ typedef struct {
 } MultiTextFieldMembers;
 
 typedef struct {
-    const char *question;
+    const char *label;
     size_t maxsize;
     int min;
     int max;

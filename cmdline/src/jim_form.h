@@ -71,7 +71,7 @@ void jim_form(Jim *jim, const Form *f) {
         switch (x->type) {
             case ft_text: {
                 TextFieldMembers p = x->text;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
                 if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
@@ -80,7 +80,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_number: {
                 NumberFieldMembers p = x->number;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 const int precision = -1;
                 if (!isnan(p.min)) {jim_member_key(jim, "min"); jim_double(jim, p.min, precision);}
@@ -90,7 +90,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_select: {
                 SelectFieldMembers p = x->select;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 jim_member_key(jim, "options");
                 jim_array_begin(jim);
@@ -102,7 +102,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_multiselect: {
                 MultiSelectFieldMembers p = x->multiselect;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 jim_member_key(jim, "options");
                 jim_array_begin(jim);
                 nob_da_foreach(char *, x, &p.options) {
@@ -115,7 +115,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_multitext: {
                 MultiTextFieldMembers p = x->multitext;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
                 if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
@@ -127,7 +127,7 @@ void jim_form(Jim *jim, const Form *f) {
             case ft_date: {
                 static char date_buffer[DATE_BUFFER_LEN];
                 DateFieldMembers p = x->date;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 if (p.start_date.is_today) {
                     jim_member_key(jim, "start_date");
@@ -150,21 +150,21 @@ void jim_form(Jim *jim, const Form *f) {
             } break;
 
             case ft_counter:
-                jim_member_key(jim, "question"); jim_string(jim, x->counter.question);
+                jim_member_key(jim, "label"); jim_string(jim, x->counter.label);
                 break;
 
             case ft_color:
-                jim_member_key(jim, "question"); jim_string(jim, x->color.question);
+                jim_member_key(jim, "label"); jim_string(jim, x->color.label);
                 break;
 
             case ft_bool: {
                 RequiredQFieldMembers p = x->boolean;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
             } break;
 
             case ft_timer:
-                jim_member_key(jim, "question"); jim_string(jim, x->timer.question);
+                jim_member_key(jim, "label"); jim_string(jim, x->timer.label);
                 break;
 
             case ft_timestamp:
@@ -173,7 +173,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_file: {
                 FileFieldMembers p = x->file;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 jim_member_key(jim, "maxsize"); jim_integer(jim, p.maxsize);
                 if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
                 if (p.max != 1) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
@@ -187,7 +187,7 @@ void jim_form(Jim *jim, const Form *f) {
 
             case ft_signature: {
                 RequiredQFieldMembers p = x->signature;
-                jim_member_key(jim, "question"); jim_string(jim, p.question);
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
             } break;
 
@@ -272,9 +272,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
         else {
             switch (field->type) {
                 case ft_text:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->text.question = strdup(jimp->string);
+                        field->text.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -297,9 +297,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_number:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->number.question = strdup(jimp->string);
+                        field->number.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -324,9 +324,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_select:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->select.question = strdup(jimp->string);
+                        field->select.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -343,9 +343,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_multiselect:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->multiselect.question = strdup(jimp->string);
+                        field->multiselect.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "options") == 0) {
                         if (!jimp_array_begin(jimp)) return false;
@@ -366,9 +366,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_multitext:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->multitext.question = strdup(jimp->string);
+                        field->multitext.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -399,9 +399,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_date:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->date.question = strdup(jimp->string);
+                        field->date.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -438,9 +438,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                 break;
 
                 case ft_counter:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->counter.question = strdup(jimp->string);
+                        field->counter.label = strdup(jimp->string);
                     }
                     else {
                         jimp_unknown_member(jimp);
@@ -449,9 +449,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_color:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->color.question = strdup(jimp->string);
+                        field->color.label = strdup(jimp->string);
                     }
                     else {
                         jimp_unknown_member(jimp);
@@ -460,9 +460,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_bool:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->boolean.question = strdup(jimp->string);
+                        field->boolean.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;
@@ -475,9 +475,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_timer:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->timer.question = strdup(jimp->string);
+                        field->timer.label = strdup(jimp->string);
                     }
                     else {
                         jimp_unknown_member(jimp);
@@ -490,9 +490,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_file:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->file.question = strdup(jimp->string);
+                        field->file.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "maxsize") == 0) {
                         if (!jimp_number(jimp)) return false;
@@ -522,9 +522,9 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     break;
 
                 case ft_signature:
-                    if (strcmp(jimp->string, "question") == 0) {
+                    if (strcmp(jimp->string, "label") == 0) {
                         if (!jimp_string(jimp)) return false;
-                        field->signature.question = strdup(jimp->string);
+                        field->signature.label = strdup(jimp->string);
                     }
                     else if (strcmp(jimp->string, "required") == 0) {
                         if (!jimp_bool(jimp)) return false;

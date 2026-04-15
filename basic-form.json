@@ -5,14 +5,14 @@
         {
             "id": "name",
             "type": "text",
-            "question": "What is your name?",
+            "label": "What is your name?",
             "placeholder": "(John Smith)",
             "maxlength": 16
         },
         {
             "id": "ssn",
             "type": "text",
-            "question": "Give me your Social Security Number! Now!!",
+            "label": "Give me your Social Security Number! Now!!",
             "required": false,
             "placeholder": "(000-00-0000)",
             "pattern": "^\\d{3}-\\d{2}-\\d{4}$"
@@ -20,7 +20,7 @@
         {
             "id": "age",
             "type": "number",
-            "question": "How old are you?",
+            "label": "How old are you?",
             "required": false,
             "min": 0,
             "max": 127
@@ -28,7 +28,7 @@
         {
             "id": "weight",
             "type": "number",
-            "question": "How much do you weigh?",
+            "label": "How much do you weigh?",
             "required": false,
             "min": 0,
             "max": 1023,
@@ -37,7 +37,7 @@
         {
             "id": "ice_cream_flavor",
             "type": "select",
-            "question": "What is your favorite ice cream flavor?",
+            "label": "What is your favorite ice cream flavor?",
             "required": false,
             "options": [
                 "vanilla",
@@ -49,7 +49,7 @@
         {
             "id": "sports",
             "type": "multiselect",
-            "question": "What sports do you play?",
+            "label": "What sports do you play?",
             "options": [
                 "basketball",
                 "baseball",
@@ -70,7 +70,7 @@
         {
             "id": "date_of_birth",
             "type": "date",
-            "question": "Enter your date of birth.",
+            "label": "Enter your date of birth.",
             "required": false,
             "start_date": "1900-01-01",
             "end_date": "2026-02-28"
@@ -78,28 +78,28 @@
         {
             "id": "some_count",
             "type": "counter",
-            "question": "Count something, would ya?"
+            "label": "Count something, would ya?"
         },
         {
             "id": "favorite_color",
             "type": "color",
-            "question": "What is your favorite color?"
+            "label": "What is your favorite color?"
         },
         {
             "id": "happy",
             "type": "bool",
-            "question": "Are you happy?"
+            "label": "Are you happy?"
         },
         {
             "id": "video_games",
             "type": "multitext",
-            "question": "What are some of your favorite video games?",
+            "label": "What are some of your favorite video games?",
             "placeholder": "(Enter a list of options separated by commas.)"
         },
         {
             "id": "breath_held",
             "type": "timer",
-            "question": "How long can you hold your breath?"
+            "label": "How long can you hold your breath?"
         },
         {
             "id": "guid",
@@ -108,7 +108,7 @@
         {
             "id": "files",
             "type": "file",
-            "question": "Upload your files...",
+            "label": "Upload your files...",
             "maxsize": 1024,
             "min": 1,
             "max": 3,
@@ -121,7 +121,7 @@
         {
             "id": "signature",
             "type": "signature",
-            "question": "Sign on the dotted line. ;)"
+            "label": "Sign on the dotted line. ;)"
         }
     ]
 }
