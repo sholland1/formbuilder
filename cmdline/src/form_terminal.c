@@ -53,7 +53,15 @@ Key read_key(FILE *stream) {
     }
 
     if (count == 4 && c == '3' && buffer[3] == '~') return KEY(key_delete);
-    if (count == 6 && c == '1' && buffer[3] == ';' && buffer[4] == '5') {
+
+    if (count == 6 && c == '1' && buffer[3] == ';' && buffer[4] == '2') {
+        c = buffer[5];
+        if (c == 'A') return KEY(key_shift_up);
+        if (c == 'B') return KEY(key_shift_down);
+        if (c == 'C') return KEY(key_shift_right);
+        if (c == 'D') return KEY(key_shift_left);
+    }
+    else if (count == 6 && c == '1' && buffer[3] == ';' && buffer[4] == '5') {
         c = buffer[5];
         if (c == 'C') return KEY(key_ctrl_right);
         if (c == 'D') return KEY(key_ctrl_left);

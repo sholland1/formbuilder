@@ -713,3 +713,94 @@ void read_multitext(const Field *f, char* buffer) {
         handle_text_buffer(&tb, k.type);
     }
 }
+
+#define ZERO_STAR "☆"
+#define PART_STAR "★"
+#define FULL_STAR "⭐"
+
+void sprint_stars(char *buffer, size_t len, Rating r) {
+    size_t used = 0;
+    for (int i = 0; i < r.max_score; i++) {
+        const char *star =
+            r.score >= (i+1) ? FULL_STAR
+            : r.score > i ? PART_STAR
+            : ZERO_STAR;
+
+        if (used >= len) break;
+
+        size_t n = strlcpy(buffer + used, star, len - used);
+        if (n >= len - used) {
+            buffer[len - 1] = '\0';
+            return;
+        }
+        used += n;
+    }
+}
+
+#define SCORE_BUFFER_LEN 7
+void sprint_score(char *buffer, Rating r) {
+    // float comparison is safe because I'm multiplying below instead of incrementing by step
+    if (r.max_score == mr_ten && r.score == mr_ten) {
+        snprintf(buffer, SCORE_BUFFER_LEN-1, "%.0f/%d", r.score, r.max_score);
+        return;
+    }
+    snprintf(buffer, SCORE_BUFFER_LEN, "%.1f/%d", fabs(r.score), r.max_score);
+}
+
+Rating read_rating(const Field *f) {
+    NOB_ASSERT(f->type == ft_rating);
+
+    RatingFieldMembers p = f->rating;
+    static char score_buffer[SCORE_BUFFER_LEN];
+    static char stars_buffer[mr_ten*sizeof(FULL_STAR)+1];
+
+    int current_score = 0;
+    int integer_max_score = p.maxrating / p.step;
+
+    Rating r = MAKE_RATING(0, p.maxrating);
+
+    sprint_score(score_buffer, r);
+    sprint_stars(stars_buffer, sizeof(stars_buffer), r);
+    fprintf(tty_out, HIDE"%s\r\n%s - %s", p.label, score_buffer, stars_buffer);
+    fflush(tty_out);
+
+    while (1) {
+        Key k = read_key(tty_in);
+        if (k.type == key_exit) user_exit();
+        if (k.type == key_enter) {
+            fprintf(tty_out, SHOW"\r\n");
+            fflush(tty_out);
+            return r;
+        }
+
+        if (k.type == key_escape) {
+            current_score = 0;
+        }
+        else if (k.type == key_arrow_up || k.type == key_arrow_right) {
+            if (r.max_score > r.score) {
+                current_score++;
+            }
+        }
+        else if (k.type == key_arrow_down || k.type == key_arrow_left) {
+            if (r.score > 0) {
+                current_score--;
+            }
+        }
+        else if (k.type == key_shift_up || k.type == key_shift_right) {
+            current_score = CLAMP(current_score + (1 / p.step), 0, integer_max_score);
+        }
+        else if (k.type == key_shift_down || k.type == key_shift_left) {
+            current_score = CLAMP(current_score - (1 / p.step), 0, integer_max_score);
+        }
+        else {
+            continue;
+        }
+
+        r.score = current_score * p.step; // important for float scores
+
+        sprint_score(score_buffer, r);
+        sprint_stars(stars_buffer, sizeof(stars_buffer), r);
+        fprintf(tty_out, "\r%s - %s"CLRDOWN, score_buffer, stars_buffer);
+        fflush(tty_out);
+    }
+}

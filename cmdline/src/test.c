@@ -173,6 +173,18 @@ static void build_basic_form_script(InputSteps *steps) {
 
     // timer field
     append_char(steps, '\n');
+
+    // rating field
+    append_key(steps, ARROW_RIGHT);
+    append_key(steps, ARROW_RIGHT);
+    append_char(steps, '\033');
+    append_key(steps, ARROW_LEFT);
+    append_key(steps, ARROW_UP);
+    append_key(steps, ARROW_UP);
+    append_key(steps, ARROW_RIGHT);
+    append_key(steps, ARROW_DOWN);
+    append_key(steps, ARROW_LEFT);
+    append_char(steps, '\n');
 }
 
 static void *script_writer_main(void *arg) {
