@@ -36,6 +36,8 @@ void display_form(const Form *form, Answers *answers) {
         answer_buffer[0] = '\0';
         opts.count = 0;
 
+        ASSERT_FIELD_TYPES_LENGTH(14);
+
         switch (f->type) {
         case ft_text:
             read_text(f, answer_buffer);

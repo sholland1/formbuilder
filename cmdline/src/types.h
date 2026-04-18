@@ -29,6 +29,9 @@ typedef enum {
     FIELD_TYPE_LENGTH,
 } FieldType;
 
+#define ASSERT_FIELD_TYPES_LENGTH(actual_length) \
+    static_assert(FIELD_TYPE_LENGTH == actual_length, "Missing FieldType handler")
+
 typedef enum {
     ts_null, ts_true, ts_false
 } Tristate;
@@ -109,6 +112,7 @@ typedef struct {
     SelectOptions fileexts;
 } FileFieldMembers;
 
+ASSERT_FIELD_TYPES_LENGTH(14);
 typedef struct {
     const char *id;
     FieldType type;

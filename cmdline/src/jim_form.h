@@ -68,6 +68,8 @@ void jim_form(Jim *jim, const Form *f) {
         jim_member_key(jim, "type");
         jim_field_type(jim, x->type);
 
+        ASSERT_FIELD_TYPES_LENGTH(14);
+
         switch (x->type) {
             case ft_text: {
                 TextFieldMembers p = x->text;
@@ -201,6 +203,8 @@ void jim_form(Jim *jim, const Form *f) {
 
 void field_set_defaults(Field *field) {
     // Set non-zero defaults
+    ASSERT_FIELD_TYPES_LENGTH(14);
+
     switch (field->type) {
         case ft_text:
             field->text.required = true;
@@ -270,6 +274,8 @@ bool jimp_field(Jimp *jimp, Field *field) {
             field_set_defaults(field);
         }
         else {
+            ASSERT_FIELD_TYPES_LENGTH(14);
+
             switch (field->type) {
                 case ft_text:
                     if (strcmp(jimp->string, "label") == 0) {
