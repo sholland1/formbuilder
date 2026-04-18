@@ -312,6 +312,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         field->text.regex = compile_regex(jimp->string, LRE_FLAG_DOTALL);
                         field->text.pattern = strdup(jimp->string);
                     }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
                     break;
 
                 case ft_number:
@@ -358,6 +362,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                         }
                         if (!jimp_array_end(jimp)) return false;
                     }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
                     break;
 
                 case ft_multiselect:
@@ -380,6 +388,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "max") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->multiselect.max = (int)jimp->number;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
                     }
                     break;
 
@@ -413,6 +425,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
 
                         field->multitext.regex = compile_regex(jimp->string, LRE_FLAG_DOTALL);
                         field->multitext.pattern = strdup(jimp->string);
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
                     }
                     break;
 
@@ -452,6 +468,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                             if (!parse_to_tm(jimp->string, dt)) return false;
                             field->date.end_date.dt = dt;
                         }
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
                     }
                 break;
 
@@ -505,6 +525,8 @@ bool jimp_field(Jimp *jimp, Field *field) {
 
                 case ft_timestamp:
                 case ft_guid:
+                    jimp_unknown_member(jimp);
+                    return false;
                     break;
 
                 case ft_file:
@@ -566,6 +588,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "maxrating") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->rating.maxrating = (MaxRating)jimp->number;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
                     }
                     break;
 
