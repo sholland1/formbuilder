@@ -271,6 +271,29 @@ def build_signature_fields():
     return fields
 
 
+def build_rating_fields():
+    fields = []
+    for req_state, maxrating_state in product(
+        ["missing", True, False],
+        ["missing", 5, 10],
+    ):
+        labels = [
+            f"required-{state_label(req_state)}",
+            f"maxrating-{state_label(maxrating_state)}",
+        ]
+        field = {
+            "id": "rating_" + '_'.join(labels),
+            "type": "rating",
+            "label": "Rating field: " + ', '.join(labels),
+        }
+        if req_state != "missing":
+            field["required"] = req_state
+        if maxrating_state != "missing":
+            field["maxrating"] = maxrating_state
+        fields.append(field)
+    return fields
+
+
 def build_fields():
     return (
         build_text_fields()
@@ -287,6 +310,7 @@ def build_fields():
         + build_guid_fields()
         + build_file_fields()
         + build_signature_fields()
+        + build_rating_fields()
     )
 
 

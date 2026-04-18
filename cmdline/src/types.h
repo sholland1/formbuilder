@@ -20,7 +20,13 @@
     X(timer) \
     X(guid) \
     X(file) \
-    X(signature)
+    X(signature) \
+    X(rating)
+
+#define UNIMPLEMENTED_FIELDTYPES \
+    X(file) \
+    X(signature) \
+    X(rating)
 
 typedef enum {
 #define X(name) ft_##name,
@@ -112,7 +118,18 @@ typedef struct {
     SelectOptions fileexts;
 } FileFieldMembers;
 
-ASSERT_FIELD_TYPES_LENGTH(14);
+typedef enum {
+    mr_five = 5,
+    mr_ten = 10,
+} MaxRating;
+
+typedef struct {
+    const char *label;
+    bool required;
+    MaxRating maxrating;
+} RatingFieldMembers;
+
+ASSERT_FIELD_TYPES_LENGTH(15);
 typedef struct {
     const char *id;
     FieldType type;
@@ -129,6 +146,7 @@ typedef struct {
         QOnlyFieldMembers timer;
         FileFieldMembers file;
         RequiredQFieldMembers signature;
+        RatingFieldMembers rating;
     };
 } Field;
 

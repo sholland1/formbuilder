@@ -1242,6 +1242,63 @@
             "type": "signature",
             "label": "Signature field: required-False",
             "required": false
+        },
+        {
+            "id": "rating_required-missing_maxrating-missing",
+            "type": "rating",
+            "label": "Rating field: required-missing, maxrating-missing"
+        },
+        {
+            "id": "rating_required-missing_maxrating-5",
+            "type": "rating",
+            "label": "Rating field: required-missing, maxrating-5",
+            "maxrating": 5
+        },
+        {
+            "id": "rating_required-missing_maxrating-10",
+            "type": "rating",
+            "label": "Rating field: required-missing, maxrating-10",
+            "maxrating": 10
+        },
+        {
+            "id": "rating_required-True_maxrating-missing",
+            "type": "rating",
+            "label": "Rating field: required-True, maxrating-missing",
+            "required": true
+        },
+        {
+            "id": "rating_required-True_maxrating-5",
+            "type": "rating",
+            "label": "Rating field: required-True, maxrating-5",
+            "required": true,
+            "maxrating": 5
+        },
+        {
+            "id": "rating_required-True_maxrating-10",
+            "type": "rating",
+            "label": "Rating field: required-True, maxrating-10",
+            "required": true,
+            "maxrating": 10
+        },
+        {
+            "id": "rating_required-False_maxrating-missing",
+            "type": "rating",
+            "label": "Rating field: required-False, maxrating-missing",
+            "required": false
+        },
+        {
+            "id": "rating_required-False_maxrating-5",
+            "type": "rating",
+            "label": "Rating field: required-False, maxrating-5",
+            "required": false,
+            "maxrating": 5
+        },
+        {
+            "id": "rating_required-False_maxrating-10",
+            "type": "rating",
+            "label": "Rating field: required-False, maxrating-10",
+            "required": false,
+            "maxrating": 10
         }
     ]
 }

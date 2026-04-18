@@ -17,15 +17,25 @@ bool load_form_from_file(const char *file_path, Form *form) {
     return jimp_form(&jimp, form);
 }
 
+void warn_unimplemented_field_type(Field *f) {
+    const char *type_name = NULL;
+    switch (f->type) {
+#define X(name) case ft_##name: type_name = "##name"; break;
+        UNIMPLEMENTED_FIELDTYPES
+#undef X
+        default:
+            type_name = "unknown";
+            break;
+    }
+    fprintf(tty_out, "Skipping field '%s' because the '%s' field type is unimplemented.\r\n", f->id, type_name);
+}
+
 void display_form(const Form *form, Answers *answers) {
     fprintf(tty_out, CLR HOME BOLD"%s"RESET"\r\n", form->title);
 
     //TODO: implement these field types
     nob_da_foreach(Field, f, &form->fields) {
-        if (f->type == ft_file)
-            fprintf(tty_out, "Skipping field '%s' because the 'file' field type is unimplemented.\r\n", f->id);
-        else if (f->type == ft_signature)
-            fprintf(tty_out, "Skipping field '%s' because the 'signature' field type is unimplemented.\r\n", f->id);
+        warn_unimplemented_field_type(f);
     }
 
     static char answer_buffer[ANSWER_BUFFER_LEN];
@@ -36,7 +46,7 @@ void display_form(const Form *form, Answers *answers) {
         answer_buffer[0] = '\0';
         opts.count = 0;
 
-        ASSERT_FIELD_TYPES_LENGTH(14);
+        ASSERT_FIELD_TYPES_LENGTH(15);
 
         switch (f->type) {
         case ft_text:
@@ -125,6 +135,7 @@ void display_form(const Form *form, Answers *answers) {
 
         case ft_file:
         case ft_signature:
+        case ft_rating:
             break;
 
         default:

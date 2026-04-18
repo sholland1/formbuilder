@@ -68,7 +68,7 @@ void jim_form(Jim *jim, const Form *f) {
         jim_member_key(jim, "type");
         jim_field_type(jim, x->type);
 
-        ASSERT_FIELD_TYPES_LENGTH(14);
+        ASSERT_FIELD_TYPES_LENGTH(15);
 
         switch (x->type) {
             case ft_text: {
@@ -193,6 +193,13 @@ void jim_form(Jim *jim, const Form *f) {
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
             } break;
 
+            case ft_rating: {
+                RatingFieldMembers p = x->rating;
+                jim_member_key(jim, "label"); jim_string(jim, p.label);
+                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+                jim_member_key(jim, "maxrating"); jim_integer(jim, p.maxrating);
+            } break;
+
             default: NOB_UNREACHABLE("Unidentified type!");
         }
         jim_object_end(jim);
@@ -203,7 +210,7 @@ void jim_form(Jim *jim, const Form *f) {
 
 void field_set_defaults(Field *field) {
     // Set non-zero defaults
-    ASSERT_FIELD_TYPES_LENGTH(14);
+    ASSERT_FIELD_TYPES_LENGTH(15);
 
     switch (field->type) {
         case ft_text:
@@ -250,6 +257,11 @@ void field_set_defaults(Field *field) {
             field->signature.required = true;
             break;
 
+        case ft_rating:
+            field->rating.required = true;
+            field->rating.maxrating = mr_five;
+            break;
+
         case ft_counter:
         case ft_color:
         case ft_timer:
@@ -274,7 +286,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
             field_set_defaults(field);
         }
         else {
-            ASSERT_FIELD_TYPES_LENGTH(14);
+            ASSERT_FIELD_TYPES_LENGTH(15);
 
             switch (field->type) {
                 case ft_text:
@@ -539,6 +551,21 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else {
                         jimp_unknown_member(jimp);
                         return false;
+                    }
+                    break;
+
+                case ft_rating:
+                    if (strcmp(jimp->string, "label") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->rating.label = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "required") == 0) {
+                        if (!jimp_bool(jimp)) return false;
+                        field->rating.required = jimp->boolean;
+                    }
+                    else if (strcmp(jimp->string, "maxrating") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->rating.maxrating = (MaxRating)jimp->number;
                     }
                     break;
 

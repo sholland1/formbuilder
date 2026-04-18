@@ -122,6 +122,12 @@
             "id": "signature",
             "type": "signature",
             "label": "Sign on the dotted line. ;)"
+        },
+        {
+            "id": "survey_rating",
+            "type": "rating",
+            "label": "How would you rate this survey?",
+            "maxrating": 5
         }
     ]
 }

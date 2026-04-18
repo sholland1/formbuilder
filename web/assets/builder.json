@@ -45,7 +45,8 @@
                         "timer",
                         "guid",
                         "file",
-                        "signature"
+                        "signature",
+                        "rating"
                     ]
                 }
             ]
@@ -337,6 +338,24 @@
                     "label": "Is your field required?"
                 }
             ]
+        },
+        "field_type_rating": {
+                {
+                    "id": "label",
+                    "type": "text",
+                    "label": "Enter some text for a label."
+                },
+                {
+                    "id": "required",
+                    "type": "bool",
+                    "label": "Is your field required?"
+                },
+                {
+                    "id": "max-rating",
+                    "type": "select",
+                    "label": "What is the max rating?",
+                    "options": [ "5", "10" ]
+                }
         }
     }
 }
