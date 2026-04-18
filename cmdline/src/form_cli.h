@@ -73,6 +73,10 @@ typedef enum {
     key_arrow_down,
     key_arrow_right,
     key_arrow_left,
+    key_shift_up,
+    key_shift_down,
+    key_shift_right,
+    key_shift_left,
     key_home,
     key_end,
     key_ctrl_right,
@@ -135,6 +139,8 @@ int64_t read_counter(const Field *f);
 void read_text(const Field *f, char *buffer);
 void read_number(const Field *f, char *buffer);
 void read_multitext(const Field *f, char *buffer);
+void sprint_score(char *buffer, Rating r);
+Rating read_rating(const Field *f);
 
 uint64_t read_timer(const Field *f);
 int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize);

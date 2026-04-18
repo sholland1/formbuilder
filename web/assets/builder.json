@@ -340,6 +340,7 @@
             ]
         },
         "field_type_rating": {
+            "fields": [
                 {
                     "id": "label",
                     "type": "text",
@@ -351,7 +352,7 @@
                     "label": "Is your field required?"
                 },
                 {
-                    "id": "max-rating",
+                    "id": "maxrating",
                     "type": "select",
                     "label": "What is the max rating?",
                     "options": [ "5", "10" ]
@@ -362,6 +363,7 @@
                     "label": "Step:",
                     "options": [ "1", "0.1", "0.5" ]
                 }
+            ]
         }
     }
 }

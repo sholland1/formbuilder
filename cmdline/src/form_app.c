@@ -20,12 +20,10 @@ bool load_form_from_file(const char *file_path, Form *form) {
 void warn_unimplemented_field_type(Field *f) {
     const char *type_name = NULL;
     switch (f->type) {
-#define X(name) case ft_##name: type_name = "##name"; break;
+#define X(name) case ft_##name: type_name = #name; break;
         UNIMPLEMENTED_FIELDTYPES
 #undef X
-        default:
-            type_name = "unknown";
-            break;
+        default: return;
     }
     fprintf(tty_out, "Skipping field '%s' because the '%s' field type is unimplemented.\r\n", f->id, type_name);
 }
@@ -135,8 +133,13 @@ void display_form(const Form *form, Answers *answers) {
 
         case ft_file:
         case ft_signature:
-        case ft_rating:
             break;
+
+        case ft_rating: {
+            Rating r = read_rating(f);
+            sprint_score(answer_buffer, r);
+            append_quoted_answer(answers, f->id, answer_buffer);
+        } break;
 
         default:
             NOB_UNREACHABLE("Unidentified type!");

@@ -198,7 +198,8 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 jim_member_key(jim, "maxrating"); jim_integer(jim, p.maxrating);
-                jim_member_key(jim, "step"); jim_integer(jim, p.step);
+                const int precision = -1;
+                jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
             } break;
 
             default: NOB_UNREACHABLE("Unidentified type!");

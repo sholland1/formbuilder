@@ -25,8 +25,7 @@
 
 #define UNIMPLEMENTED_FIELDTYPES \
     X(file) \
-    X(signature) \
-    X(rating)
+    X(signature)
 
 typedef enum {
 #define X(name) ft_##name,
@@ -122,6 +121,13 @@ typedef enum {
     mr_five = 5,
     mr_ten = 10,
 } MaxRating;
+
+typedef struct {
+    float score;
+    MaxRating max_score;
+} Rating;
+
+#define MAKE_RATING(s, ms) (Rating){ (s), (ms) }
 
 typedef struct {
     const char *label;
