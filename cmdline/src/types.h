@@ -127,6 +127,7 @@ typedef struct {
     const char *label;
     bool required;
     MaxRating maxrating;
+    double step;
 } RatingFieldMembers;
 
 ASSERT_FIELD_TYPES_LENGTH(15);

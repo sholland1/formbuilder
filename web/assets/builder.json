@@ -355,6 +355,12 @@
                     "type": "select",
                     "label": "What is the max rating?",
                     "options": [ "5", "10" ]
+                },
+                {
+                    "id": "step",
+                    "type": "select",
+                    "label": "Step:",
+                    "options": [ "1", "0.1", "0.5" ]
                 }
         }
     }

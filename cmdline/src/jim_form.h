@@ -198,6 +198,7 @@ void jim_form(Jim *jim, const Form *f) {
                 jim_member_key(jim, "label"); jim_string(jim, p.label);
                 if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
                 jim_member_key(jim, "maxrating"); jim_integer(jim, p.maxrating);
+                jim_member_key(jim, "step"); jim_integer(jim, p.step);
             } break;
 
             default: NOB_UNREACHABLE("Unidentified type!");
@@ -222,7 +223,7 @@ void field_set_defaults(Field *field) {
             field->number.required = true;
             field->number.min = -NAN;
             field->number.max = NAN;
-            field->number.step = 1;
+            field->number.step = 1.0f;
             break;
 
         case ft_select:
@@ -260,6 +261,7 @@ void field_set_defaults(Field *field) {
         case ft_rating:
             field->rating.required = true;
             field->rating.maxrating = mr_five;
+            field->rating.step = 1.0f;
             break;
 
         case ft_counter:
@@ -588,6 +590,10 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "maxrating") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->rating.maxrating = (MaxRating)jimp->number;
+                    }
+                    else if (strcmp(jimp->string, "step") == 0) {
+                        if (!jimp_number(jimp)) return false;
+                        field->rating.step = (double)jimp->number;
                     }
                     else {
                         jimp_unknown_member(jimp);

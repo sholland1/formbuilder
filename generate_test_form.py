@@ -15,14 +15,14 @@ def state_label(value):
 
 def build_text_fields():
     fields = []
-    for req_state, placeholder, maxlength, pattern in product(
+    for required, placeholder, maxlength, pattern in product(
         ["missing", True, False],
         [False, True],
         [False, True],
         [False, True],
     ):
         labels = [
-            f"required-{state_label(req_state)}",
+            f"required-{state_label(required)}",
             f"placeholder-{'yes' if placeholder else 'no'}",
             f"maxlength-{'yes' if maxlength else 'no'}",
             f"pattern-{'yes' if pattern else 'no'}",
@@ -32,8 +32,8 @@ def build_text_fields():
             "type": "text",
             "label": "Text field: " + ", ".join(labels),
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         if placeholder:
             field["placeholder"] = "(text placeholder)"
         if maxlength:
@@ -81,14 +81,14 @@ def build_multitext_fields():
 
 def build_number_fields():
     fields = []
-    for req_state, minp, maxp, step in product(
+    for required, minp, maxp, step in product(
         ["missing", True, False],
         [False, True],
         [False, True],
         [False, True],
     ):
         labels = [
-            f"required-{state_label(req_state)}",
+            f"required-{state_label(required)}",
             f"min-{'yes' if minp else 'no'}",
             f"max-{'yes' if maxp else 'no'}",
             f"step-{'yes' if step else 'no'}",
@@ -98,8 +98,8 @@ def build_number_fields():
             "type": "number",
             "label": "Number field: " + ", ".join(labels),
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         if minp:
             field["min"] = 0
         if maxp:
@@ -112,16 +112,16 @@ def build_number_fields():
 
 def build_select_fields():
     fields = []
-    for req_state in ["missing", True, False]:
-        label = f"required-{state_label(req_state)}"
+    for required in ["missing", True, False]:
+        label = f"required-{state_label(required)}"
         field = {
             "id": "select_" + label,
             "type": "select",
             "label": "Select field: " + label,
             "options": ["alpha", "beta", "gamma"],
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         fields.append(field)
     return fields
 
@@ -182,9 +182,9 @@ def build_date_fields():
         if not end_is_before_start(start, end)
     ]
     fields = []
-    for req_state, startp, endp in filtered_combinations:
+    for required, startp, endp in filtered_combinations:
         labels = [
-            f"required-{state_label(req_state)}",
+            f"required-{state_label(required)}",
             f"start-date-{startp.removeprefix('[').removesuffix(']')}",
             f"end-date-{endp.removeprefix('[').removesuffix(']')}",
         ]
@@ -193,8 +193,8 @@ def build_date_fields():
             "type": "date",
             "label": "Date field: " + ", ".join(labels),
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         if startp != "missing":
             field["start_date"] = startp
         if endp != "missing":
@@ -213,15 +213,15 @@ def build_color_fields():
 
 def build_bool_fields():
     fields = []
-    for req_state in ["missing", True, False]:
-        label = f"required-{state_label(req_state)}"
+    for required in ["missing", True, False]:
+        label = f"required-{state_label(required)}"
         field = {
             "id": "bool_" + label,
             "type": "bool",
             "label": "Boolean field: " + label,
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         fields.append(field)
     return fields
 
@@ -258,38 +258,42 @@ def build_file_fields():
 
 def build_signature_fields():
     fields = []
-    for req_state in ["missing", True, False]:
-        label = f"required-{state_label(req_state)}"
+    for required in ["missing", True, False]:
+        label = f"required-{state_label(required)}"
         field = {
             "id": "signature_" + label,
             "type": "signature",
             "label": "Signature field: " + label,
         }
-        if req_state != "missing":
-            field["required"] = req_state
+        if required != "missing":
+            field["required"] = required
         fields.append(field)
     return fields
 
 
 def build_rating_fields():
     fields = []
-    for req_state, maxrating_state in product(
+    for required, maxrating, step in product(
         ["missing", True, False],
         ["missing", 5, 10],
+        ["missing",  1, 0.1, 0.5 ],
     ):
         labels = [
-            f"required-{state_label(req_state)}",
-            f"maxrating-{state_label(maxrating_state)}",
+            f"required-{state_label(required)}",
+            f"maxrating-{state_label(maxrating)}",
+            f"step-{state_label(step)}",
         ]
         field = {
             "id": "rating_" + '_'.join(labels),
             "type": "rating",
             "label": "Rating field: " + ', '.join(labels),
         }
-        if req_state != "missing":
-            field["required"] = req_state
-        if maxrating_state != "missing":
-            field["maxrating"] = maxrating_state
+        if required != "missing":
+            field["required"] = required
+        if maxrating != "missing":
+            field["maxrating"] = maxrating
+        if step != "missing":
+            field["step"] = step
         fields.append(field)
     return fields
 

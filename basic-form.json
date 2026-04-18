@@ -127,7 +127,8 @@
             "id": "survey_rating",
             "type": "rating",
             "label": "How would you rate this survey?",
-            "maxrating": 5
+            "maxrating": 5,
+            "step": 0.5
         }
     ]
 }
