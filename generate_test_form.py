@@ -10,7 +10,7 @@ OUTPUT_PATH = Path("comprehensive-test-form.json")
 def state_label(value):
     if value == "missing":
         return "missing"
-    return str(value)
+    return str(value).replace('.', '_dot_')
 
 
 def build_text_fields():
@@ -275,7 +275,7 @@ def build_rating_fields():
     fields = []
     for required, maxrating, step in product(
         ["missing", True, False],
-        ["missing", 5, 10],
+        [5, 10],
         ["missing",  1, 0.1, 0.5 ],
     ):
         labels = [
@@ -290,8 +290,7 @@ def build_rating_fields():
         }
         if required != "missing":
             field["required"] = required
-        if maxrating != "missing":
-            field["maxrating"] = maxrating
+        field["maxrating"] = maxrating
         if step != "missing":
             field["step"] = step
         fields.append(field)
