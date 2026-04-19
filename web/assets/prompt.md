@@ -14,7 +14,7 @@ Return ONLY a raw JSON object — no markdown, no backticks, no explanation. The
 
 Every field object has two universal properties:
 - **`id`** (text): a unique camelCase or kebab-case identifier for the field, starting with a letter and containing only letters, numbers, underscores, or hyphens.
-- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`, `"guid"`, `"file"`, `"signature"`
+- **`type`** (select): one of: `"text"`, `"multitext"`, `"number"`, `"select"`, `"multiselect"`, `"timestamp"`, `"date"`, `"counter"`, `"color"`, `"bool"`, `"timer"`, `"guid"`, `"file"`, `"signature"`, `"rating"`
 
 Additional properties depend on the type:
 
@@ -50,7 +50,7 @@ Numeric input.
 - **`required`** (bool): whether the field is required (default true)
 - **`min`** (number) *(optional)*: minimum value / minimum number of entries / minimum selections
 - **`max`** (number) *(optional)*: maximum value / maximum number of entries / maximum selections
-- **`step`** (select) *(optional)*: one of "1", "2", "3", "4", "5", "10", "20", "25", "50", "100", "0.1", "0.2", "0.25", "0.5", "0.01", "0.02", "0.025", "0.05", "0.001", "0.002", "0.0025", "0.005", "0.0001", "0.0002", "0.00025", "0.0005"
+- **`step`** (select) *(optional)*: numeric step size (default 1); one of "1", "2", "3", "4", "5", "10", "20", "25", "50", "100", "0.1", "0.2", "0.25", "0.5", "0.01", "0.02", "0.025", "0.05", "0.001", "0.002", "0.0025", "0.005", "0.0001", "0.0002", "0.00025", "0.0005"
 
 ---
 
@@ -138,6 +138,16 @@ Allows the user to draw their name with the mouse or touchscreen.
 
 - **`label`** (text): the label/prompt shown to the user
 - **`required`** (bool): whether the field is required (default true)
+
+---
+
+### type: `"rating"`
+Give rating out of 5 or out of 10 stars
+
+- **`label`** (text): the label/prompt shown to the user
+- **`required`** (bool): whether the field is required (default true)
+- **`maxrating`** (select): choose out of 5 or out of 10 stars (default 5); one of "5", "10"
+- **`step`** (select) *(optional)*: numeric step size (default 1); one of "1", "0.1", "0.5"
 
 ## Rules
 

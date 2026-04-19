@@ -361,7 +361,8 @@
                     "id": "step",
                     "type": "select",
                     "label": "Step:",
-                    "options": [ "1", "0.1", "0.5" ]
+                    "options": [ "1", "0.1", "0.5" ],
+                    "required": false
                 }
             ]
         }

@@ -20,12 +20,13 @@ PROP_DESCRIPTIONS: dict[str, str] = {
     "pattern":     "regex the value must match",
     "min":         "minimum value / minimum number of entries / minimum selections",
     "max":         "maximum value / maximum number of entries / maximum selections",
-    "step":        "numeric step size",
+    "step":        "numeric step size (default 1)",
     "options":     "list of available choices (json array)",
     "start_date":  "earliest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date",
     "end_date":    "latest allowed date 'YYYY-MM-DD' or '[today]' to indicate the current date",
     "maxsize":     "maximum file size in KB",
     "fileexts":    "list of allowed file extensions, each starts with a period (json array)",
+    "maxrating":   "choose out of 5 or out of 10 stars (default 5)",
 }
 
 # Human-readable descriptions for each field type.
@@ -44,6 +45,7 @@ TYPE_DESCRIPTIONS: dict[str, str] = {
     "guid":        "Automatically generates a GUID when the form is submitted. No additional properties needed — do not add any.",
     "file":        "File picker.",
     "signature":   "Allows the user to draw their name with the mouse or touchscreen.",
+    "rating":      "Give rating out of 5 or out of 10 stars",
 }
 
 
@@ -59,7 +61,7 @@ def field_meta(field: dict) -> str:
     # For select/multiselect fields whose options are the legal values, list them.
     if ftype == "select" and "options" in field:
         opts = ", ".join(f'"{o}"' for o in field["options"])
-        description = f"one of {opts}"
+        description = f"{description}; one of {opts}"
     elif ftype == "number":
         constraints = []
         if "max" in field:
