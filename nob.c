@@ -13,7 +13,7 @@ typedef struct {
     bool gen_test_form;
     bool gen_prompt;
     const char *serve_port;
-} Build_Config;
+} BuildConfig;
 
 static void append_common_cli_sources(Nob_Cmd *cmd) {
     nob_cmd_append(cmd,
@@ -39,7 +39,7 @@ static void append_compile_flags(Nob_Cmd *cmd, bool release) {
     }
 }
 
-static void log_usage(const Build_Config *config) {
+static void log_usage(const BuildConfig *config) {
     nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form] [gen-prompt]", config->program_name);
 }
 
@@ -51,7 +51,7 @@ static bool is_port_arg(const char *arg) {
     return true;
 }
 
-static bool parse_build_config(Build_Config *config, int argc, char **argv) {
+static bool parse_build_config(BuildConfig *config, int argc, char **argv) {
     config->program_name = nob_shift_args(&argc, &argv);
     config->serve_port = "8000";
 
@@ -110,7 +110,7 @@ static bool open_in_browser(const char *url) {
 int main(int argc, char **argv) {
     NOB_GO_REBUILD_URSELF(argc, argv);
 
-    Build_Config config = {0};
+    BuildConfig config = {0};
     if (!parse_build_config(&config, argc, argv)) return 1;
 
     bool should_build_form = !config.serve && !config.test && !config.gen_test_form && !config.gen_prompt;
