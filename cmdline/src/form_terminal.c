@@ -38,6 +38,8 @@ Key read_key(FILE *stream) {
 
     c = buffer[1];
     if (count == 2 && c == 'd') return KEY(key_ctrl_delete);
+    if (count == 3 && c == 'O' && buffer[2] == 'P') return KEY(key_f1);
+
     if (c != '[') return KEY(key_unknown);
 
     c = buffer[2];

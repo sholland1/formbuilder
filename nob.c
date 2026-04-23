@@ -24,6 +24,7 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
         SRC_FOLDER"form_answers.c",
         SRC_FOLDER"form_terminal.c",
         SRC_FOLDER"form_fields.c",
+        SRC_FOLDER"form_help.c",
         SRC_FOLDER"form_timer.c",
         SRC_FOLDER"form_app.c");
 }

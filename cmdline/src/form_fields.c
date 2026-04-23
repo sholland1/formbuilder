@@ -84,7 +84,10 @@ Color read_color(const Field *f) {
             return c;
         }
 
-        if (k.type == key_tab) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_tab) {
             static const int next_pos[] = {3, 3, 5, 5, 1, 1};
             pos = next_pos[pos];
         }
@@ -257,7 +260,10 @@ bool read_date(const Field *f, struct tm *value) {
             }
         }
 
-        if (k.type == key_escape) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_escape) {
             pos = 0;
             month = 0;
             day = 0;
@@ -307,7 +313,10 @@ Tristate read_bool(const Field *f) {
             return (Tristate)(pos + required);
         }
 
-        if (k.type == key_arrow_up) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_arrow_up) {
             if (pos == 0) pos = OPTS_LEN - required;
             else pos--;
         }
@@ -356,7 +365,10 @@ void read_select(const Field *f, char *buffer) {
             return;
         }
 
-        if (k.type == key_arrow_up) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_arrow_up) {
             if (pos == 0) pos = opts.count - required;
             else pos--;
         }
@@ -421,7 +433,10 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
             selected_indexes[pos] = !selected_indexes[pos];
         }
 
-        if (k.type == key_arrow_up) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_arrow_up) {
             if (pos == 0) pos = opts.count - 1;
             else pos--;
         }
@@ -449,7 +464,10 @@ int64_t read_counter(const Field *f) {
             return value;
         }
 
-        if (k.type == key_escape) {
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
+        else if (k.type == key_escape) {
             value = 0;
         }
         else if (k.type == key_arrow_up || (k.type == key_char && k.ch == ' ')) {
@@ -590,6 +608,10 @@ void read_text(const Field *f, char *buffer) {
             return;
         }
 
+        if (k.type == key_f1) {
+            display_help(f->type);
+            continue;
+        }
         if (k.type == key_char && tb.position < f->text.maxlength - 1) {
             place_char_in_text_buffer(&tb, (char) k.ch);
             continue;
@@ -627,6 +649,10 @@ void read_number(const Field *f, char *buffer) {
 
         if (k.type == key_char && (k.ch == '-' || k.ch == '.' || isdigit(k.ch))) {
             place_char_in_text_buffer(&tb, (char) k.ch);
+            continue;
+        }
+        if (k.type == key_f1) {
+            display_help(f->type);
             continue;
         }
 
@@ -705,6 +731,10 @@ void read_multitext(const Field *f, char* buffer) {
             return;
         }
 
+        if (k.type == key_f1) {
+            display_help(f->type);
+            continue;
+        }
         if (k.type == key_char) {
             place_char_in_text_buffer(&tb, (char) k.ch);
             continue;
@@ -773,6 +803,9 @@ Rating read_rating(const Field *f) {
             return r;
         }
 
+        if (k.type == key_f1) {
+            display_help(f->type);
+        }
         if (k.type == key_escape) {
             current_score = 0;
         }

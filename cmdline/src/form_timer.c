@@ -57,6 +57,10 @@ uint64_t read_timer(const Field *f) {
     while (1) {
         Key k = read_key(tty_in);
         if (k.type == key_exit) user_exit();
+        if (k.type == key_f1) {
+            display_help(f->type);
+            continue;
+        }
 
         if (running) {
             if (k.type == key_char && k.ch == ' ') {

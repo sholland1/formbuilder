@@ -41,6 +41,8 @@
 #define SHOW      "\033[?25h"
 #define UP(n)     "\033["#n"A"
 #define RIGHT(n)  "\033["#n"G"
+#define MODAL     "\033[s\033[?1049h"HOME
+#define UNMODAL   "\033[?1049l\033[u"
 
 #define PROMPT     BOLD"→"RESET
 #define ERR_PROMPT RED PROMPT
@@ -81,6 +83,7 @@ typedef enum {
     key_end,
     key_ctrl_right,
     key_ctrl_left,
+    key_f1,
     key_exit,
     key_unknown,
 } KeyType;
@@ -144,5 +147,7 @@ Rating read_rating(const Field *f);
 
 uint64_t read_timer(const Field *f);
 int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize);
+
+void display_help(FieldType type);
 
 #endif
