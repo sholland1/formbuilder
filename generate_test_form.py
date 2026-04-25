@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-OUTPUT_PATH = Path("comprehensive-test-form.json")
+OUTPUT_PATH = Path("test_forms", "comprehensive-test-form.json")
 
 
 def state_label(value):
@@ -296,6 +296,28 @@ def build_rating_fields():
         fields.append(field)
     return fields
 
+def build_group_fields():
+    fields = []
+    counter_field_1 = build_counter_fields()[0]
+    counter_field_1['id'] += "_1"
+    counter_field_2 = build_counter_fields()[0]
+    counter_field_2['id'] += "_2"
+    field = {
+        "id": "group_1",
+        "type": "group",
+        "label": "Group field",
+        "fields": [
+            counter_field_1,
+            {
+                "id": "group_1_1",
+                "type": "group",
+                "label": "Group field",
+                "fields": [ counter_field_2 ]
+            }
+        ]
+    }
+    fields.append(field)
+    return fields
 
 def build_fields():
     return (
@@ -314,6 +336,7 @@ def build_fields():
         + build_file_fields()
         + build_signature_fields()
         + build_rating_fields()
+        + build_group_fields()
     )
 
 

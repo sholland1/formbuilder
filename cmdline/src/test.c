@@ -1,4 +1,5 @@
 #include "form_app.h"
+#include "types.h"
 
 #include <errno.h>
 #include <pthread.h>
@@ -24,6 +25,20 @@ typedef struct {
     int fd;
     InputSteps *steps;
 } ScriptWriter;
+
+#define FORM_DIR "test_forms/"
+typedef struct {
+    const char *form_name;
+    const char *answer_structure;
+    void (*script)(InputSteps*);
+} FormTestCase;
+
+AnswerStructureType parse_answer_structure_type(const char *type_str) {
+    if (strcmp(type_str, "basic") == 0) return ast_basic;
+    if (strcmp(type_str, "flat") == 0) return ast_flat;
+    if (strcmp(type_str, "nested") == 0) return ast_nested;
+    NOB_UNREACHABLE("Unidentified type!");
+}
 
 #define FIXED_TEST_TIME ((time_t)1772368496)
 #define SCRIPT_TIMEOUT_SECONDS 1
@@ -94,6 +109,9 @@ static void append_key(InputSteps *steps, const char *sequence) {
 #define ARROW_DOWN "\033[B"
 #define ARROW_RIGHT "\033[C"
 #define ARROW_LEFT "\033[D"
+
+static void build_basic_group_form_script(InputSteps *steps) {
+}
 
 static void build_basic_form_script(InputSteps *steps) {
     // text field
@@ -267,7 +285,17 @@ static bool test_deserialize_all_fields(const char *path) {
     return true;
 }
 
-static bool test_basic_form_script(const char *form_path, const char *answers_path) {
+static bool test_form_script(const FormTestCase *test_case) {
+    char form_path[128];
+    sprintf(form_path, FORM_DIR"%s.json", test_case->form_name);
+    char answers_path[128];
+    if (test_case->answer_structure == NULL) {
+        sprintf(answers_path, FORM_DIR"%s.answers.json", test_case->form_name);
+    }
+    else {
+        sprintf(answers_path, FORM_DIR"%s-%s.answers.json", test_case->form_name, test_case->answer_structure);
+    }
+
     Form form = {0};
     TEST_CHECK(load_form_from_file(form_path, &form), "deserialize %s", form_path);
     TEST_CHECK(signal(SIGALRM, on_script_timeout) != SIG_ERR, "install timeout handler");
@@ -276,7 +304,7 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     TEST_CHECK(nob_read_entire_file(answers_path, &expected), "read %s", answers_path);
 
     InputSteps steps = {0};
-    build_basic_form_script(&steps);
+    test_case->script(&steps);
 
     int input_fds[2];
 #if LINUX
@@ -314,6 +342,11 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
 
     FILE *json_stream = tmpfile();
     TEST_CHECK(json_stream != NULL, "tmpfile: %s", strerror(errno));
+
+    AnswerStructureType answer_structure_type = ast_nested;
+    if (test_case->answer_structure != NULL) {
+        answer_structure_type = parse_answer_structure_type(test_case->answer_structure);
+    }
     output_answers(&answers, 0, json_stream);
 
     Nob_String_Builder actual = {0};
@@ -338,16 +371,25 @@ static bool test_basic_form_script(const char *form_path, const char *answers_pa
     return true;
 }
 
+FormTestCase test_forms[] = {
+    {"basic-form", NULL, build_basic_form_script},
+    {"basic-group-form", "nested", build_basic_group_form_script},
+    {"basic-group-form", "flat", build_basic_group_form_script},
+    {"basic-group-form", "basic", build_basic_group_form_script},
+};
+
 int main(void) {
-    const char deserialize_path[] = "comprehensive-test-form.json";
-    const char scripted_path[] = "basic-form.json";
-    const char answers_path[] = "basic-form.answers.json";
+    const char deserialize_path[] = FORM_DIR"comprehensive-test-form.json";
 
     setenv("TZ", "UTC", 1);
     tzset();
 
     if (!test_deserialize_all_fields(deserialize_path)) return 1;
-    if (!test_basic_form_script(scripted_path, answers_path)) return 1;
+
+    for (int i = 0; i < 4; i++) {
+        FormTestCase test_case = test_forms[i];
+        if (!test_form_script(&test_case)) return 1;
+    }
 
     puts(PASS"All tests passed.");
     return 0;

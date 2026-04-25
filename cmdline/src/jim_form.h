@@ -23,11 +23,20 @@ void jim_field_type(Jim *jim, FieldType t) {
 }
 
 // TODO: maybe match with regex
-FieldType parse_type(const char *type_str) {
+FieldType parse_field_type(const char *type_str) {
 #define X(name) if (strcmp(type_str, #name) == 0) return ft_##name;
     FIELDTYPES
 #undef X
     NOB_UNREACHABLE("Unidentified type!");
+}
+
+void jim_answer_structure_type(Jim *jim, AnswerStructureType t) {
+    switch (t) {
+    case ast_nested: jim_string(jim, "nested"); break;
+    case ast_flat: jim_string(jim, "flat"); break;
+    case ast_basic: jim_string(jim, "basic"); break;
+    default: NOB_UNREACHABLE("Unidentified type!");
+    }
 }
 
 bool parse_yyyy_mm_dd(const char *str, int *real_year, int *month, int *day) {
@@ -307,7 +316,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
         }
         else if (strcmp(jimp->string, "type") == 0) {
             if (!jimp_string(jimp)) return false;
-            field->type = parse_type(jimp->string);
+            field->type = parse_field_type(jimp->string);
             field_set_defaults(field);
         }
         else {
@@ -694,7 +703,7 @@ void jim_answers(Jim *jim, const Answers *answers) {
     jim_object_begin(jim);
     nob_da_foreach(Answer, x, answers) {
         jim_member_key(jim, x->id);
-        if (x->type == ft_multiselect) {
+        if (x->type == at_list) {
             jim_array_begin(jim);
             nob_da_foreach(char*, o, &x->options) {
                 jim_string(jim, *o);

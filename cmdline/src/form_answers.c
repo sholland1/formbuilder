@@ -5,7 +5,7 @@
 void append_raw_answer(Answers *answers, const char *id, const char *value) {
     Answer a = {
         .id = strdup(id),
-        .type = ft_text,
+        .type = at_string,
         .value = strdup(value),
     };
     nob_da_append(answers, a);
@@ -14,7 +14,7 @@ void append_raw_answer(Answers *answers, const char *id, const char *value) {
 void append_static_answer(Answers *answers, const char *id, const char *value) {
     Answer a = {
         .id = strdup(id),
-        .type = ft_text,
+        .type = at_string,
         .value = value,
     };
     nob_da_append(answers, a);
@@ -33,7 +33,7 @@ void append_quoted_answer(Answers *answers, const char *id, const char *value) {
 void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts) {
     Answer a = {
         .id = strdup(id),
-        .type = ft_multiselect,
+        .type = at_list,
     };
     a.options.capacity = 0;
     a.options.count = 0;
@@ -45,7 +45,7 @@ void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *
 void append_multitext_answer(Answers *answers, const char *id, const char *values) {
     Answer a = {
         .id = strdup(id),
-        .type = ft_multiselect,
+        .type = at_list,
     };
     a.options.capacity = 0;
     a.options.count = 0;

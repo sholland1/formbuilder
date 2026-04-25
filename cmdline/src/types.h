@@ -137,7 +137,7 @@ typedef struct {
     double step;
 } RatingFieldMembers;
 
-typedef struct _fields Fields;
+typedef struct _Fields Fields;
 
 typedef struct {
     const char *label;
@@ -166,11 +166,17 @@ typedef struct {
     };
 } Field;
 
-struct _fields {
+struct _Fields {
     Field *items;
     size_t count;
     size_t capacity;
 };
+
+typedef enum {
+    ast_nested,
+    ast_flat,
+    ast_basic,
+} AnswerStructureType;
 
 typedef struct {
     const char *id;
@@ -178,20 +184,29 @@ typedef struct {
     Fields fields;
 } Form;
 
+typedef struct _Answers Answers;
+
+typedef enum {
+    at_string,
+    at_list,
+    at_nested,
+} AnswerType;
+
 typedef struct {
     const char *id;
-    FieldType type;
+    AnswerType type;
     union {
         const char *value;
         SelectOptions options;
+        Answers *answers;
     };
 } Answer;
 
-typedef struct {
+struct _Answers {
     Answer *items;
     size_t count;
     size_t capacity;
-} Answers;
+};
 
 typedef struct {
     const char *file_path;

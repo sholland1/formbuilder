@@ -1,0 +1,30 @@
+{
+    "id": "basic-group-form",
+    "title": "My Basic Group Test Form",
+    "fields": [
+        {
+            "id": "group_1",
+            "type": "group",
+            "label": "Group field",
+            "fields": [
+                {
+                    "id": "counter_1",
+                    "type": "counter",
+                    "label": "Counter field"
+                },
+                {
+                    "id": "group_1_1",
+                    "type": "group",
+                    "label": "Group field",
+                    "fields": [
+                        {
+                            "id": "counter_2",
+                            "type": "counter",
+                            "label": "Counter field"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
