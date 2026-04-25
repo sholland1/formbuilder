@@ -32,6 +32,7 @@
 #define RESET     "\033[0m"
 #define BOLD      "\033[1m"
 #define FAINT     "\033[2m"
+#define ITALIC    "\033[3m"
 #define UNDERLINE "\033[4m"
 #define RED       "\033[31m"
 #define GREEN     "\033[32m"
@@ -133,21 +134,23 @@ void terminal_init(void);
 void terminal_deinit(void);
 
 void color_to_str(char *buffer, Color c);
-Color read_color(const Field *f);
-bool read_date(const Field *f, struct tm *value);
-Tristate read_bool(const Field *f);
-void read_select(const Field *f, char *buffer);
-void read_multiselect(const Field *f, SelectOptions *selected_opts);
-int64_t read_counter(const Field *f);
-void read_text(const Field *f, char *buffer);
-void read_number(const Field *f, char *buffer);
-void read_multitext(const Field *f, char *buffer);
+Color read_color(const Field *f, int depth);
+bool read_date(const Field *f, int depth, struct tm *value);
+Tristate read_bool(const Field *f, int depth);
+void read_select(const Field *f, int depth, char *buffer);
+void read_multiselect(const Field *f, int depth, SelectOptions *selected_opts);
+int64_t read_counter(const Field *f, int depth);
+void read_text(const Field *f, int depth, char *buffer);
+void read_number(const Field *f, int depth, char *buffer);
+void read_multitext(const Field *f, int depth, char *buffer);
 void sprint_score(char *buffer, Rating r);
-Rating read_rating(const Field *f);
+Rating read_rating(const Field *f, int depth);
 
-uint64_t read_timer(const Field *f);
+uint64_t read_timer(const Field *f, int depth);
 int ns_to_iso8601_duration(uint64_t total_ns, char *buf, size_t bufsize);
 
 void display_help(FieldType type);
+
+const char* make_indent(int depth);
 
 #endif

@@ -21,7 +21,8 @@
     X(guid) \
     X(file) \
     X(signature) \
-    X(rating)
+    X(rating) \
+    X(group)
 
 #define UNIMPLEMENTED_FIELDTYPES \
     X(file) \
@@ -136,7 +137,14 @@ typedef struct {
     double step;
 } RatingFieldMembers;
 
-ASSERT_FIELD_TYPES_LENGTH(15);
+typedef struct _fields Fields;
+
+typedef struct {
+    const char *label;
+    Fields *fields;
+} GroupFieldMembers;
+
+ASSERT_FIELD_TYPES_LENGTH(16);
 typedef struct {
     const char *id;
     FieldType type;
@@ -154,14 +162,15 @@ typedef struct {
         FileFieldMembers file;
         RequiredQFieldMembers signature;
         RatingFieldMembers rating;
+        GroupFieldMembers group;
     };
 } Field;
 
-typedef struct {
+struct _fields {
     Field *items;
     size_t count;
     size_t capacity;
-} Fields;
+};
 
 typedef struct {
     const char *id;

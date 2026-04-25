@@ -13,18 +13,18 @@
 static volatile bool running = false;
 static volatile uint64_t nanoseconds_total = 0;
 
-static void fprint_timer(FILE *stream, uint64_t total) {
+static void fprint_timer(FILE *stream, const char *indent, uint64_t total) {
     uint64_t hours = total / NANOSEC_PER_HOUR;
     uint64_t minutes = (total % NANOSEC_PER_HOUR) / NANOSEC_PER_MIN;
     uint64_t seconds = (total % NANOSEC_PER_MIN) / NANOSEC_PER_SEC;
     uint64_t centi = (total % NANOSEC_PER_SEC) / NANOSEC_PER_CENTISEC;
 
-    fprintf(stream, "\r%02lld:%02lld:%02lld:%02lld"CLRDOWN, hours, minutes, seconds, centi);
+    fprintf(stream, "\r%s%02lld:%02lld:%02lld:%02lld"CLRDOWN, indent, hours, minutes, seconds, centi);
     fflush(stream);
 }
 
 static void *timer_thread(void *arg) {
-    NOB_UNUSED(arg);
+    const char *indent = (const char *)arg;
 
     running = true;
     struct timespec last;
@@ -40,19 +40,20 @@ static void *timer_thread(void *arg) {
             nanoseconds_total += elapsed_ns;
             last = now;
         }
-        fprint_timer(tty_out, nanoseconds_total);
+        fprint_timer(tty_out, indent, nanoseconds_total);
         usleep(TIMER_SLEEP_TIME);
     }
     return NULL;
 }
 
-uint64_t read_timer(const Field *f) {
+uint64_t read_timer(const Field *f, int depth) {
     NOB_ASSERT(f->type == ft_timer);
 
     pthread_t timer_tid;
-    fprintf(tty_out, HIDE"%s\r\n", f->timer.label);
+    const char *indent = make_indent(depth);
+    fprintf(tty_out, HIDE"%s%s\r\n%s", indent, f->timer.label, indent);
     fprintf(tty_out, "Press [space] to start, [esc] to reset, or [enter] to submit.\r\n");
-    fprint_timer(tty_out, nanoseconds_total);
+    fprint_timer(tty_out, indent, nanoseconds_total);
 
     while (1) {
         Key k = read_key(tty_in);
@@ -66,8 +67,8 @@ uint64_t read_timer(const Field *f) {
             if (k.type == key_char && k.ch == ' ') {
                 running = false;
 
-                fprintf(tty_out, UP(1)"\rTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n");
-                fprint_timer(tty_out, nanoseconds_total);
+                fprintf(tty_out, UP(1)"\r%sTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n", indent);
+                fprint_timer(tty_out, indent, nanoseconds_total);
 
                 pthread_join(timer_tid, NULL);
             }
@@ -82,15 +83,15 @@ uint64_t read_timer(const Field *f) {
 
         if (k.type == key_escape) {
             nanoseconds_total = 0;
-            fprintf(tty_out, UP(1)"\rTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n");
-            fprint_timer(tty_out, nanoseconds_total);
+            fprintf(tty_out, UP(1)"\r%sTimer paused. Press [space] to start, [esc] to reset, or [enter] to submit."CLRDOWN"\r\n", indent);
+            fprint_timer(tty_out, indent, nanoseconds_total);
             continue;
         }
 
         if (k.type == key_char && k.ch == ' ') {
-            fprintf(tty_out, UP(1)"\rTimer running. Press [space] to stop."CLRDOWN"\r\n");
-            fprint_timer(tty_out, nanoseconds_total);
-            if (pthread_create(&timer_tid, NULL, timer_thread, NULL) != 0) {
+            fprintf(tty_out, UP(1)"\r%sTimer running. Press [space] to stop."CLRDOWN"\r\n", indent);
+            fprint_timer(tty_out, indent, nanoseconds_total);
+            if (pthread_create(&timer_tid, NULL, timer_thread, (void *)indent) != 0) {
                 perror("Failed to create timer thread");
                 return (uint64_t) -1;
             }

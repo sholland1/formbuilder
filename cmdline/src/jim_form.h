@@ -52,167 +52,184 @@ bool parse_to_tm(const char *str, struct tm* tm) {
     return true;
 }
 
+static void jim_field(Jim *jim, const Field *x) {
+    jim_object_begin(jim);
+    jim_member_key(jim, "id");
+    jim_string(jim, x->id);
+    jim_member_key(jim, "type");
+    jim_field_type(jim, x->type);
+
+    ASSERT_FIELD_TYPES_LENGTH(16);
+
+    switch (x->type) {
+        case ft_text: {
+            TextFieldMembers p = x->text;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
+            if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
+            if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
+        } break;
+
+        case ft_number: {
+            NumberFieldMembers p = x->number;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            const int precision = -1;
+            if (!isnan(p.min)) {jim_member_key(jim, "min"); jim_double(jim, p.min, precision);}
+            if (!isnan(p.max)) {jim_member_key(jim, "max"); jim_double(jim, p.max, precision);}
+            if (p.step != 1) {jim_member_key(jim, "step"); jim_double(jim, p.step, precision);}
+        } break;
+
+        case ft_select: {
+            SelectFieldMembers p = x->select;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            jim_member_key(jim, "options");
+            jim_array_begin(jim);
+            nob_da_foreach(char *, x, &p.options) {
+                jim_string(jim, *x);
+            }
+            jim_array_end(jim);
+        } break;
+
+        case ft_multiselect: {
+            MultiSelectFieldMembers p = x->multiselect;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            jim_member_key(jim, "options");
+            jim_array_begin(jim);
+            nob_da_foreach(char *, x, &p.options) {
+                jim_string(jim, *x);
+            }
+            jim_array_end(jim);
+            if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+            if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+        } break;
+
+        case ft_multitext: {
+            MultiTextFieldMembers p = x->multitext;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
+            if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+            if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+            if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
+            if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
+        } break;
+
+        case ft_date: {
+            static char date_buffer[DATE_BUFFER_LEN];
+            DateFieldMembers p = x->date;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            if (p.start_date.is_today) {
+                jim_member_key(jim, "start_date");
+                jim_string(jim, "[today]");
+            }
+            else if (p.start_date.dt) {
+                jim_member_key(jim, "start_date");
+                strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.start_date.dt);
+                jim_string(jim, date_buffer);
+            }
+            if (p.end_date.is_today) {
+                jim_member_key(jim, "end_date");
+                jim_string(jim, "[today]");
+            }
+            else if (p.end_date.dt) {
+                jim_member_key(jim, "end_date");
+                strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.end_date.dt);
+                jim_string(jim, date_buffer);
+            }
+        } break;
+
+        case ft_counter:
+            jim_member_key(jim, "label"); jim_string(jim, x->counter.label);
+            break;
+
+        case ft_color:
+            jim_member_key(jim, "label"); jim_string(jim, x->color.label);
+            break;
+
+        case ft_bool: {
+            RequiredQFieldMembers p = x->boolean;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+        } break;
+
+        case ft_timer:
+            jim_member_key(jim, "label"); jim_string(jim, x->timer.label);
+            break;
+
+        case ft_timestamp:
+        case ft_guid:
+            break;
+
+        case ft_file: {
+            FileFieldMembers p = x->file;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            jim_member_key(jim, "maxsize"); jim_integer(jim, p.maxsize);
+            if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
+            if (p.max != 1) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
+            jim_member_key(jim, "fileexts");
+            jim_array_begin(jim);
+            nob_da_foreach(char *, x, &p.fileexts) {
+                jim_string(jim, *x);
+            }
+            jim_array_end(jim);
+        } break;
+
+        case ft_signature: {
+            RequiredQFieldMembers p = x->signature;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+        } break;
+
+        case ft_rating: {
+            RatingFieldMembers p = x->rating;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+            if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
+            jim_member_key(jim, "maxrating"); jim_integer(jim, p.maxrating);
+            const int precision = -1;
+            jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
+        } break;
+
+        case ft_group: {
+            GroupFieldMembers p = x->group;
+            jim_member_key(jim, "label"); jim_string(jim, p.label);
+
+            jim_member_key(jim, "fields");
+            jim_array_begin(jim);
+            nob_da_foreach(Field, y, p.fields) {
+                jim_field(jim, y);
+            }
+            jim_array_end(jim);
+        } break;
+
+        default: NOB_UNREACHABLE("Unidentified type!");
+    }
+    jim_object_end(jim);
+}
+
 void jim_form(Jim *jim, const Form *f) {
     jim_object_begin(jim);
     jim_member_key(jim, "id");
     jim_string(jim, f->id);
     jim_member_key(jim, "title");
     jim_string(jim, f->title);
-    jim_member_key(jim, "fields");
 
+    jim_member_key(jim, "fields");
     jim_array_begin(jim);
     nob_da_foreach(Field, x, &f->fields) {
-        jim_object_begin(jim);
-        jim_member_key(jim, "id");
-        jim_string(jim, x->id);
-        jim_member_key(jim, "type");
-        jim_field_type(jim, x->type);
-
-        ASSERT_FIELD_TYPES_LENGTH(15);
-
-        switch (x->type) {
-            case ft_text: {
-                TextFieldMembers p = x->text;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
-                if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
-                if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
-            } break;
-
-            case ft_number: {
-                NumberFieldMembers p = x->number;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                const int precision = -1;
-                if (!isnan(p.min)) {jim_member_key(jim, "min"); jim_double(jim, p.min, precision);}
-                if (!isnan(p.max)) {jim_member_key(jim, "max"); jim_double(jim, p.max, precision);}
-                if (p.step != 1) {jim_member_key(jim, "step"); jim_double(jim, p.step, precision);}
-            } break;
-
-            case ft_select: {
-                SelectFieldMembers p = x->select;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                jim_member_key(jim, "options");
-                jim_array_begin(jim);
-                nob_da_foreach(char *, x, &p.options) {
-                    jim_string(jim, *x);
-                }
-                jim_array_end(jim);
-            } break;
-
-            case ft_multiselect: {
-                MultiSelectFieldMembers p = x->multiselect;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                jim_member_key(jim, "options");
-                jim_array_begin(jim);
-                nob_da_foreach(char *, x, &p.options) {
-                    jim_string(jim, *x);
-                }
-                jim_array_end(jim);
-                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
-            } break;
-
-            case ft_multitext: {
-                MultiTextFieldMembers p = x->multitext;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                if (p.placeholder) { jim_member_key(jim, "placeholder"); jim_string(jim, p.placeholder);}
-                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != INT_MAX) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
-                if (p.maxlength != SIZE_MAX) { jim_member_key(jim, "maxlength"); jim_integer(jim, p.maxlength);}
-                if (p.pattern) {jim_member_key(jim, "pattern"); jim_string(jim, p.pattern);}
-            } break;
-
-            case ft_date: {
-                static char date_buffer[DATE_BUFFER_LEN];
-                DateFieldMembers p = x->date;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                if (p.start_date.is_today) {
-                    jim_member_key(jim, "start_date");
-                    jim_string(jim, "[today]");
-                }
-                else if (p.start_date.dt) {
-                    jim_member_key(jim, "start_date");
-                    strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.start_date.dt);
-                    jim_string(jim, date_buffer);
-                }
-                if (p.end_date.is_today) {
-                    jim_member_key(jim, "end_date");
-                    jim_string(jim, "[today]");
-                }
-                else if (p.end_date.dt) {
-                    jim_member_key(jim, "end_date");
-                    strftime(date_buffer, DATE_BUFFER_LEN, "%Y-%m-%d", p.end_date.dt);
-                    jim_string(jim, date_buffer);
-                }
-            } break;
-
-            case ft_counter:
-                jim_member_key(jim, "label"); jim_string(jim, x->counter.label);
-                break;
-
-            case ft_color:
-                jim_member_key(jim, "label"); jim_string(jim, x->color.label);
-                break;
-
-            case ft_bool: {
-                RequiredQFieldMembers p = x->boolean;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-            } break;
-
-            case ft_timer:
-                jim_member_key(jim, "label"); jim_string(jim, x->timer.label);
-                break;
-
-            case ft_timestamp:
-            case ft_guid:
-                break;
-
-            case ft_file: {
-                FileFieldMembers p = x->file;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                jim_member_key(jim, "maxsize"); jim_integer(jim, p.maxsize);
-                if (p.min != 0) {jim_member_key(jim, "min"); jim_integer(jim, p.min);}
-                if (p.max != 1) {jim_member_key(jim, "max"); jim_integer(jim, p.max);}
-                jim_member_key(jim, "fileexts");
-                jim_array_begin(jim);
-                nob_da_foreach(char *, x, &p.fileexts) {
-                    jim_string(jim, *x);
-                }
-                jim_array_end(jim);
-            } break;
-
-            case ft_signature: {
-                RequiredQFieldMembers p = x->signature;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-            } break;
-
-            case ft_rating: {
-                RatingFieldMembers p = x->rating;
-                jim_member_key(jim, "label"); jim_string(jim, p.label);
-                if (!p.required) {jim_member_key(jim, "required"); jim_bool(jim, p.required);}
-                jim_member_key(jim, "maxrating"); jim_integer(jim, p.maxrating);
-                const int precision = -1;
-                jim_member_key(jim, "step"); jim_double(jim, p.step, precision);
-            } break;
-
-            default: NOB_UNREACHABLE("Unidentified type!");
-        }
-        jim_object_end(jim);
+        jim_field(jim, x);
     }
     jim_array_end(jim);
+
     jim_object_end(jim);
 }
 
 void field_set_defaults(Field *field) {
     // Set non-zero defaults
-    ASSERT_FIELD_TYPES_LENGTH(15);
+    ASSERT_FIELD_TYPES_LENGTH(16);
 
     switch (field->type) {
         case ft_text:
@@ -265,6 +282,11 @@ void field_set_defaults(Field *field) {
             field->rating.step = 1.0f;
             break;
 
+        case ft_group: {
+            Fields *fields = (Fields*)malloc(sizeof(Fields));
+            field->group.fields = fields;
+        } break;
+
         case ft_counter:
         case ft_color:
         case ft_timer:
@@ -289,7 +311,7 @@ bool jimp_field(Jimp *jimp, Field *field) {
             field_set_defaults(field);
         }
         else {
-            ASSERT_FIELD_TYPES_LENGTH(15);
+            ASSERT_FIELD_TYPES_LENGTH(16);
 
             switch (field->type) {
                 case ft_text:
@@ -595,6 +617,26 @@ bool jimp_field(Jimp *jimp, Field *field) {
                     else if (strcmp(jimp->string, "step") == 0) {
                         if (!jimp_number(jimp)) return false;
                         field->rating.step = (double)jimp->number;
+                    }
+                    else {
+                        jimp_unknown_member(jimp);
+                        return false;
+                    }
+                    break;
+
+                case ft_group:
+                    if (strcmp(jimp->string, "label") == 0) {
+                        if (!jimp_string(jimp)) return false;
+                        field->group.label = strdup(jimp->string);
+                    }
+                    else if (strcmp(jimp->string, "fields") == 0) {
+                        if (!jimp_array_begin(jimp)) return false;
+                        while (jimp_array_item(jimp)) {
+                            Field f = {0};
+                            if (!jimp_field(jimp, &f)) return false;
+                            nob_da_append(field->group.fields, f);
+                        }
+                        if (!jimp_array_end(jimp)) return false;
                     }
                     else {
                         jimp_unknown_member(jimp);

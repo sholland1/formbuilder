@@ -63,18 +63,30 @@ void color_to_str(char *buffer, Color c) {
 #define RGB_SET(rgb, component, value) \
     (((rgb) & ~(0xFu << (component))) | (((value) & 0xFu) << (component)))
 
-Color read_color(const Field *f) {
+
+const char* make_indent(int depth) {
+    assert(depth < 128);
+    static char indent[128*3+2];
+    for (int i = 0; i < depth; i++) {
+        strcpy(indent+i*3, "│");
+    }
+    indent[depth*3] = ' ';
+    indent[depth*3+1] = '\0';
+    return indent;
+}
+
+Color read_color(const Field *f, int depth) {
     NOB_ASSERT(f->type == ft_color);
 
     static const uint8_t component_locations[] = {3, 4, 8, 9, 13, 14};
-
-    fprintf(tty_out, "%s\r\n "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", f->color.label);
+    const char *indent = make_indent(depth);
+    fprintf(tty_out, "%s%s\r\n%s "RED"R"RESET"    "GREEN"G"RESET"    "BLUE"B"RESET"\r\n", indent, f->color.label, indent);
 
     Color c = {0};
     int pos = 1;
     while (1) {
-        fprintf(tty_out, "\r"CLRDOWN"0x%.2X 0x%.2X 0x%.2X : "RGB_BG"   "RESET, c.r, c.g, c.b, c.r, c.g, c.b);
-        fprintf(tty_out, "\r"RIGHT(%d), component_locations[pos]);
+        fprintf(tty_out, "\r"CLRDOWN"%s0x%.2X 0x%.2X 0x%.2X : "RGB_BG"   "RESET, indent, c.r, c.g, c.b, c.r, c.g, c.b);
+        fprintf(tty_out, "\r%s"RIGHT(%d), indent, component_locations[pos] + depth + 1);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -190,7 +202,7 @@ static bool is_valid_date(int real_year, int month, int day, const struct tm *st
     return false;
 }
 
-bool read_date(const Field *f, struct tm *value) {
+bool read_date(const Field *f, int depth, struct tm *value) {
     NOB_ASSERT(f->type == ft_date);
 
     static const char *month_names[] = {
@@ -208,9 +220,10 @@ bool read_date(const Field *f, struct tm *value) {
     set_default_date(&start_date, &f->date.start_date, current_time);
     set_default_date(&end_date, &f->date.end_date, current_time);
 
+    const char *indent = make_indent(depth);
     static char buffer[DATE_BUFFER_LEN];
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &start_date);
-    fprintf(tty_out, HIDE"%s%s : [%s - ", f->date.label, f->date.required ? "*" : "", buffer);
+    fprintf(tty_out, HIDE"%s%s%s : [%s - ", indent, f->date.label, f->date.required ? "*" : "", buffer);
     strftime(buffer, DATE_BUFFER_LEN, "%m/%d/%Y", &end_date);
     fprintf(tty_out, "%s]\r\n", buffer);
     fflush(tty_out);
@@ -222,7 +235,7 @@ bool read_date(const Field *f, struct tm *value) {
 
     while (1) {
         bool failed_checks = f->date.required && !is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date);
-        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        fprintf(tty_out, "\r%s%s ", indent, failed_checks ? ERR_PROMPT : PROMPT);
         if (pos == 0) fprintf(tty_out, UNDERLINE);
         fprintf(tty_out, pos == 0 ? "%9s" : "%3s", month_names[month]);
         if (pos == 0) fprintf(tty_out, RESET);
@@ -244,7 +257,7 @@ bool read_date(const Field *f, struct tm *value) {
         if (k.type == key_exit) user_exit();
         if (k.type == key_enter) {
             if (is_valid_date(REAL_YEAR(year), month, day, &start_date, &end_date)) {
-                fprintf(tty_out, "\r"PROMPT" %s %d, %d"CLRDOWN SHOW"\r\n", month_names[month], day, REAL_YEAR(year));
+                fprintf(tty_out, "\r%s"PROMPT" %s %d, %d"CLRDOWN SHOW"\r\n", indent, month_names[month], day, REAL_YEAR(year));
                 fflush(tty_out);
 
                 value->tm_year = year;
@@ -254,7 +267,7 @@ bool read_date(const Field *f, struct tm *value) {
                 return true;
             }
             if (!f->date.required) {
-                fprintf(tty_out, "\r"ERR_PROMPT" (null)"CLRDOWN SHOW"\r\n");
+                fprintf(tty_out, "\r%s"ERR_PROMPT" (null)"CLRDOWN SHOW"\r\n", indent);
                 fflush(tty_out);
                 return false;
             }
@@ -288,21 +301,23 @@ bool read_date(const Field *f, struct tm *value) {
     }
 }
 
-Tristate read_bool(const Field *f) {
+Tristate read_bool(const Field *f, int depth) {
     NOB_ASSERT(f->type == ft_bool);
+
+    const char *indent = make_indent(depth);
 
     #define OPTS_LEN 2
     const char *opts[OPTS_LEN] = {"Yes", "No"};
     bool required = f->boolean.required;
-    fprintf(tty_out, HIDE"%s%s", f->boolean.label, required ? "*" : "");
+    fprintf(tty_out, HIDE"%s%s%s", indent, f->boolean.label, required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
         if (!required) {
-            fprintf(tty_out, "\r\n%s", pos == 0 ? PROMPT : " ");
+            fprintf(tty_out, "\r\n%s%s", indent, pos == 0 ? PROMPT : " ");
         }
         for (size_t i = !required; i < OPTS_LEN + !required; i++) {
-            fprintf(tty_out, "\r\n%s %s", pos == i ? PROMPT : " ", opts[i - !required]);
+            fprintf(tty_out, "\r\n%s%s %s", indent, pos == i ? PROMPT : " ", opts[i - !required]);
         }
         fflush(tty_out);
 
@@ -328,20 +343,21 @@ Tristate read_bool(const Field *f) {
     }
 }
 
-void read_select(const Field *f, char *buffer) {
+void read_select(const Field *f, int depth, char *buffer) {
     NOB_ASSERT(f->type == ft_select);
 
+    const char *indent = make_indent(depth);
     SelectOptions opts = f->select.options;
     bool required = f->select.required;
-    fprintf(tty_out, HIDE"%s%s", f->select.label, required ? "*" : "");
+    fprintf(tty_out, HIDE"%s%s%s", indent, f->select.label, required ? "*" : "");
 
     size_t pos = 0;
     while (1) {
         if (!required) {
-            fprintf(tty_out, "\r\n%s", pos == 0 ? PROMPT : " ");
+            fprintf(tty_out, "\r\n%s%s", indent, pos == 0 ? PROMPT : " ");
         }
         for (size_t i = !required; i < opts.count + !required; i++) {
-            fprintf(tty_out, "\r\n%s %s", pos == i ? PROMPT : " ", opts.items[i - !required]);
+            fprintf(tty_out, "\r\n%s%s %s", indent, pos == i ? PROMPT : " ", opts.items[i - !required]);
         }
         fflush(tty_out);
 
@@ -380,11 +396,12 @@ void read_select(const Field *f, char *buffer) {
     }
 }
 
-void read_multiselect(const Field *f, SelectOptions *selected_opts) {
+void read_multiselect(const Field *f, int depth, SelectOptions *selected_opts) {
     NOB_ASSERT(f->type == ft_multiselect);
 
+    const char *indent = make_indent(depth);
     MultiSelectFieldMembers p = f->multiselect;
-    fprintf(tty_out, HIDE"%s ", p.label);
+    fprintf(tty_out, HIDE"%s%s ", indent, p.label);
     if (p.max == INT_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)");
         else fprintf(tty_out, "(at least %d)", p.min);
@@ -405,7 +422,8 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
         }
         bool fail_checks = fails_multiselect_checks(f, selected_opt_count);
         for (size_t i = 0; i < opts.count; i++) {
-            fprintf(tty_out, "\r\n%s %s %s",
+            fprintf(tty_out, "\r\n%s%s %s %s",
+                indent,
                 pos == i
                     ? fail_checks ? ERR_PROMPT : PROMPT
                     : " ",
@@ -448,10 +466,11 @@ void read_multiselect(const Field *f, SelectOptions *selected_opts) {
     }
 }
 
-int64_t read_counter(const Field *f) {
+int64_t read_counter(const Field *f, int depth) {
     NOB_ASSERT(f->type == ft_counter);
 
-    fprintf(tty_out, HIDE"%s\r\n0", f->counter.label);
+    const char *indent = make_indent(depth);
+    fprintf(tty_out, HIDE"%s%s\r\n%s0", indent, f->counter.label, indent);
     fflush(tty_out);
 
     int64_t value = 0;
@@ -480,7 +499,7 @@ int64_t read_counter(const Field *f) {
             continue;
         }
 
-        fprintf(tty_out, "\r%lld"CLRDOWN, value);
+        fprintf(tty_out, "\r%s%lld"CLRDOWN, indent, value);
         fflush(tty_out);
     }
 }
@@ -575,7 +594,7 @@ static void handle_text_buffer(TextBuffer *tb, KeyType kt) {
     }
 }
 
-void read_text(const Field *f, char *buffer) {
+void read_text(const Field *f, int depth, char *buffer) {
     NOB_ASSERT(f->type == ft_text);
 
     TextBuffer tb = {
@@ -584,19 +603,20 @@ void read_text(const Field *f, char *buffer) {
         .buffer = buffer,
     };
 
-    fprintf(tty_out, "%s%s\r\n", f->text.label, f->text.required ? "*" : "");
+    const char *indent = make_indent(depth);
+    fprintf(tty_out, "%s%s%s\r\n", indent, f->text.label, f->text.required ? "*" : "");
 
     const char *ph = f->text.placeholder;
     while (1) {
         bool failed_checks = fails_text_checks(f, buffer);
-        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        fprintf(tty_out, "\r%s%s ", indent, failed_checks ? ERR_PROMPT : PROMPT);
         if (tb.end == 0 && ph) {
             fprintf(tty_out, FAINT"%s"RESET, ph);
         }
         else {
             fprintf(tty_out, "%s", buffer);
         }
-        fprintf(tty_out, CLRDOWN"\r"RIGHT(%zu), tb.position + 3);
+        fprintf(tty_out, CLRDOWN"\r%s"RIGHT(%zu), indent, tb.position + 3 + depth + 1);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -621,7 +641,7 @@ void read_text(const Field *f, char *buffer) {
     }
 }
 
-void read_number(const Field *f, char *buffer) {
+void read_number(const Field *f, int depth, char *buffer) {
     NOB_ASSERT(f->type == ft_number);
 
     TextBuffer tb = {
@@ -630,12 +650,13 @@ void read_number(const Field *f, char *buffer) {
         .buffer = buffer,
     };
 
+    const char *indent = make_indent(depth);
     NumberFieldMembers p = f->number;
-    fprintf(tty_out, "%s%s\r\n", p.label, p.required ? "*" : "");
+    fprintf(tty_out, "%s%s%s\r\n", indent, p.label, p.required ? "*" : "");
 
     while (1) {
         bool failed_checks = fails_number_checks(f, buffer);
-        fprintf(tty_out, "\r%s %s"CLRDOWN"\r"RIGHT(%zu), failed_checks ? ERR_PROMPT : PROMPT, buffer, tb.position + 3);
+        fprintf(tty_out, "\r%s%s %s"CLRDOWN"\r%s"RIGHT(%zu), indent, failed_checks ? ERR_PROMPT : PROMPT, buffer, indent, tb.position + 3 + depth + 1);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -689,7 +710,7 @@ static bool fails_multitext_checks(const Field *f, const char *answer) {
     return count < p.min;
 }
 
-void read_multitext(const Field *f, char* buffer) {
+void read_multitext(const Field *f, int depth, char* buffer) {
     NOB_ASSERT(f->type == ft_multitext);
 
     MultiTextFieldMembers p = f->multitext;
@@ -700,7 +721,8 @@ void read_multitext(const Field *f, char* buffer) {
         .buffer = buffer,
     };
 
-    fprintf(tty_out, "%s%s\r\n", p.label, p.required ? "*" : "");
+    const char *indent = make_indent(depth);
+    fprintf(tty_out, "%s%s%s\r\n%s", indent, p.label, p.required ? "*" : "", indent);
     if (p.max == INT_MAX) {
         if (p.min == 0) fprintf(tty_out, "(any)\r\n");
         else fprintf(tty_out, "(at least %d)\r\n", p.min);
@@ -712,14 +734,14 @@ void read_multitext(const Field *f, char* buffer) {
     const char *ph = p.placeholder;
     while (1) {
         bool failed_checks = fails_multitext_checks(f, buffer);
-        fprintf(tty_out, "\r%s ", failed_checks ? ERR_PROMPT : PROMPT);
+        fprintf(tty_out, "\r%s%s ", indent, failed_checks ? ERR_PROMPT : PROMPT);
         if (tb.end == 0 && ph) {
             fprintf(tty_out, FAINT"%s"RESET, ph);
         }
         else {
             fprintf(tty_out, "%s", buffer);
         }
-        fprintf(tty_out, CLRDOWN"\r"RIGHT(%zu), tb.position + 3);
+        fprintf(tty_out, CLRDOWN"\r%s"RIGHT(%zu), indent, tb.position + 3 + depth + 1);
         fflush(tty_out);
 
         Key k = read_key(tty_in);
@@ -777,7 +799,7 @@ void sprint_score(char *buffer, Rating r) {
     snprintf(buffer, SCORE_BUFFER_LEN, "%.1f/%d", fabs(r.score), r.max_score);
 }
 
-Rating read_rating(const Field *f) {
+Rating read_rating(const Field *f, int depth) {
     NOB_ASSERT(f->type == ft_rating);
 
     RatingFieldMembers p = f->rating;
@@ -789,9 +811,10 @@ Rating read_rating(const Field *f) {
 
     Rating r = MAKE_RATING(0, p.maxrating);
 
+    const char *indent = make_indent(depth);
     sprint_score(score_buffer, r);
     sprint_stars(stars_buffer, sizeof(stars_buffer), r);
-    fprintf(tty_out, HIDE"%s\r\n%s - %s", p.label, score_buffer, stars_buffer);
+    fprintf(tty_out, HIDE"%s%s\r\n%s%s - %s", indent, p.label, indent, score_buffer, stars_buffer);
     fflush(tty_out);
 
     while (1) {
@@ -833,7 +856,7 @@ Rating read_rating(const Field *f) {
 
         sprint_score(score_buffer, r);
         sprint_stars(stars_buffer, sizeof(stars_buffer), r);
-        fprintf(tty_out, "\r%s - %s"CLRDOWN, score_buffer, stars_buffer);
+        fprintf(tty_out, "\r%s%s - %s"CLRDOWN, indent, score_buffer, stars_buffer);
         fflush(tty_out);
     }
 }

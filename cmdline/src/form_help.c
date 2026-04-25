@@ -139,9 +139,13 @@ static void print_help_rating(FILE *stream) {
         UNIMPLEMENTED_FIELDTYPES
 #undef X
 
+static void print_help_group(FILE *stream) {
+    print_no_keys(stream, "Group field is unimplemented in the CLI and is skipped.");
+}
+
 void display_help(FieldType type) {
     fprintf(tty_out, MODAL);
-    fprintf(tty_out, "Help\n\r");
+    fprintf(tty_out, "Help\r\n");
 
     switch (type) {
 #define X(name) case ft_##name: print_help_##name(tty_out); break;
