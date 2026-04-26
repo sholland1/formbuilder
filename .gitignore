@@ -3,7 +3,7 @@ build/
 
 *.old
 *.md
-*test.json
+test*.json
 *.vim
 
 nob
