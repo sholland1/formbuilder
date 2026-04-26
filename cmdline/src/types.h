@@ -217,10 +217,4 @@ struct _Answers {
     size_t capacity;
 };
 
-typedef struct {
-    const char *file_path;
-    int pretty_print;
-    AnswerStructureType *answer_structure;
-} AppConfig;
-
 #endif
