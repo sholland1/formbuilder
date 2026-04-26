@@ -39,6 +39,13 @@ void jim_answer_structure_type(Jim *jim, AnswerStructureType t) {
     }
 }
 
+static AnswerStructureType *parse_answer_structure_type(const char *type_str) {
+    if (strcmp(type_str, "basic") == 0) return ANSWER_STRUCTURE_BASIC;
+    if (strcmp(type_str, "flat") == 0) return ANSWER_STRUCTURE_FLAT;
+    if (strcmp(type_str, "nested") == 0) return ANSWER_STRUCTURE_NESTED;
+    NOB_UNREACHABLE("Unidentified type!");
+}
+
 bool parse_yyyy_mm_dd(const char *str, int *real_year, int *month, int *day) {
     if (sscanf(str, "%d-%d-%d", real_year, month, day) == 3) {
         // TODO: Better validation
@@ -225,6 +232,8 @@ void jim_form(Jim *jim, const Form *f) {
     jim_string(jim, f->id);
     jim_member_key(jim, "title");
     jim_string(jim, f->title);
+    jim_member_key(jim, "answer_structure");
+    jim_answer_structure_type(jim, f->answer_structure ? *f->answer_structure : ast_nested);
 
     jim_member_key(jim, "fields");
     jim_array_begin(jim);
@@ -682,6 +691,10 @@ bool jimp_form(Jimp *jimp, Form *form) {
             if (!jimp_string(jimp)) return false;
             form->title = strdup(jimp->string);
         }
+        else if (strcmp(jimp->string, "answer_structure") == 0) {
+            if (!jimp_string(jimp)) return false;
+            form->answer_structure = parse_answer_structure_type(jimp->string);
+        }
         else if (strcmp(jimp->string, "fields") == 0) {
             if (!jimp_array_begin(jimp)) return false;
             while (jimp_array_item(jimp)) {
@@ -699,11 +712,102 @@ bool jimp_form(Jimp *jimp, Form *form) {
     return jimp_object_end(jimp);
 }
 
-void jim_answers(Jim *jim, const Answers *answers) {
+typedef struct {
+    size_t capacity;
+    size_t count;
+    const char **items;
+} Nested_Ids;
+
+const char *nob_da_join(Nested_Ids *ids, char delim) {
+    static Nob_String_Builder sb = {0};
+    sb.count = 0;
+    nob_da_foreach(const char*, it, ids) {
+        nob_sb_append_cstr(&sb, *it);
+        nob_sb_append(&sb, delim);
+    }
+    sb.items[--sb.count] = '\0';
+    return sb.items;
+}
+
+void print_answers_nested(const Answers *answers) {
+    nob_da_foreach(Answer, a, answers) {
+        printf("id: %s, type: %d\n", a->id, a->type);
+        if (a->type == at_nested) {
+            print_answers_nested(a->answers);
+        }
+    }
+}
+
+void jim_answers_flat2(Jim *jim, Nested_Ids *nested_ids, const Answers *answers) {
+    nob_da_foreach(Answer, x, answers) {
+        nob_da_append(nested_ids, x->id);
+        const char *prefix = nob_da_join(nested_ids, '.');
+
+        if (x->type == at_nested) {
+            jim_answers_flat2(jim, nested_ids, x->answers);
+        }
+        else if (x->type == at_list) {
+            jim_member_key(jim, prefix);
+            jim_array_begin(jim);
+            nob_da_foreach(char*, o, &x->options) {
+                jim_string(jim, *o);
+            }
+            jim_array_end(jim);
+        }
+        else {
+            jim_member_key(jim, prefix);
+            jim_element_begin(jim);
+            jim_write_cstr(jim, x->value);
+            jim_element_end(jim);
+        }
+        nob_da_pop(nested_ids);
+    }
+}
+
+void jim_answers_flat(Jim *jim, const Answers *answers) {
+    // print_answers_nested(answers);
+    jim_object_begin(jim);
+    Nested_Ids nested_ids = {0};
+    jim_answers_flat2(jim, &nested_ids, answers);
+    jim_object_end(jim);
+}
+
+void jim_answers_basic2(Jim *jim, const Answers *answers) {
+    nob_da_foreach(Answer, x, answers) {
+        if (x->type == at_nested) {
+            jim_answers_basic2(jim, x->answers);
+        }
+        else if (x->type == at_list) {
+            jim_member_key(jim, x->id);
+            jim_array_begin(jim);
+            nob_da_foreach(char*, o, &x->options) {
+                jim_string(jim, *o);
+            }
+            jim_array_end(jim);
+        }
+        else {
+            jim_member_key(jim, x->id);
+            jim_element_begin(jim);
+            jim_write_cstr(jim, x->value);
+            jim_element_end(jim);
+        }
+    }
+}
+
+void jim_answers_basic(Jim *jim, const Answers *answers) {
+    jim_object_begin(jim);
+    jim_answers_basic2(jim, answers);
+    jim_object_end(jim);
+}
+
+void jim_answers_nested(Jim *jim, const Answers *answers) {
     jim_object_begin(jim);
     nob_da_foreach(Answer, x, answers) {
         jim_member_key(jim, x->id);
-        if (x->type == at_list) {
+        if (x->type == at_nested) {
+            jim_answers_nested(jim, x->answers);
+        }
+        else if (x->type == at_list) {
             jim_array_begin(jim);
             nob_da_foreach(char*, o, &x->options) {
                 jim_string(jim, *o);
@@ -717,4 +821,13 @@ void jim_answers(Jim *jim, const Answers *answers) {
         }
     }
     jim_object_end(jim);
+}
+
+void jim_answers(Jim *jim, const Answers *answers, AnswerStructureType answer_structure_type) {
+    switch(answer_structure_type) {
+    case ast_nested: jim_answers_nested(jim, answers); break;
+    case ast_flat: jim_answers_flat(jim, answers); break;
+    case ast_basic: jim_answers_basic(jim, answers); break;
+    default: NOB_UNREACHABLE("Unidentified type!");
+    }
 }

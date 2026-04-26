@@ -21,6 +21,7 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
         SRC_FOLDER"libregexp/libunicode.c",
         SRC_FOLDER"libregexp/cutils.c",
         SRC_FOLDER"regex.c",
+        SRC_FOLDER"types.c",
         SRC_FOLDER"form_answers.c",
         SRC_FOLDER"form_terminal.c",
         SRC_FOLDER"form_fields.c",

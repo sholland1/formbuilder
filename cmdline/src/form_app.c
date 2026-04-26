@@ -151,9 +151,12 @@ void display_field(const Field *f, int depth, SpecialFields *sp, Answers *answer
 
         fprint_depth(tty_out, depth);
         fprintf(tty_out, "├\r\n");
+
+        Answers *nested_answers = (Answers*)malloc(sizeof(Answers));
         nob_da_foreach(Field, ff, f->group.fields) {
-            display_field(ff, depth+1, sp, answers);
+            display_field(ff, depth+1, sp, nested_answers);
         }
+        append_group_answers(answers, f->id, nested_answers);
 
         fprint_depth(tty_out, depth);
         fprintf(tty_out, "└\r\n");
@@ -200,11 +203,11 @@ void display_form(const Form *form, Answers *answers) {
     }
 }
 
-void output_answers(const Answers *answers, int pretty_print, FILE *stream) {
+void output_answers(const Answers *answers, int pretty_print, AnswerStructureType answer_structure_type, FILE *stream) {
     setlocale(LC_NUMERIC, "C");
 
     Jim jim = {.pp = pretty_print};
-    jim_answers(&jim, answers);
+    jim_answers(&jim, answers, answer_structure_type);
     fwrite(jim.sink, jim.sink_count, 1, stream);
 }
 

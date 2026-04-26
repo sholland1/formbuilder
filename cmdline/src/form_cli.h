@@ -124,6 +124,7 @@ void append_null_answer(Answers *answers, const char *id);
 void append_quoted_answer(Answers *answers, const char *id, const char *value);
 void append_multiselect_answer(Answers *answers, const char *id, SelectOptions *opts);
 void append_multitext_answer(Answers *answers, const char *id, const char *values);
+void append_group_answers(Answers *answers, const char *id, Answers *inner_answers);
 
 bool is_empty(const char *s);
 

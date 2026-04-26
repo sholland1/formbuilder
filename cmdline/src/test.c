@@ -111,6 +111,18 @@ static void append_key(InputSteps *steps, const char *sequence) {
 #define ARROW_LEFT "\033[D"
 
 static void build_basic_group_form_script(InputSteps *steps) {
+    for (int i = 0; i < 5; i++) {
+        append_char(steps, ' ');
+    }
+    append_char(steps, '\n');
+    for (int i = 0; i < 6; i++) {
+        append_char(steps, ' ');
+    }
+    append_char(steps, '\n');
+    for (int i = 0; i < 7; i++) {
+        append_char(steps, ' ');
+    }
+    append_char(steps, '\n');
 }
 
 static void build_basic_form_script(InputSteps *steps) {
@@ -263,7 +275,7 @@ static void trim_trailing_newlines(Nob_String_Builder *sb) {
     while (sb->count > 0) {
         char c = sb->items[sb->count - 1];
         if (c != '\n' && c != '\r') break;
-        sb->count--;
+        nob_da_pop(sb);
     }
 }
 
@@ -347,7 +359,7 @@ static bool test_form_script(const FormTestCase *test_case) {
     if (test_case->answer_structure != NULL) {
         answer_structure_type = parse_answer_structure_type(test_case->answer_structure);
     }
-    output_answers(&answers, 0, json_stream);
+    output_answers(&answers, 0, answer_structure_type, json_stream);
 
     Nob_String_Builder actual = {0};
     TEST_CHECK(read_stream(json_stream, &actual), "read generated answers");
@@ -367,7 +379,7 @@ static bool test_form_script(const FormTestCase *test_case) {
     tty_out = NULL;
     free_steps(&steps);
 
-    printf(PASS"scripted %s\n", form_path);
+    printf(PASS"scripted %s, type: %s\n", form_path, test_case->answer_structure);
     return true;
 }
 

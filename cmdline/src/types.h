@@ -178,9 +178,18 @@ typedef enum {
     ast_basic,
 } AnswerStructureType;
 
+extern AnswerStructureType answer_structure_nested_value;
+extern AnswerStructureType answer_structure_flat_value;
+extern AnswerStructureType answer_structure_basic_value;
+
+#define ANSWER_STRUCTURE_NESTED (&answer_structure_nested_value)
+#define ANSWER_STRUCTURE_FLAT   (&answer_structure_flat_value)
+#define ANSWER_STRUCTURE_BASIC  (&answer_structure_basic_value)
+
 typedef struct {
     const char *id;
     const char *title;
+    AnswerStructureType *answer_structure;
     Fields fields;
 } Form;
 
@@ -211,6 +220,7 @@ struct _Answers {
 typedef struct {
     const char *file_path;
     int pretty_print;
+    AnswerStructureType *answer_structure;
 } AppConfig;
 
 #endif

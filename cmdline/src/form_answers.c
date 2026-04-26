@@ -58,6 +58,15 @@ void append_multitext_answer(Answers *answers, const char *id, const char *value
     nob_da_append(answers, a);
 }
 
+void append_group_answers(Answers *answers, const char *id, Answers *inner_answers) {
+    Answer a = {
+        .id = strdup(id),
+        .type = at_nested,
+    };
+    a.answers = inner_answers;
+    nob_da_append(answers, a);
+}
+
 bool is_empty(const char *s) {
     return !s || !*s;
 }
