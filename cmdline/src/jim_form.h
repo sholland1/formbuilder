@@ -738,13 +738,13 @@ void print_answers_nested(const Answers *answers) {
     }
 }
 
-void jim_answers_flat2(Jim *jim, Nested_Ids *nested_ids, const Answers *answers) {
+void jim_answers_flat_inner(Jim *jim, Nested_Ids *nested_ids, const Answers *answers) {
     nob_da_foreach(Answer, x, answers) {
         nob_da_append(nested_ids, x->id);
         const char *prefix = nob_da_join(nested_ids, '.');
 
         if (x->type == at_nested) {
-            jim_answers_flat2(jim, nested_ids, x->answers);
+            jim_answers_flat_inner(jim, nested_ids, x->answers);
         }
         else if (x->type == at_list) {
             jim_member_key(jim, prefix);
@@ -768,14 +768,14 @@ void jim_answers_flat(Jim *jim, const Answers *answers) {
     // print_answers_nested(answers);
     jim_object_begin(jim);
     Nested_Ids nested_ids = {0};
-    jim_answers_flat2(jim, &nested_ids, answers);
+    jim_answers_flat_inner(jim, &nested_ids, answers);
     jim_object_end(jim);
 }
 
-void jim_answers_basic2(Jim *jim, const Answers *answers) {
+void jim_answers_basic_inner(Jim *jim, const Answers *answers) {
     nob_da_foreach(Answer, x, answers) {
         if (x->type == at_nested) {
-            jim_answers_basic2(jim, x->answers);
+            jim_answers_basic_inner(jim, x->answers);
         }
         else if (x->type == at_list) {
             jim_member_key(jim, x->id);
@@ -796,7 +796,7 @@ void jim_answers_basic2(Jim *jim, const Answers *answers) {
 
 void jim_answers_basic(Jim *jim, const Answers *answers) {
     jim_object_begin(jim);
-    jim_answers_basic2(jim, answers);
+    jim_answers_basic_inner(jim, answers);
     jim_object_end(jim);
 }
 

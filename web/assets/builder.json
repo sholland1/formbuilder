@@ -15,6 +15,16 @@
                     "id": "title",
                     "type": "text",
                     "label": "What is the title of your form?"
+                },
+                {
+                    "id": "answer_structure",
+                    "type": "select",
+                    "label": "Choose the structure of the answer output. (This is important if your choose a group type field below.)",
+                    "options": [
+                        "nested",
+                        "flat",
+                        "basic"
+                    ]
                 }
             ]
         },
@@ -363,6 +373,20 @@
                     "label": "Step:",
                     "options": [ "1", "0.1", "0.5" ],
                     "required": false
+                }
+            ]
+        },
+        "field_type_group": {
+            "fields": [
+                {
+                    "id": "label",
+                    "type": "text",
+                    "label": "Enter some text for a label."
+                },
+                {
+                    "id": "fields",
+                    "type": "group",
+                    "label": "Fields:"
                 }
             ]
         }
