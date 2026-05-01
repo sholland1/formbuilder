@@ -1,6 +1,7 @@
 {
     "id": "comprehensive-test-form",
     "title": "All Field Permutations",
+    "answer_structure": "nested",
     "fields": [
         {
             "id": "text_required-missing_placeholder-no_maxlength-no_pattern-no",

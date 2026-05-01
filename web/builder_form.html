@@ -126,6 +126,9 @@
         const header = document.getElementById('builder-header');
         header.querySelector('#id').value = formObject.id;
         header.querySelector('#title').value = formObject.title;
+        if (formObject.answer_structure) {
+            header.querySelector('#answer_structure').value = formObject.answer_structure;
+        }
 
         for (const fieldData of formObject.fields) {
             const field_id = addField();

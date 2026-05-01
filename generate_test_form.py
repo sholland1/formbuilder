@@ -344,6 +344,7 @@ def main():
     form = {
         "id": "comprehensive-test-form",
         "title": "All Field Permutations",
+        "answer_structure": "nested",
         "fields": build_fields(),
     }
     bytes = OUTPUT_PATH.write_text(json.dumps(form, indent=4) + "\n")
