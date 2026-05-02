@@ -44,16 +44,16 @@
     const form_id = 'basic-form';
     if (formObject) {
         const builder = new FormBuilder(document, () => Temporal.Now.plainDateTimeISO());
-        builder.build(formObject, form_id);
+
+        const formDiv = document.getElementById(form_id);
+        builder.build(formObject, formDiv);
 
         document.title = formObject.title;
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
-            const form = document.getElementById(form_id);
-            const isValid = form.reportValidity();
-            if (!isValid) return;
+            if (!formDiv.reportValidity()) return;
 
-            let formData = await builder.getFormData();
+            let formData = await builder.getFormData(formDiv);
             let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute('href', dataStr);
