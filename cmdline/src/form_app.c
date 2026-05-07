@@ -152,7 +152,7 @@ void display_field(const Field *f, int depth, SpecialFields *sp, Answers *answer
         fprint_depth(tty_out, depth);
         fprintf(tty_out, "├\r\n");
 
-        Answers *nested_answers = (Answers*)malloc(sizeof(Answers));
+        Answers *nested_answers = (Answers*)calloc(1, sizeof(Answers));
         nob_da_reserve(nested_answers, f->group.fields->count);
         nob_da_foreach(Field, ff, f->group.fields) {
             display_field(ff, depth+1, sp, nested_answers);

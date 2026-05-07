@@ -32,12 +32,29 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
 }
 
 static void append_compile_flags(Nob_Cmd *cmd, bool release) {
-    nob_cmd_append(cmd, "cc", "-Wall", "-lm", "-pthread");
+    nob_cmd_append(cmd, "cc", "-Wall", "-Wpedantic", "-lm", "-pthread");
     if (release) {
-        nob_cmd_append(cmd, "-s", "-Os", "-flto=auto", "-fdata-sections", "-ffunction-sections", "-Wl,--gc-sections");
+        nob_cmd_append(cmd,
+            "-Os",
+            "-flto=auto",
+            "-fdata-sections",
+            "-ffunction-sections",
+            "-DNDEBUG",
+            "-D_FORTIFY_SOURCE=2",
+            "-fstack-protector-strong",
+        );
     }
     else {
-        nob_cmd_append(cmd, "-DDEBUG=1");
+        nob_cmd_append(cmd,
+            "-DDEBUG=1",
+            "-g",
+            // "-O1",
+            // "-fsanitize=address,undefined",
+            // "-fno-omit-frame-pointer",
+            // "-fno-optimize-sibling-calls",
+            // "-rdynamic",
+            // "-Wextra",
+        );
     }
 }
 

@@ -299,13 +299,13 @@ static bool test_deserialize_all_fields(const char *path) {
 
 static bool test_form_script(const FormTestCase *test_case) {
     char form_path[128];
-    sprintf(form_path, FORM_DIR"%s.json", test_case->form_name);
+    snprintf(form_path, 128, FORM_DIR"%s.json", test_case->form_name);
     char answers_path[128];
     if (test_case->answer_structure == NULL) {
-        sprintf(answers_path, FORM_DIR"%s.answers.json", test_case->form_name);
+        snprintf(answers_path, 128, FORM_DIR"%s.answers.json", test_case->form_name);
     }
     else {
-        sprintf(answers_path, FORM_DIR"%s-%s.answers.json", test_case->form_name, test_case->answer_structure);
+        snprintf(answers_path, 128, FORM_DIR"%s-%s.answers.json", test_case->form_name, test_case->answer_structure);
     }
 
     Form form = {0};

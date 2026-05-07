@@ -301,7 +301,7 @@ void field_set_defaults(Field *field) {
             break;
 
         case ft_group: {
-            Fields *fields = (Fields*)malloc(sizeof(Fields));
+            Fields *fields = (Fields*)calloc(1, sizeof(Fields));
             field->group.fields = fields;
         } break;
 

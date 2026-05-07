@@ -772,7 +772,7 @@ void read_multitext(const Field *f, int depth, char* buffer) {
 
 void sprint_stars(char *buffer, size_t len, Rating r) {
     size_t used = 0;
-    for (int i = 0; i < r.max_score; i++) {
+    for (int i = 0; i < (int)r.max_score; i++) {
         const char *star =
             r.score >= (i+1) ? FULL_STAR
             : r.score > i ? PART_STAR
