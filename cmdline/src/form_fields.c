@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #define DATE_BUFFER_LEN 11
 
@@ -499,7 +500,7 @@ int64_t read_counter(const Field *f, int depth) {
             continue;
         }
 
-        fprintf(tty_out, "\r%s%lld"CLRDOWN, indent, value);
+        fprintf(tty_out, "\r%s%"PRId64 CLRDOWN, indent, value);
         fflush(tty_out);
     }
 }

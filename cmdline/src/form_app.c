@@ -7,6 +7,7 @@
 
 #include <locale.h>
 #include <uuid/uuid.h>
+#include <inttypes.h>
 
 bool load_form_from_file(const char *file_path, Form *form) {
     Nob_String_Builder sb = {0};
@@ -100,7 +101,7 @@ void display_field(const Field *f, int depth, SpecialFields *sp, Answers *answer
     } break;
 
     case ft_counter:
-        snprintf(sp->answer_buffer, ANSWER_BUFFER_LEN, "%lld", read_counter(f, depth));
+        snprintf(sp->answer_buffer, ANSWER_BUFFER_LEN, "%"PRId64, read_counter(f, depth));
         append_raw_answer(answers, f->id, sp->answer_buffer);
         break;
 

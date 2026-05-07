@@ -33,6 +33,9 @@ static void append_common_cli_sources(Nob_Cmd *cmd) {
 
 static void append_compile_flags(Nob_Cmd *cmd, bool release) {
     nob_cmd_append(cmd, "cc", "-Wall", "-Wpedantic", "-lm", "-pthread");
+#if defined(__linux__)
+    nob_cmd_append(cmd, "-luuid", "-Wno-unused-result", "-Wno-unused-value");
+#endif
     if (release) {
         nob_cmd_append(cmd,
             "-Os",

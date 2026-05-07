@@ -221,6 +221,17 @@ static void *script_writer_main(void *arg) {
     ScriptWriter *writer = (ScriptWriter *) arg;
     for (size_t i = 0; i < writer->steps->count; ++i) {
         InputStep *step = &writer->steps->items[i];
+#if defined(__linux__)
+        ssize_t written = write(writer->fd, step->bytes, step->len);
+        if (written < 0) {
+            perror("write");
+            break;
+        }
+        if ((size_t) written != step->len) {
+            fprintf(stderr, "short write while writing scripted input\n");
+            break;
+        }
+#else
         for (;;) {
             ssize_t written = write(writer->fd, step->bytes, step->len);
             if ((size_t) written == step->len) {
@@ -240,6 +251,7 @@ static void *script_writer_main(void *arg) {
             close(writer->fd);
             return NULL;
         }
+#endif
     }
     close(writer->fd);
     return NULL;
@@ -319,7 +331,7 @@ static bool test_form_script(const FormTestCase *test_case) {
     test_case->script(&steps);
 
     int input_fds[2];
-#if LINUX
+#if defined(__linux__)
     int input_socket_type = SOCK_SEQPACKET;
 #else
     int input_socket_type = SOCK_DGRAM;
