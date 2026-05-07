@@ -83,138 +83,102 @@ static void on_script_timeout(int signo) {
 }
 
 static void append_step(InputSteps *steps, const char *bytes, size_t len) {
-    InputStep step = {0};
-    step.bytes = (char *) malloc(len);
-    NOB_ASSERT(step.bytes != NULL);
-    memcpy(step.bytes, bytes, len);
-    step.len = len;
-    nob_da_append(steps, step);
+    char *copy = (char *) malloc(len);
+    NOB_ASSERT(copy != NULL);
+    memcpy(copy, bytes, len);
+    nob_da_append(steps, ((InputStep){ copy, len }));
 }
 
-static void append_char(InputSteps *steps, char ch) {
-    append_step(steps, &ch, 1);
-}
+#undef UP
+#undef RIGHT
 
-static void append_text(InputSteps *steps, const char *text) {
-    for (const char *p = text; *p != '\0'; ++p) {
-        append_char(steps, *p);
-    }
-}
+#define UP UP_(1)
+#define DOWN DOWN_(1)
+#define RIGHT RIGHT_(1)
+#define LEFT LEFT_(1)
+#define UP_(n) KEYS("\033[A", (n))
+#define DOWN_(n) KEYS("\033[B", (n))
+#define RIGHT_(n) KEYS("\033[C", (n))
+#define LEFT_(n) KEYS("\033[D", (n))
 
-static void append_key(InputSteps *steps, const char *sequence) {
-    append_step(steps, sequence, strlen(sequence));
-}
+#define SPACE(n) CHARS(' ', (n))
 
-#define ARROW_UP "\033[A"
-#define ARROW_DOWN "\033[B"
-#define ARROW_RIGHT "\033[C"
-#define ARROW_LEFT "\033[D"
+// Script DSL for readable test input sequences.
+#define SP CHAR(' ')
+#define NL CHAR('\n')
+#define ESC CHAR('\033')
+#define CHAR(ch) append_step(steps, (const char[]){(ch)}, 1)
+#define CHARS(ch, n) do { \
+    NOB_ASSERT((n) > 0); \
+    for (int i = 0; i < (n); i++) CHAR(ch); \
+} while (0)
+#define TEXT(str) for (const char *p = (str); *p != '\0'; ++p) CHAR(*p)
+#define KEYS(seq, n) do { \
+    NOB_ASSERT((n) > 0); \
+    for (int i = 0; i < (n); i++) append_step(steps, (seq), strlen(seq)); \
+} while (0)
 
 static void build_basic_group_form_script(InputSteps *steps) {
-    for (int i = 0; i < 5; i++) {
-        append_char(steps, ' ');
-    }
-    append_char(steps, '\n');
-    for (int i = 0; i < 6; i++) {
-        append_char(steps, ' ');
-    }
-    append_char(steps, '\n');
-    for (int i = 0; i < 7; i++) {
-        append_char(steps, ' ');
-    }
-    append_char(steps, '\n');
+    SPACE(5); NL;
+    SPACE(6); NL;
+    SPACE(7); NL;
 }
 
 static void build_basic_form_script(InputSteps *steps) {
     // text field
-    append_char(steps, '\n');
-    append_text(steps, "XXXX");
-    append_char(steps, '\033');
-    append_text(steps, "Alice");
-    append_char(steps, '\n');
+    NL;
+    CHARS('X', 4);
+    ESC;
+    TEXT("Alice\n");
 
     // text field with pattern
-    append_text(steps, "XXXX");
-    append_char(steps, '\n');
-    for (int i = 0; i < 4; i++) append_char(steps, '\b');
-    append_text(steps, "123-45-6789");
-    append_char(steps, '\n');
+    CHARS('X', 4); NL;
+    CHARS('\b', 4);
+    TEXT("123-45-6789\n");
 
     // number field with step of 1
-    append_text(steps, "12");
-    for (int i = 0; i < 31; ++i) append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_DOWN);
-    append_char(steps, '\n');
+    TEXT("12");
+    UP_(31); DOWN;
+    NL;
 
     // number field with step of .1
-    append_text(steps, "180.4");
-    append_key(steps, ARROW_UP);
-    append_char(steps, '\n');
+    TEXT("180.4"); UP; NL;
 
     // select field
-    append_key(steps, ARROW_DOWN);
-    append_char(steps, '\n');
+    DOWN; NL;
 
     // multiselect field
-    append_char(steps, ' ');
-    append_key(steps, ARROW_DOWN);
-    append_key(steps, ARROW_DOWN);
-    append_key(steps, ARROW_DOWN);
-    append_key(steps, ARROW_DOWN);
-    append_char(steps, ' ');
-    append_char(steps, '\n');
+    SP; DOWN_(4); SP; NL;
 
     // date field
-    append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_RIGHT);
-    for (int i = 0; i < 15; ++i) append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_RIGHT);
-    for (int i = 0; i < 26; ++i) append_key(steps, ARROW_DOWN);
-    append_char(steps, '\n');
+    UP; RIGHT; UP_(15); RIGHT; DOWN_(26);
+    NL;
 
     // counter field
-    append_char(steps, ' ');
-    append_char(steps, ' ');
-    append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_DOWN);
-    append_char(steps, '\n');
+    SP; SP; UP; DOWN; NL;
 
     // color field #1A2B3C
-    append_key(steps, ARROW_LEFT);
-    append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_RIGHT);
-    append_char(steps, 'a');
-    append_key(steps, ARROW_RIGHT);
-    append_key(steps, ARROW_RIGHT);
-    for (int i = 0; i < 0x2B; i++) append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_RIGHT);
-    append_char(steps, '3');
-    append_key(steps, ARROW_RIGHT);
-    append_char(steps, 'C');
-    append_char(steps, '\n');
+    LEFT; UP; RIGHT;
+    CHAR('a'); RIGHT_(2);
+    UP_(0x2B); RIGHT;
+    CHAR('3'); RIGHT;
+    CHAR('C');
+    NL;
 
     // bool field
-    append_key(steps, ARROW_DOWN);
-    append_char(steps, '\n');
+    DOWN; NL;
 
     // multitext field
-    append_text(steps, "mario,zelda");
-    append_char(steps, '\n');
+    TEXT("mario,zelda\n");
 
     // timer field
-    append_char(steps, '\n');
+    NL;
 
     // rating field
-    append_key(steps, ARROW_RIGHT);
-    append_key(steps, ARROW_RIGHT);
-    append_char(steps, '\033');
-    append_key(steps, ARROW_LEFT);
-    append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_UP);
-    append_key(steps, ARROW_RIGHT);
-    append_key(steps, ARROW_DOWN);
-    append_key(steps, ARROW_LEFT);
-    append_char(steps, '\n');
+    RIGHT_(2);
+    ESC;
+    LEFT; UP_(2); RIGHT; DOWN; LEFT;
+    NL;
 }
 
 static void *script_writer_main(void *arg) {
