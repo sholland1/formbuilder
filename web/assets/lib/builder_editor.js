@@ -104,6 +104,10 @@ function editForm(formData) {
 
         for (const propName in fieldData) {
             const element = currentFieldForm.querySelector(`#${propName}`);
+            if (!element) {
+                console.log(`element was null when creating field '${propName}'`);
+                break;
+            }
             if (propName === 'required') {
                 element.value = fieldData[propName] !== false ? 'Yes' : 'No';
             } else {

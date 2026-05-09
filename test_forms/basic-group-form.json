@@ -1,31 +1,32 @@
 {
     "id": "basic-group-form",
     "title": "My Basic Group Test Form",
+    "answer_structure": "nested",
     "fields": [
         {
             "id": "counter_0",
             "type": "counter",
-            "label": "Counter field"
+            "label": "Counter field 0"
         },
         {
             "id": "group_1",
             "type": "group",
-            "label": "Group field",
+            "label": "Group field 1",
             "fields": [
                 {
                     "id": "counter_1",
                     "type": "counter",
-                    "label": "Counter field"
+                    "label": "Counter field 1"
                 },
                 {
                     "id": "group_1_1",
                     "type": "group",
-                    "label": "Group field",
+                    "label": "Group field 1.1",
                     "fields": [
                         {
                             "id": "counter_2",
                             "type": "counter",
-                            "label": "Counter field"
+                            "label": "Counter field 2"
                         }
                     ]
                 }

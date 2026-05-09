@@ -271,6 +271,9 @@ export default class FormBuilder {
 
             inputElements = [ canvas, this.element('div', {}, clearButton)];
         }
+        else if (field.type === 'group') {
+            inputElements = field.fields.flatMap(f => this.#createComponent(f, currentDateStr));
+        }
         else {
             console.log('Unsupported element type: ' + field.type)
             inputElements = ['Unsupported element type: ' + field.type];
@@ -396,7 +399,7 @@ export default class FormBuilder {
                 };
             }
             else {
-                if (input.required || input.value) {
+                if (input?.required || input?.value) {
                     formData[input.id] = input.value;
                 }
             }

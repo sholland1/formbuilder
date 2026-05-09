@@ -79,6 +79,9 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, v
     cursor: url('../images/hand_pen.ico') 7 24, auto;
 }
 
+/* group */
+.builder-group { border-left: solid 1px }
+
 /* color input smaller */
 input[type="color"]{width:56px;height:40px;padding:6px;border-radius:8px}
 

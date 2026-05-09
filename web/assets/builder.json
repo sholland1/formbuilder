@@ -56,7 +56,8 @@
                         "guid",
                         "file",
                         "signature",
-                        "rating"
+                        "rating",
+                        "group"
                     ]
                 }
             ]
