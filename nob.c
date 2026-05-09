@@ -12,6 +12,7 @@ typedef struct {
     bool test;
     bool gen_test_form;
     bool gen_prompt;
+    bool cloc;
     const char *serve_port;
 } BuildConfig;
 
@@ -101,6 +102,9 @@ static bool parse_build_config(BuildConfig *config, int argc, char **argv) {
         else if (strcmp(arg, "gen-prompt") == 0) {
             config->gen_prompt = true;
         }
+        else if (strcmp(arg, "cloc") == 0) {
+            config->cloc = true;
+        }
         else {
             nob_log(NOB_ERROR, "Unknown arg %s", arg);
             log_usage(config);
@@ -136,7 +140,7 @@ int main(int argc, char **argv) {
     BuildConfig config = {0};
     if (!parse_build_config(&config, argc, argv)) return 1;
 
-    bool should_build_form = !config.serve && !config.test && !config.gen_test_form && !config.gen_prompt;
+    bool should_build_form = !config.serve && !config.test && !config.gen_test_form && !config.gen_prompt && !config.cloc;
     if (should_build_form) {
         if (!nob_mkdir_if_not_exists(BUILD_FOLDER)) return 1;
 
@@ -176,6 +180,16 @@ int main(int argc, char **argv) {
     if (config.gen_prompt) {
         Nob_Cmd cmd = {0};
         nob_cmd_append(&cmd, "python3", "generate_prompt.py");
+        if (!nob_cmd_run(&cmd)) return 1;
+    }
+
+    if (config.cloc) {
+        const char *excludes[] = { "jim.h", "jimp.h", "nob.h", "libregexp/" };
+        Nob_Cmd cmd = {0};
+        nob_cmd_append(&cmd, "tokei");
+        for (int i = 0; i < NOB_ARRAY_LEN(excludes); i++) {
+            nob_cmd_append(&cmd, "--exclude", excludes[i]);
+        }
         if (!nob_cmd_run(&cmd)) return 1;
     }
 
