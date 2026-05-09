@@ -9,7 +9,7 @@ export default class FormBuilder {
 
     // Creates a DOM element
     element(tagName, attrs, ...innerElements) {
-        let element = this.#document.createElement(tagName);
+        const element = this.#document.createElement(tagName);
         for (const key in attrs) {
             if (attrs[key]) element.setAttribute(key, attrs[key]);
         }
@@ -91,9 +91,9 @@ export default class FormBuilder {
                 id: field.id, type: 'number',
                 step: '1', value: '0', disabled: true
             });
-            let plusButton = this.element('button', { type: 'button', class: 'builder-button-plus' }, '+');
-            let minusButton = this.element('button', { type: 'button', class: 'builder-button-minus' }, '-');
-            let clearButton = this.element('button', { type: 'button', class: 'builder-button-clear' }, 'Clear');
+            const plusButton = this.element('button', { type: 'button', class: 'builder-button-plus' }, '+');
+            const minusButton = this.element('button', { type: 'button', class: 'builder-button-minus' }, '-');
+            const clearButton = this.element('button', { type: 'button', class: 'builder-button-clear' }, 'Clear');
             plusButton.addEventListener('click', () => inputElement.value++);
             minusButton.addEventListener('click',
                 () => inputElement.value = Math.max(inputElement.value-1, 0));
@@ -154,8 +154,8 @@ export default class FormBuilder {
                 ctx.restore();
             }
 
-            let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
-            let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
+            const startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
+            const resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
             let hiddenDurationValue = this.element('input', {
                 id: field.id, type: 'number',
                 hidden: true, value: '0'
@@ -359,7 +359,7 @@ export default class FormBuilder {
                 continue;
             }
 
-            let inputs = item.querySelectorAll('[id]');
+            const inputs = item.querySelectorAll('[id]');
 
             if (type === 'multiselect') {
                 const actual_id = item.querySelector('label[for]').attributes['for'].value;
@@ -401,8 +401,8 @@ export default class FormBuilder {
                 formData[input.id] = Temporal.Duration.from({milliseconds: durationInMs});
             }
             else if (type === 'file') {
-                let files = Array.from(input.files);
-                let readFile = this.#readFile;
+                const files = Array.from(input.files);
+                const readFile = this.#readFile;
                 formData[input.id] = await Promise.all(
                     files.map(async f => ({
                         name: f.name,

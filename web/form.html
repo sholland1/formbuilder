@@ -53,8 +53,8 @@
         document.getElementById('submit-btn').addEventListener('click', async () => {
             if (!formDiv.reportValidity()) return;
 
-            let formData = await builder.getFormData(formDiv, formObject.answer_structure);
-            let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData));
+            const formData = await builder.getFormData(formDiv, formObject.answer_structure);
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData));
             let downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute('href', dataStr);
             downloadAnchorNode.setAttribute('download', `${formObject.id}.answers.json`);
