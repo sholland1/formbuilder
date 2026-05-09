@@ -62,7 +62,8 @@ static void append_compile_flags(Nob_Cmd *cmd, bool release) {
 }
 
 static void log_usage(const BuildConfig *config) {
-    nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form] [gen-prompt]", config->program_name);
+    nob_log(NOB_INFO, "Usage: %s [release] [run] [serve [port]] [test] [gen-test-form] [gen-prompt]",
+            config->program_name);
 }
 
 static bool is_port_arg(const char *arg) {
@@ -179,7 +180,8 @@ int main(int argc, char **argv) {
     }
 
     if (config.serve) {
-        const char *url = nob_temp_sprintf("http://localhost:%s/form.html?preview=true", config.serve_port);
+        const char *url = nob_temp_sprintf(
+            "http://localhost:%s/form.html?preview=true", config.serve_port);
         Nob_Cmd server_cmd = {0};
         Nob_Procs procs = {0};
 

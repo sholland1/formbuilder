@@ -32,10 +32,25 @@ export default class FormBuilder {
 
         let inputElements;
         if (field.type === 'text') {
-            inputElements = [ this.element('input', { id: field.id, type: 'text', pattern: field.pattern, placeholder: field.placeholder ?? '', maxlength: String(field.maxlength), required: field.required !== false }) ];
+            inputElements = [
+                this.element('input', {
+                    id: field.id, type: 'text',
+                    pattern: field.pattern,
+                    placeholder: field.placeholder ?? '',
+                    maxlength: String(field.maxlength),
+                    required: field.required !== false,
+                })
+            ];
         }
         else if (field.type === 'multitext') {
-            inputElements = [ this.element('input', { id: field.id, type: 'text', pattern: field.pattern, placeholder: field.placeholder ?? '', required: field.min > 0 }) ];
+            inputElements = [
+                this.element('input', {
+                    id: field.id, type: 'text',
+                    pattern: field.pattern,
+                    placeholder: field.placeholder ?? '',
+                    required: field.min > 0,
+                })
+            ];
         }
         else if (field.type === 'number') {
             inputElements = [
@@ -63,15 +78,25 @@ export default class FormBuilder {
         else if (field.type === 'date') {
             const minDate = field.min === 'today' ? currentDateStr : field.min;
             const maxDate = field.max === 'today' ? currentDateStr : field.max;
-            inputElements = [ this.element('input', { id: field.id, type: field.type, min: minDate, max: maxDate, required: field.required !== false }) ];
+            inputElements = [
+                this.element('input', {
+                    id: field.id, type: field.type,
+                    min: minDate, max: maxDate,
+                    required: field.required !== false,
+                })
+            ];
         }
         else if (field.type === 'counter') {
-            let inputElement = this.element('input', { id: field.id, type: 'number', step: '1', value: '0', disabled: true });
+            let inputElement = this.element('input', {
+                id: field.id, type: 'number',
+                step: '1', value: '0', disabled: true
+            });
             let plusButton = this.element('button', { type: 'button', class: 'builder-button-plus' }, '+');
             let minusButton = this.element('button', { type: 'button', class: 'builder-button-minus' }, '-');
             let clearButton = this.element('button', { type: 'button', class: 'builder-button-clear' }, 'Clear');
             plusButton.addEventListener('click', () => inputElement.value++);
-            minusButton.addEventListener('click', () => inputElement.value = Math.max(inputElement.value-1, 0));
+            minusButton.addEventListener('click',
+                () => inputElement.value = Math.max(inputElement.value-1, 0));
             clearButton.addEventListener('click', () => inputElement.value = 0);
 
             inputElements = [ inputElement, plusButton, minusButton, clearButton ];
@@ -131,7 +156,10 @@ export default class FormBuilder {
 
             let startButton = this.element('button', { type: 'button', class: 'builder-button-start-stop' }, 'Start');
             let resetButton = this.element('button', { type: 'button', class: 'builder-button-reset' }, 'Reset');
-            let hiddenDurationValue = this.element('input', { id: field.id, type: 'number', hidden: true, value: '0' });
+            let hiddenDurationValue = this.element('input', {
+                id: field.id, type: 'number',
+                hidden: true, value: '0'
+            });
 
             let startTime = 0;
             let accumulatedTime = 0;
@@ -261,7 +289,10 @@ export default class FormBuilder {
             console.log(`formObject was null, id: ${formDiv.id}`);
             return;
         }
-        if (formObject.title) formDiv.appendChild(this.element('h1', { id: 'builder-title' }, formObject.title));
+        if (formObject.title) {
+            formDiv.appendChild(
+                this.element('h1', { id: 'builder-title' }, formObject.title));
+        }
 
         const currentDateStr = this.#getDate().toPlainDate().toString(); //format date like YYYY-MM-DD
         for (const f of formObject.fields) {
@@ -291,7 +322,9 @@ export default class FormBuilder {
         // TODO: use actual FormData object to upload data and files
         let formData = {};
         for (const item of items) {
-            const type = Array.from(item.classList).find(c => c !== 'builder-item').replace('builder-', '');
+            const type = Array.from(item.classList)
+                .find(c => c !== 'builder-item')
+                .replace('builder-', '');
             if (type === 'timestamp') {
                 formData[item.id] = this.#getDate();
                 continue;

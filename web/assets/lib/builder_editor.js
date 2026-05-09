@@ -50,7 +50,8 @@ function createEmptyFieldForm() {
     // Set up dropdown to change field type
     fieldForm
         .querySelector('#type')
-        .addEventListener('change', e => app.builder.build(app.forms[`field_type_${e.currentTarget.value}`], fieldRest));
+        .addEventListener('change', e =>
+            app.builder.build(app.forms[`field_type_${e.currentTarget.value}`], fieldRest));
 
     // Set up field id in details to match user entered id
     fieldForm.querySelector('input#id').addEventListener('keyup', e =>
@@ -161,7 +162,8 @@ async function getFormData() {
     // Input is assumed valid
     const header = document.getElementById('builder-header');
     const formData = await app.builder.getFormData(header);
-    const fieldsElements = document.getElementById('builder-fields').querySelectorAll('details[id^="field_"]');
+    const fieldsElements = document.getElementById('builder-fields')
+        .querySelectorAll('details[id^="field_"]');
     formData.fields = await Promise.all(
         Array.from(fieldsElements, app.builder.getFormData));
 
