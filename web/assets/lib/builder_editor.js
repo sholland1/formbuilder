@@ -58,15 +58,13 @@ function createEmptyFieldForm() {
         fieldId.innerText = e.currentTarget.value || `Field ${indexCopy}`);
 
     // Set up Shift+Tab to focus previous element
-    const focusable = fieldForm.querySelectorAll('input, select, textarea');
-    if (focusable.length > 0) {
-        focusable[0].addEventListener('keydown', e => {
-            if (e.shiftKey && e.key === 'Tab') {
-                e.preventDefault();
-                e.currentTarget.parentElement.parentElement.parentElement.previousElementSibling.focus();
-            }
-        });
-    }
+    const focusable = fieldForm.querySelector('input, select, textarea');
+    focusable?.addEventListener('keydown', e => {
+        if (e.shiftKey && e.key === 'Tab') {
+            e.preventDefault();
+            e.currentTarget.parentElement.parentElement.parentElement.previousElementSibling.focus();
+        }
+    });
 
     // Set up Tab to focus and open next element
     fieldForm.addEventListener('keydown', e => {
@@ -90,8 +88,14 @@ function createEmptyFieldForm() {
     return fieldForm;
 }
 
+const globalBuilder = {
+    title: document.getElementById('builder-title'),
+    header: document.getElementById('builder-header'),
+    fields: document.getElementById('builder-fields'),
+};
+
 function editForm(formData) {
-    const header = document.getElementById('builder-header');
+    const header = globalBuilder.header;
     header.querySelector('#id').value = formData.id;
     header.querySelector('#title').value = formData.title;
     if (formData.answer_structure) {
@@ -100,7 +104,7 @@ function editForm(formData) {
 
     for (const fieldData of formData.fields) {
         const currentFieldForm = createEmptyFieldForm();
-        document.getElementById('builder-fields').appendChild(currentFieldForm);
+        globalBuilder.fields.appendChild(currentFieldForm);
 
         for (const propName in fieldData) {
             const element = currentFieldForm.querySelector(`#${propName}`);
@@ -125,19 +129,16 @@ function editForm(formData) {
 
 app.setEditFormHandler(editForm);
 
-document.getElementById('builder-title').innerText = app.builderFormObject.title;
-const header = document.getElementById('builder-header');
-app.builder.build(app.forms.header, header);
+globalBuilder.title.innerText = app.builderFormObject.title;
+app.builder.build(app.forms.header, globalBuilder.header);
 
 const initialDragElement = document.getElementById('builder-initial-drag-element');
 addDragEvents(initialDragElement, initialDragElement);
 
-document.getElementById('add_field').addEventListener('mousedown', () => {
-    const currentFieldForm = createEmptyFieldForm();
-    document.getElementById('builder-fields').appendChild(currentFieldForm);
-});
+document.getElementById('add_field').addEventListener('mousedown', () =>
+    globalBuilder.fields.appendChild(createEmptyFieldForm()));
 document.getElementById('toggle_sections').addEventListener('mousedown', () => {
-    const detailNodes = document.querySelectorAll('#builder-fields details');
+    const detailNodes = globalBuilder.fields.querySelectorAll('details');
     const anyOpen = Array.from(detailNodes).some(d => d.open);
     detailNodes.forEach(d => d.open = !anyOpen);
 });
@@ -164,10 +165,9 @@ function validateForm() {
 
 async function getFormData() {
     // Input is assumed valid
-    const header = document.getElementById('builder-header');
-    const formData = await app.builder.getFormData(header, 'basic');
+    const formData = await app.builder.getFormData(globalBuilder.header, 'basic');
 
-    const fieldElements = document.getElementById('builder-fields')
+    const fieldElements = globalBuilder.fields
         .getElementsByClassName('builder-field-start');
     formData.fields = await Promise.all(
         Array.from(fieldElements, async element => {
