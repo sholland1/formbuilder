@@ -165,11 +165,16 @@ function validateForm() {
 async function getFormData() {
     // Input is assumed valid
     const header = document.getElementById('builder-header');
-    const formData = await app.builder.getFormData(header);
-    const fieldsElements = document.getElementById('builder-fields')
-        .querySelectorAll('details[id^="field_"]');
+    const formData = await app.builder.getFormData(header, 'basic');
+
+    const fieldElements = document.getElementById('builder-fields')
+        .getElementsByClassName('builder-field-start');
     formData.fields = await Promise.all(
-        Array.from(fieldsElements, app.builder.getFormData));
+        Array.from(fieldElements, async element => {
+            const firstElements = await app.builder.getFormData(element, 'basic');
+            const secondElements = await app.builder.getFormData(element.nextSibling, 'basic');
+            return {...firstElements, ...secondElements};
+        }));
 
     return formData;
 }

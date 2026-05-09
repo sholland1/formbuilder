@@ -320,8 +320,8 @@ export default class FormBuilder {
     }
 
     // Collects the user entered data from a form
-    async getFormData(element) {
-        const items = element.getElementsByClassName('builder-item');
+    async getFormData(element, answerStructure) {
+        const items = element.querySelectorAll(':scope > .builder-item');
         // TODO: use actual FormData object to upload data and files
         let formData = {};
         for (const item of items) {
@@ -336,13 +336,33 @@ export default class FormBuilder {
                 formData[item.id] = crypto.randomUUID();
                 continue;
             }
+            else if (type === 'group') {
+                const groupId = item.querySelector('label[for]').attributes['for'].value;
+                const innerFormData = await this.getFormData(item.children[1], answerStructure);
+                switch (answerStructure) {
+                case 'nested':
+                    formData[groupId] = innerFormData;
+                    break;
+                case 'flat':
+                    for (const id in innerFormData) {
+                        formData[`${groupId}.${id}`] = innerFormData[id];
+                    }
+                    break;
+                case 'basic':
+                    for (const id in innerFormData) {
+                        formData[id] = innerFormData[id];
+                    }
+                    break;
+                default:
+                    break;
+                }
+                continue;
+            }
 
-            let inputs = Array.from(item.getElementsByTagName('*')).filter(e => e.id)
+            let inputs = item.querySelectorAll('[id]');
 
             if (type === 'multiselect') {
-                const actual_id = Array.from(item.getElementsByTagName('label'))
-                    .find(l => l.classList.contains('builder-label'))
-                    .getAttribute('for');
+                const actual_id = item.querySelector('label[for]').attributes['for'].value;
                 formData[actual_id] = inputs
                     .filter(input => input.checked)
                     .map(input => input.value);
