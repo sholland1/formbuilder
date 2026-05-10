@@ -387,7 +387,8 @@
                 {
                     "id": "fields",
                     "type": "group",
-                    "label": "Fields:"
+                    "label": "Inner fields:",
+                    "fields": []
                 }
             ]
         }

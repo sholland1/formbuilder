@@ -1,25 +1,22 @@
 import builderFormObject from '../builder.json' with { type: 'json' };
-import FormBuilder from './FormBuilder.js';
+import FormBuilderBuilder from './FormBuilderBuilder.js';
 
 export class FormBuilderState {
-    constructor(doc) {
+    constructor(doc, builderFormObject) {
         this.document = doc;
         this.builderFormObject = builderFormObject;
-        this.forms = builderFormObject.forms;
-        this.builder = new FormBuilder(doc, () => Temporal.Now.plainDateTimeISO());
+        this.builderElements = {
+            title: doc.getElementById('builder-title'),
+            header: doc.getElementById('builder-header'),
+            fields: doc.getElementById('builder-fields'),
+        };
+        this.builder = new FormBuilderBuilder(doc, () => Temporal.Now.plainDateTimeISO(), builderFormObject);
         this.systemPromptText = null;
-        this.fieldIndex = 0;
-        this.editFormHandler = null;
     }
 
-    setEditFormHandler(handler) {
-        this.editFormHandler = handler;
-    }
-
-    editForm(data) {
-        if (this.editFormHandler) {
-            this.editFormHandler(data);
-        }
+    editForm(formData) {
+        this.builder.editForm(this.builderElements, formData);
+        this.setVisibility('builder');
     }
 
     setVisibility(sectionId) {
@@ -42,16 +39,15 @@ export class FormBuilderState {
     }
 
     clearForm() {
-        this.fieldIndex = 0;
-        const builderFields = this.document.getElementById('builder-fields');
+        const builderFields = this.builderElements.fields;
         const placeholder = builderFields.firstElementChild;
         builderFields.replaceChildren(placeholder);
 
-        const builderHeader = this.document.getElementById('builder-header');
-        this.builder.build(this.forms.header, builderHeader);
+        this.builder.clear();
+        this.builder.build(this.builderFormObject.forms.header, this.builderElements.header);
 
         this.document.querySelector('input#id').focus();
     }
 }
 
-export const formBuilderState = new FormBuilderState(document);
+export const formBuilderState = new FormBuilderState(document, builderFormObject);
