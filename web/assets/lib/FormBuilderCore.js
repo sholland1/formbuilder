@@ -67,10 +67,10 @@ export default class FormBuilderCore {
         else if (field.type === 'multiselect') {
             let i = 0;
             inputElements =
-                field.options.flatMap(o => [
-                    this.element('input', { id: field.id + i, type: 'checkbox', value: o }),
-                    this.element('label', { for: field.id + i++ }, o),
-                ]);
+                field.options.map(o =>
+                    this.element('label', { for: field.id + i },
+                        this.element('input', { id: field.id + i++, type: 'checkbox', value: o }),
+                        o));
         }
         else if (field.type === 'date') {
             const minDate = field.min === 'today' ? currentDateStr : field.min;
@@ -339,9 +339,11 @@ export default class FormBuilderCore {
 
             if (type === 'multiselect') {
                 const actualId = item.querySelector('label[for]').getAttribute('for');
-                typedElements.push({id: actualId, type: type, element: inputs});
+                typedElements.push({id: actualId, type: type, element: inputs.entries().map(x => x[1]) });
                 continue;
             }
+
+            if (type === 'rating') continue;
 
             typedElements.push({id: inputs[0].id, type: type, element: inputs[0]});
         }
@@ -368,7 +370,8 @@ export default class FormBuilderCore {
         else if (item.type === 'multiselect') {
             formData[item.id] = item.element
                 .filter(input => input.checked)
-                .map(input => input.value);
+                .map(input => input.value)
+                .toArray();
         }
         else if (item.type === 'counter') {
             formData[item.id] = Number(item.element.value);
