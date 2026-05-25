@@ -15,7 +15,10 @@
             <button id='edit-btn'>Edit</button>
         </div>
         <form id='basic-form'></form>
-        <button id='submit-btn' type='button'>Submit</button>
+        <div id='buttons'>
+            <button id='print-btn' type='button'>Print</button>
+            <button id='submit-btn' type='button'>Submit</button>
+        </div>
     </div>
 </body>
 
@@ -49,6 +52,10 @@
         builder.build(formObject, formDiv);
 
         document.title = formObject.title;
+
+        document.getElementById('print-btn').addEventListener('click', () => {
+            window.print();
+        });
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
             if (!formDiv.reportValidity()) return;

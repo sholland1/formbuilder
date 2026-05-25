@@ -2,3 +2,4 @@ program,text,number,select,multiselect,multitext,timestamp,date,counter,color,bo
 builder.json,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 FormBuilder.js,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1
 form.c,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1
+web print,1,1,1,1,1,-,0,1,0,1,1,-,1,1,0,1

@@ -34,7 +34,7 @@ input[type="search"]{
     padding:10px 12px;
     border:1px solid #e6e9ef;
     background:var(--card);
-    border-radius:8px;
+    border-radius:var(--radius);
     font-size:14px;
     color:#111827;
     outline: none;
@@ -62,7 +62,7 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, v
 .builder-button-plus,
 .builder-button-minus,
 .builder-button-clear{
-    padding:6px 10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer;font-weight:600;
+    padding:6px 10px;border-radius:var(--radius);border:1px solid #e6e9ef;background:#fff;cursor:pointer;font-weight:600;
 }
 .builder-button-plus{color:var(--accent)}
 .builder-button-minus{color:var(--danger)}
@@ -83,10 +83,10 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%, v
 .builder-group { border-left: solid 1px }
 
 /* color input smaller */
-input[type="color"]{width:56px;height:40px;padding:6px;border-radius:8px}
+input[type="color"]{width:56px;height:40px;padding:6px;border-radius:var(--radius)}
 
 /* disabled input look (counter display) */
-input[disabled]{background:#f8fafc;border-color:#e6e9ef;color:#6b7280}
+input[disabled]{background:#f8fafc;border-color:#e6e9ef;color:var(--muted)}
 
 /* validation states */
 input:invalid,select:invalid,textarea:invalid{border-color:var(--danger)}
@@ -103,7 +103,7 @@ small{color:var(--muted);font-size:12px}
 
 /* ordinary buttons */
 button{
-    padding:8px 14px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer;font-weight:600;
+    padding:8px 14px;border-radius:var(--radius);border:1px solid #e6e9ef;background:#fff;cursor:pointer;font-weight:600;
 }
 button:hover{background:rgba(0,0,0,0.04)}
 
@@ -112,4 +112,52 @@ button:hover{background:rgba(0,0,0,0.04)}
     .container{margin:16px;padding:16px}
     .builder-number > div{flex-direction:column;align-items:stretch}
     input[type="number"]{width:100%}
+}
+
+/* print adjustments */
+@media print {
+    #preview,#buttons,button,input[type="file"],
+    input[type="date"]::-webkit-calendar-picker-indicator{display:none}
+    .container {
+        margin:0;
+        padding:0;
+        border-radius:initial;
+        box-shadow:none;
+    }
+    .builder-item{break-inside:avoid}
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea,
+    input[type="search"]{
+        border: none;
+        border-bottom: solid 1px black;
+        border-radius: initial;
+        background-image: none;
+        box-shadow:none;
+    }
+
+    input[type="checkbox"]{filter:grayscale(100%)}
+    input[disabled]{background-color:white;color:black}
+
+    ::placeholder{opacity:0 !important }
+
+    /*
+    Source - https://stackoverflow.com/a/4298216
+    Posted by antonj, modified by community. See post 'Timeline' for change history
+    Retrieved 2026-05-25, License - CC BY-SA 4.0
+     */
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        /* display: none; <- Crashes Chrome on hover */
+        -webkit-appearance: none;
+        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+
+    input[type="number"] {
+        -moz-appearance:textfield; /* Firefox */
+    }
 }
