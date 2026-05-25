@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
 
     if (config.serve) {
         const char *url = nob_temp_sprintf(
-            "http://localhost:%s/form.html?preview=true", config.serve_port);
+            "http://localhost:%s/builder_form.html", config.serve_port);
         Nob_Cmd server_cmd = {0};
         Nob_Procs procs = {0};
 
