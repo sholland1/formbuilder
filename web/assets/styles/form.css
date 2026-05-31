@@ -18,7 +18,7 @@ html,body{height:100%;margin:0;font-family:Inter, Roboto, system-ui, -apple-syst
 #basic_form{display:flex;flex-direction:column;gap:var(--gap);padding:8px 0}
 
 /* each label block */
-.builder-item{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:transparent}
+.builder-item{display:flex;flex-direction:column;padding:12px;border-radius:10px;background:transparent}
 .builder-label{font-weight:600;color:#0b1220;margin-bottom:6px;display:block}
 
 /* common controls */

@@ -14,7 +14,7 @@ export default class FormBuilderBuilder extends FormBuilderCore {
         this.build(this.#builderFormObject.forms.header, builderElements.header);
 
         const initialDragElement = this._document.getElementById('builder-initial-drag-element');
-        this.addDragEvents(initialDragElement, initialDragElement);
+        this.addDragEvents(initialDragElement);
 
         this._document.getElementById('add_field').addEventListener('mousedown', () =>
             builderElements.fields.appendChild(this.createEmptyFieldForm()));
@@ -129,15 +129,25 @@ export default class FormBuilderBuilder extends FormBuilderCore {
         return formData;
     }
 
-    addDragEvents(element, outerElement) {
-        element.addEventListener('dragenter', e => e.currentTarget.classList.add('dragging-over'));
-        element.addEventListener('dragleave', e => e.currentTarget.classList.remove('dragging-over'));
+    addDragEvents(element) {
+        element.addEventListener('dragenter', e => {
+            e.stopPropagation();
+            this._document.querySelectorAll('.dragging-over')
+                .forEach(el => el.classList.remove('dragging-over'));
+            e.currentTarget.classList.add('dragging-over');
+        });
+        element.addEventListener('dragleave', e => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('dragging-over');
+            }
+        });
         element.addEventListener('dragover', e => e.preventDefault());
         element.addEventListener('drop', e => {
             e.preventDefault();
+            e.stopPropagation();
             e.currentTarget.classList.remove('dragging-over');
             const result = Number(e.dataTransfer.getData('text/plain'));
-            outerElement.after(this._document.getElementById(`field_${result}`));
+            e.currentTarget.after(this._document.getElementById(`field_${result}`));
         });
     }
 
@@ -163,13 +173,12 @@ export default class FormBuilderBuilder extends FormBuilderCore {
             e.dataTransfer.setData('text/plain', indexCopy);
         });
         fieldGrip.addEventListener('dragend', () => this._document.body.classList.remove('dragging'));
-        this.addDragEvents(fieldSummary, fieldForm);
+        this.addDragEvents(fieldForm);
 
         // Add empty form for field
         this.build(this.#builderFormObject.forms.field_start, fieldStart);
 
         // Set up dropdown to change field type
-        // TODO: improve dragging in and out of group
         // TODO: validate at least one field inside group
         // TODO: carry over label and other fields
         fieldForm
@@ -179,7 +188,6 @@ export default class FormBuilderBuilder extends FormBuilderCore {
                 this.build(fieldEntryFormData, fieldRest);
                 if (e.currentTarget.value !== 'group') return;
 
-                // TODO: move this stuff into FormBuilder.js or something
                 const builderGroupFields = fieldRest.querySelector('.builder-group');
                 builderGroupFields.remove();
                 const groupTitle = builderGroupFields.children[0].innerText;
@@ -197,6 +205,10 @@ export default class FormBuilderBuilder extends FormBuilderCore {
                     this.element('div', { class: 'builder-details-buttons' }, addFieldButton, toggleButton),
                     builderGroupFields);
                 fieldRest.append(nonDetailsStructure);
+
+                const placeholderField = builderGroupFields.getElementsByClassName('builder-field-container')[0];
+                placeholderField.style.height = '8px';
+                this.addDragEvents(placeholderField);
 
                 toggleButton.addEventListener('mousedown', () => {
                     const detailNodes = nonDetailsStructure.querySelectorAll('#builder-fields details');

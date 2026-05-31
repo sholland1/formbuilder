@@ -278,7 +278,7 @@ export default class FormBuilderCore {
 
         return this.element('div', { class: 'builder-item builder-' + field.type },
             this.element('label', { for: field.id, class: 'builder-label' }, field.label),
-            this.element('div', {}, ...inputElements));
+            this.element('div', { class: 'builder-field-container' }, ...inputElements));
     }
 
     // Builds a form composed of components
