@@ -46,6 +46,7 @@ TYPE_DESCRIPTIONS: dict[str, str] = {
     "file":        "File picker.",
     "signature":   "Allows the user to draw their name with the mouse or touchscreen.",
     "rating":      "Give rating out of 5 or out of 10 stars",
+    "group":       "Container for nested fields.",
 }
 
 
@@ -93,6 +94,12 @@ def build_type_section(type_key: str, form_def: dict) -> str:
         return header  # e.g. timestamp — no extra properties
 
     lines = [header, ""]
+    if type_name == "group":
+        lines.append("- **`label`** (text): the label/prompt shown to the user")
+        lines.append("- **`fields`** (array of FieldObject): nested field objects")
+        lines.append("  Child fields follow the same rules as top-level fields and can themselves be groups.")
+        return "\n".join(lines)
+
     for field in doc_fields:
         lines.append(field_meta(field))
 
@@ -101,6 +108,13 @@ def build_type_section(type_key: str, form_def: dict) -> str:
 
 def generate_prompt(builder: dict) -> str:
     """Derive and return the full system prompt from a builder.json structure."""
+
+    header_form = builder["forms"].get("header", {})
+    answer_structure_field = next(
+        (f for f in header_form.get("fields", []) if f["id"] == "answer_structure"),
+        None,
+    )
+    answer_structure_options = answer_structure_field["options"] if answer_structure_field else []
 
     # Collect all type names from field_start's type selector
     field_start = builder["forms"].get("field_start", {})
@@ -135,8 +149,11 @@ The JSON must match this schema exactly:
 {{
   "id": string,       // kebab-case identifier, e.g. "contact-form"
   "title": string,    // human-readable form title
+  "answer_structure": string, // one of: {", ".join(f'`"{o}"`' for o in answer_structure_options)}
   "fields": [ ...FieldObject ]
 }}
+
+Unless the user explicitly requests a different answer layout, set `"answer_structure"` to `"nested"`.
 
 ## Field Types and Their Properties
 
@@ -144,6 +161,9 @@ Every field object has two universal properties:
 - **`id`** (text): a unique camelCase or kebab-case identifier for the field, \
 starting with a letter and containing only letters, numbers, underscores, or hyphens.
 - **`type`** (select): one of: {", ".join(f'`"{t}"`' for t in all_types)}
+
+Some field types, such as `group`, may also include a nested `fields` array. \
+Those child fields follow the same rules and can themselves contain nested groups.
 
 Additional properties depend on the type:
 
