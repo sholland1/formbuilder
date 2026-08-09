@@ -20,7 +20,7 @@ export class FormBuilderState {
     }
 
     setVisibility(sectionId) {
-        const sectionIds = ['intro', 'builder', 'genai'];
+        const sectionIds = ['intro', 'builder'];
         for (const id of sectionIds) {
             this.document.getElementById(id).hidden = sectionId !== id;
         }
@@ -28,9 +28,6 @@ export class FormBuilderState {
         let selector;
         if (sectionId === 'builder') {
             selector = 'input#id';
-        } else if (sectionId === 'genai') {
-            const apiKey = this.document.getElementById('api-key').value;
-            selector = apiKey ? 'textarea#prompt' : 'input#api-key';
         }
 
         if (selector) {

@@ -49,9 +49,8 @@ document.getElementById('btn-preview').addEventListener('click', async () => {
 document.getElementById('btn-clear').addEventListener('click', () => {
     sessionStorage.formObject = null;
     app.clearForm();
+    app.setVisibility('intro');
 });
-
-document.getElementById('btn-back-from-build').addEventListener('mousedown', () => app.setVisibility('intro'));
 
 try {
     app.editForm(JSON.parse(sessionStorage.formObject));

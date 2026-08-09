@@ -26,14 +26,13 @@
             }
         }
 
-        #intro { text-align: center }
-
         input#api-key { width: 200px }
         textarea#prompt {
             height: 20em;
             width: 100%;
             resize: none;
         }
+        #error-message { color: red }
 
         .wait-cursor { cursor:wait }
 
@@ -46,26 +45,24 @@
 
 <body>
     <div class='container'>
-        <div id='intro'>
-            <h1>Welcome to the Form Builder!</h1>
-            <button id='btn-scratch' type='button'>Start Building</button>
-            <button id='btn-gen-ai' type='button'>Generate With AI</button>
-            <button id='btn-upload' type='button'>Upload Existing Form</button>
-        </div>
+        <h1>Form Builder</h1>
+        <p class="subtitle">Create and edit forms with AI or by hand.</p>
 
-        <div id='genai' hidden>
-            <h1>Generate a form with AI</h1>
+        <div id='intro'>
+            <div>
+                <label for='api-key'>OpenAI API key:</label>
+                <input id='api-key' type='text' required />
+            </div>
+            <h2>Describe a form to AI</h2>
+            <p>Tell the AI what kind of form you need. It will generate a starting form for you.</p>
             <div id='error-message' hidden></div>
             <form id='prompt-form'>
-                <div>
-                    <label for='api-key'>OpenAI API key:</label>
-                    <input id='api-key' type='text' required />
-                </div>
-                <label for='prompt'>Describe the form you want to make:</label>
-                <textarea id='prompt' required></textarea>
-                <button id='btn-generate' type='button'>Generate</button>
-                <button id='btn-back-from-generate' type='button'>Back</button>
+                <textarea id='prompt' rows='5' placeholder='e.g. A contact form with name, email, phone, and a message field. Make the email required.'></textarea>
+                <button id='submit-btn' type='button'>Generate with AI</button>
+                <button id='btn-scratch' type='button'>Design from scratch</button>
+                <button id='btn-upload' type='button'>Edit existing form</button>
             </form>
+
             <div id='loading-message' hidden>
                 <h2>Generating form...</h2>
             </div>
@@ -91,13 +88,11 @@
             <button id='btn-download' type='button'>Download</button>
             <button id='btn-preview' type='button'>Preview</button>
             <button id='btn-clear' type='button'>Clear</button>
-            <button id='btn-back-from-build' type='button'>Back</button>
         </div>
     </div>
 </body>
 
 <script type='module' src='assets/lib/builder_intro.js'></script>
-<script type='module' src='assets/lib/builder_genai.js'></script>
 <script type='module' src='assets/lib/builder_editor.js'></script>
 
 </html>
